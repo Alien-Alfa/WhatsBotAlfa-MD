@@ -73,9 +73,9 @@ command({
   },
   async (message, match, m) => {
     if (!message.reply_message)
-      return await message.treply("_Reply to a sticker_");
+      return await message.reply("_Reply to a sticker_");
     if (message.reply_message.mtype !== "stickerMessage")
-      return await message.treply("_Not a sticker_");
+      return await message.reply("_Not a sticker_");
     let buff = await m.quoted.download();
     return await message.sendMessage(buff, {}, "image");
   }
@@ -91,9 +91,9 @@ command({
   },
   async (message, match, m) => {
     if (!message.reply_message)
-      return await message.treply("_Reply to a sticker_");
+      return await message.reply("_Reply to a sticker_");
     if (message.reply_message.mtype !== "stickerMessage")
-      return await message.treply("_Not a sticker_");
+      return await message.reply("_Not a sticker_");
     let buff = await m.quoted.download();
     let buffer = await webp2mp4(buff);
     return await message.sendMessage(buffer, {}, "video");
@@ -109,13 +109,11 @@ command({
     type: "downloader",
   }, async (message, match, m) => {
     if (!(match || message.reply_message.text))
-      return await message.treply("_Enter Song Name_");
+      return await message.reply("_Enter Song Name_");
     match = match || message.reply_message.text;
     if (ytIdRegex.test(match)) {
-      search(match).then(async ({ videos }) => { let title = await videos[0].title 
-        let urig = `https://ytdl.tiodevhost.my.id/?url=${videos[0].url}&filter=audioonly&quality=highestaudio&contenttype=audio/mpeg`
-
-        let buff = await AddMp3Meta(urig, videos[0].thumbnail, {
+      yta(match.trim()).then(async ({ dl_link, title, thumb }) => {
+        let buff = await AddMp3Meta(dl_link, thumb, {
           title,
         });
         message.sendMessage(
@@ -126,11 +124,9 @@ command({
       });
     }
     search(match + "song").then(async ({ videos }) => {
-      await message.treply(`_Downloading ${videos[0].title}_`);
-      search(match).then(async ({ videos }) => { let title = await videos[0].title 
-        let urig = `https://ytdl.tiodevhost.my.id/?url=${videos[0].url}&filter=audioonly&quality=highestaudio&contenttype=audio/mpeg`
-
-        let buff = await AddMp3Meta(urig, videos[0].thumbnail, {
+      await message.reply(`_Downloading ${videos[0].title}_`);
+      yta(videos[0].url).then(async ({ dl_link, title, thumb }) => {
+        let buff = await AddMp3Meta(dl_link, thumb, {
           title,
           artist: [videos[0].author],
         });
@@ -154,25 +150,17 @@ command({
   }, async (message, match, m) => {
     if (!match)
     if (!message.reply_message.text)
-      return await message.treply("_Enter Video Name_");
+      return await message.reply("_Enter Video Name_");
     match = match || message.reply_message.text;
     if (ytIdRegex.test(match)) {
-      search(match).then(async ({ videos }) => { let title = await videos[0].title 
-        let urig = `https://ytdl.tiodevhost.my.id/?url=${videos[0].url}&filter=audioandvideo&quality=highestvideo&contenttype=video/mp4`
-
-        message.sendFromUrl(urig, {
-          caption :title,
-           filename: title });
+      ytv(match.trim()).then(({ dl_link, title }) => {
+        message.sendFromUrl(dl_link, { filename: title });
       });
     }
     search(match).then(async ({ videos }) => {
-      await message.treply(`_Downloading ${videos[0].title}_`);
-      search(match).then(async ({ videos }) => { let title = await videos[0].title 
-
-        let urig = `https://ytdl.tiodevhost.my.id/?url=${videos[0].url}&filter=audioandvideo&quality=highestvideo&contenttype=video/mp4`
-        message.sendFromUrl(urig, { filename: title,
-          caption :title,
-          quoted: message });
+      await message.reply(`_Downloading ${videos[0].title}_`);
+      ytv(videos[0].url).then(({ dl_link, title }) => {
+        message.sendFromUrl(dl_link, { filename: title, quoted: message });
       });
     });
   }
@@ -189,11 +177,40 @@ command({
     type: "downloader",
   },
   async (message, match, m) => {
-    //if(message.reply_message.text) return await message.treply('_Enter Video Name_')
+    //if(message.reply_message.text) return await message.reply('_Enter Video Name_')
     let buff = await m.quoted.download();
     buff = await toAudio(buff, "mp3");
     return await message.sendMessage(buff, { mimetype: "audio/mpeg" }, "audio");
   }
+);
+
+
+command({
+  pattern: "load",
+  fromMe: isPrivate,
+  desc: "Downloads from a direct link",
+  type: "downloader",
+}, async (message, match, m) => {
+  match = match || message.reply_message.text;
+  if (!match)
+    return message.reply(
+      "_Send a direct media link_\n_*link;caption(optional)*_"
+    );
+  try {
+    let url = match.split(";")[0];
+    let options = {};
+    options.caption = match.split(";")[1];
+
+    if (isUrl(url)) {
+      message.sendDocFromUrl(url, options);
+    } else {
+      message.reply("_Not a URL_");
+    }
+  } catch (e) {
+    console.log(e);
+    message.reply("_No content found_");
+  }
+}
 );
 
 
@@ -205,7 +222,7 @@ command({
   }, async (message, match, m) => {
     match = match || message.reply_message.text;
     if (!match)
-      return message.treply(
+      return message.reply(
         "_Send a direct media link_\n_*link;caption(optional)*_"
       );
     try {
@@ -216,11 +233,11 @@ command({
       if (isUrl(url)) {
         message.sendFromUrl(url, options);
       } else {
-        message.treply("_Not a URL_");
+        message.reply("_Not a URL_");
       }
     } catch (e) {
       console.log(e);
-      message.treply("_No content found_");
+      message.reply("_No content found_");
     }
   }
 );
@@ -232,7 +249,7 @@ command({
     desc: "Search Youtube",
     type: "search",
   }, async (message, match, m) => {
-    if (!match) return await message.treply("_Enter a search term_");
+    if (!match) return await message.reply("_Enter a search term_");
     let rows = [];
     search(match).then(async ({ videos }) => {
       videos.forEach((result) => {
@@ -243,7 +260,7 @@ command({
           }\nPublished : ${result.ago}\nDescription : ${
             result.description
           }\nURL : ${result.url}`,
-          rowId: `${prefix} ytv `,
+          rowId: ` `,
         });
       });
       await message.client.sendMessage(message.jid, {
@@ -268,16 +285,13 @@ command({
     dontAddCommandList: true,
   }, async (message, match, m) => {
     match = match || message.reply_message.text;
-    if (!match) return await message.treply("_Enter a URL_");
+    if (!match) return await message.reply("_Enter a URL_");
 
-    if (!ytIdRegex.test(match)) return await message.treply("_Invalid Url_");
-    search(match).then(async ({ videos }) => { let title = await videos[0].title 
-      await message.treply(`_Downloading ${title}_`);
-      let urig = `https://ytdl.tiodevhost.my.id/?url=${videos[0].url}&filter=audioandvideo&quality=highestvideo&contenttype=video/mp4`
-
-      return await message.sendFromUrl(urig, {
+    if (!ytIdRegex.test(match)) return await message.reply("_Invalid Url_");
+    ytv(match).then(async ({ dl_link, title }) => {
+      await message.reply(`_Downloading ${title}_`);
+      return await message.sendFromUrl(dl_link, {
         filename: title,
-        caption :title,
         quoted: message,
       });
     });
@@ -292,13 +306,11 @@ command({
     dontAddCommandList: true,
   }, async (message, match, m) => {
     match = match || message.reply_message.text;
-    if (!match) return await message.treply("_Enter a URL_");
-    if (!ytIdRegex.test(match)) return await message.treply("_Invalid Url_");
-    search(match).then(async ({ videos }) => { let title = await videos[0].title 
-      await message.treply(`_Downloading ${title}_`);
-      let urig = `https://ytdl.tiodevhost.my.id/?url=${videos[0].url}&filter=audioonly&quality=highestaudio&contenttype=audio/mpeg`
-
-      let buff = await AddMp3Meta(urig, videos[0].thumbnail, {
+    if (!match) return await message.reply("_Enter a URL_");
+    if (!ytIdRegex.test(match)) return await message.reply("_Invalid Url_");
+    yta(match).then(async ({ dl_link, title, thumb }) => {
+      await message.reply(`_Downloading ${title}_`);
+      let buff = await AddMp3Meta(dl_link, thumb, {
         title,
       });
       return await message.sendMessage(
@@ -309,9 +321,3 @@ command({
     });
   }
 );
-
-
-
-
-
-
