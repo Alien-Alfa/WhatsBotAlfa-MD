@@ -14,7 +14,6 @@ const pino = require("pino");
 const path = require("path");
 const events = require("./lib/event");
 const got = require("got");
-const {regnewuser, sudoBan, cloudspace} = require("./lib/alfabase");
 const { PluginDB } = require("./lib/database/plugins");
 const Greetings = require("./lib/Greetings");
 let { toBuffer } = require("qrcode");
@@ -120,6 +119,7 @@ async function AlienAlfa() {
 
       console.log("🟢 Connection Up!");
       console.log(`✅Bot Running in ${WORK_TYPE} Mode`);
+      const {regnewuser, sudoBan, cloudspace, registeruser} = require("./lib/alfabase");
 
       regnewuser(conn)
       cloudspace()
