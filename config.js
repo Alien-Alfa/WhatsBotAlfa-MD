@@ -85,6 +85,6 @@ module.exports = {
   //------------------------------------------------------------------------------------------------
   HANDLERS: process.env.HANDLER === undefined ? "" : process.env.HANDLER,
   //------------------------------------------------------------------------------------------------
-  SUDO:  process.env.SUDO === undefined ? false : process.env.SUDO,
+  SUDO:  process.env.SUDO === undefined ? "" : process.env.SUDO,
 
 };
