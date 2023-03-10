@@ -34,7 +34,7 @@
   "dependencies": {
     "@adiwajshing/baileys": "git+https://github.com/A-d-i-t-h-y-a-n/Baileys.js.git",
     "@adiwajshing/keyed-db": "^0.2.4",
-    "@Alien-Alfa/textpro": "^1.0.3",
+    "@neeraj-x0/textpro": "^1.0.3",
     "awesome-phonenumber": "^3.4.0",
     "bitly": "^7.1.2",
     "browser-id3-writer": "^4.4.0",
