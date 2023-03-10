@@ -44,7 +44,7 @@ command({
 
 },
 async (message, match, m) => {
-  registeruser(message)
+  //registeruser(message)
   })
 
 
