@@ -31,7 +31,7 @@ command({ pattern: "setsudo ?(.*)",
       } else {  process.send('reset') }
  });
   }
-);
+); 
 
 command({ pattern: "getsudo ?(.*)", 
     fromMe: true, 
