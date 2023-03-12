@@ -14,8 +14,9 @@ command({ pattern: "setsudo ?(.*)",
   async (message,match, m) => {
     let SUDO = parsedData.config.SUDO
     var newSudo;
-    if(match.include("@")){
-      newSudo = (match).toString().split("@")[1]}
+    if(match){
+      let i = match.include("@")
+      newSudo = (i).toString().split("@")[1]}
     if(message.reply_message){
       newSudo = (message.reply_message.jid).split("@")[0]}
     if (!newSudo) return await m.sendMessage("*reply to a number*", { quoted: m });
@@ -31,7 +32,8 @@ command({ pattern: "setsudo ?(.*)",
       } else {  process.send('reset') }
  });
   }
-); 
+);
+
 
 command({ pattern: "getsudo ?(.*)", 
     fromMe: true, 
