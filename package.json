@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/Alien-Alfa/WhatsBotAlfa-MD#readme",
   "dependencies": {
-    "@adiwajshing/baileys": "git+https://github.com/A-d-i-t-h-y-a-n/Baileys.js.git",
+    "@adiwajshing/baileys": "^4.4.0",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@neeraj-x0/textpro": "^1.0.3",
     "awesome-phonenumber": "^3.4.0",
