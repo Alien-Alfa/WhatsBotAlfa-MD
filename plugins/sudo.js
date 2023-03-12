@@ -22,7 +22,7 @@ command({ pattern: "setsudo ?(.*)",
     if (!newSudo) return await m.sendMessage("*reply to a number*", { quoted: m });
      let setSudo = (SUDO + "," + newSudo).replace(/,,/g, ",");
     setSudo = setSudo.startsWith(",") ? setSudo.replace(",", "") : setSudo;
-    await message.sendMessage({text: "_new sudo numbers are:" + setSudo+'_'}, {
+    await message.client.sendMessage(message.jid,{text: "_new sudo numbers are:" + setSudo+'_'}, {
       quoted: m,
     });
     parsedData.config.SUDO = setSudo
