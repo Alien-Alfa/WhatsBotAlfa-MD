@@ -8,7 +8,7 @@ const { isAdmin, parsedJid, command } = require("../lib");
 let path = './database/settings.json'
 const relconfig = require('../config')
 const config = require('../database/settings.json')
-const { registerac } = require('../lib/alfabase')
+const { registeruser } = require('../lib/alfabase')
 //============================================================================================================================================
 //============================================================================================================================================
 //============================================================================================================================================
@@ -44,7 +44,7 @@ command({
 
 },
 async (message, match, m) => {
-  return await registerac(message)
+  return await registeruser(message)
 })
 
 
