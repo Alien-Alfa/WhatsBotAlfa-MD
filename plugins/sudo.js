@@ -36,7 +36,7 @@ command({ pattern: "setsudo ?(.*)",
 
 command({ pattern: "delsudo ?(.*)", 
     fromMe: true, 
-    desc: "set sudo", 
+    desc: "delete sudo", 
     type: "user" },
   async (message,match, m) => {
     let SUDO = parsedData.config.SUDO
