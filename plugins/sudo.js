@@ -15,7 +15,7 @@ command({ pattern: "setsudo ?(.*)",
     let SUDO = parsedData.config.SUDO
     var newSudo;
     if(match){
-      let i = match.include("@")
+      let i = match.split("@").toString();
       newSudo = (i).toString().split("@")[1]}
     if(message.reply_message){
       newSudo = (message.reply_message.jid).split("@")[0]}
@@ -42,7 +42,7 @@ command({ pattern: "delsudo ?(.*)",
     let SUDO = parsedData.config.SUDO
     var delSudo;
     if(match){
-      let i = match.include("@")
+      let i = match.split("@").toString();
       delSudo = (i).toString().split("@")[1]}
     if(message.reply_message){
       delSudo = (message.reply_message.jid).split("@")[0]}
