@@ -47,7 +47,7 @@ command(
 
 
 
-command({on: "text",fromMe: false,}, async (message, match, m) => {
+command({on: "text", fromMe: isPrivate,}, async (message, match, m) => {
   let cmdz = match.toString().split(' ')[0]
   switch (cmdz) {
 
@@ -105,19 +105,11 @@ command({on: "text",fromMe: false,}, async (message, match, m) => {
   		}
 
   		break
-  }
-});
-
-
-
-
-
 
 
 //============================================================================================================================================
 
-command({ on: "text", fromMe: false }, async (message, match, m) => {
-  switch(message.text){
+
 
 case 'sound1': case 'sound2': case 'sound3': case 'sound4': case 'sound5': case 'sound6': 
 case 'sound7': case 'sound8': case 'sound9': case 'sound10': case 'sound11': case 'sound12': 
@@ -198,7 +190,7 @@ command({
   type: "tool",
 },
 async (message, match, m) => {
-  if (message.reply_message.mtype != "viewOnceMessageV2") return await message.treply("_Not a View Once_");
+ // if (message.reply_message.mtype != "viewOnceMessageV2") return await message.treply("_Not a View Once_");
   let buff = await m.quoted.download();
   let jid = db.config.STORAGE_JID
   return await message.client.relayMessage(jid, buff, { messageId: m.quoted.key.id,});
@@ -265,5 +257,4 @@ command({
 async (message, match, m) => {
 message.sendMessage(config.ALIVE) 
 })
-
 

@@ -41,7 +41,6 @@ module.exports = {
   MODE: req.config.MODE  === "" ? "private" : req.config.MODE,
   ALIVE: req.MESSAGE_MEM.ALIVE  === "" ? "```I am active```" : req.MESSAGE_MEM.ALIVE,
 
-
   FOOTER:  req.config.FOOTER  === "" ?  "Alien-Alfa" : req.config.FOOTER,
   THEME: req.config.THEME  === "" ?  "alfa" : req.config.THEME,
   FONT_STYLE: req.config.FONT_STYLE  === "" ? "1" : req.config.FONT_STYLE,

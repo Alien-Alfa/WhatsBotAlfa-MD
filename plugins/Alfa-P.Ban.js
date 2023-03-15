@@ -1,7 +1,7 @@
 const fs = require("fs")
 const chalk = require("chalk")
 const { writeFile, readFile } = require("fs");
-const { isAdmin, parsedJid, command } = require("../lib");
+const { isAdmin, parsedJid, command, isPrivate } = require("../lib");
 //let data =  readFile('./database/settings.json')
 //let db = JSON.parse(data);
 //let bannnnnn = db.settings.banned
@@ -66,7 +66,7 @@ const axios = require("axios");
 
   command({
     pattern: "qc",
-    fromMe: false,
+    fromMe: isPrivate,
     desc: "Show All commands",
     dontAddCommandList: true,
     type: "theme",

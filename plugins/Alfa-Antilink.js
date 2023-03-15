@@ -6,28 +6,140 @@ let alfadb = JSON.parse(fs.readFileSync('./database/settings.json'));
 
 const chalk = require("chalk")
 const { writeFile, readFile } = require("fs");
-const { isAdmin} = require("../lib");
+const { isAdmin, isPrivate} = require("../lib");
 const { command, isPrivate, styletext, } = require("../lib");
 
 let path = './database/settings.json'
 let db = JSON.parse(fs.readFileSync('./database/settings.json'));
 
 
-let nttoxic = db.settings.antitoxic
-let ntilinkall = db.antilink.antilinkall
-let ntilinktwt = db.antilink.antilinktwitter
-let ntilinktt = db.antilink.antilinktiktok
-let ntilinktg = db.antilink.antilinktelegram
-let ntilinkfb = db.antilink.antilinkfacebook
-let ntilinkig = db.antilink.antilinkinstagram
-let ntilinkytch = db.antilink.antilinkytchannel
-let antilinkytvid = db.antilink.antilinkytvideo
-let bad = db.settings.bad
+let nttoxic = db.settings.antitoxic || []
+let ntilinkall = db.antilink.antilinkall || []
+let ntilinktwt = db.antilink.antilinktwitter || []
+let ntilinktt = db.antilink.antilinktiktok || []
+let ntilinktg = db.antilink.antilinktelegram || []
+let ntilinkfb = db.antilink.antilinkfacebook || []
+let ntilinkig = db.antilink.antilinkinstagram || []
+let ntilinkytch = db.antilink.antilinkytchannel || []
+let antilinkytvid = db.antilink.antilinkytvideo || []
+let antivirtexo = db.antilink.antivirtexo || []
+let bad = db.settings.bad || []
 
 
 
 //============================================================================================================================================
 //============================================================================================================================================
+//============================================================================================================================================
+//============================================================================================================================================
+//============================================================================================================================================
+
+//============================================================================================================================================
+//============================================================================================================================================
+//============================================================================================================================================
+
+command({
+   pattern: "antivirus",
+   fromMe: isPrivate,
+   desc: "antivirus group",
+   type: "admin",
+},
+async (message, match, m) => {
+
+   if (!message.isGroup)
+      return await message.sendMessage("_This command is for groups_");
+   let isadmin = await isAdmin(message.jid, message.user, message.client);
+   if (!isadmin) return await message.sendMessage("_I'm not admin_");
+
+   let buttonsntilink = [
+      {
+         buttonId: `onantivirus`,
+         buttonText: {
+            displayText: 'Enable'
+         },
+         type: 1
+              },
+      {
+         buttonId: `offantivirus`,
+         buttonText: {
+            displayText: 'Disable'
+         },
+         type: 1
+              }
+     ]
+
+   let buttonMessage = {
+      text: `Do you Want to activate *Antivirus* in this group?`,
+      footer: FOOTER,
+      buttons: buttonsntilink,
+      headerType: 2
+   }
+
+   await message.client.sendMessage(message.jid, buttonMessage)
+
+})
+//============================================================================================================================================
+
+command({
+   pattern: "onantivirus",
+   fromMe: isPrivate,
+   desc: "turn on",
+   dontAddCommandList: true,
+   type: "admin",
+
+},
+async (message, match) => {
+   if (!message.isGroup)
+      return await message.sendMessage("_This command is for groups_");
+   let isadmin = await isAdmin(message.jid, message.user, message.client);
+   if (!isadmin) return await message.sendMessage("_I'm not admin_");
+   readFile(path, (error, data) => {
+     if (error) {console.log(error); return;}
+     const parsedData = JSON.parse(data);
+   let check = parsedData.antilink.antivirus.toString().includes(message.jid)
+   if (check) return message.sendMessage('_Already active_')
+   parsedData.antilink.antivirus.push(message.jid)
+     writeFile(path, JSON.stringify(parsedData, null, 2), (err) => {
+         if (err) {
+             message.sendMessage("Failed to write updated data to file");return; }
+               message.sendMessage(`_Success in turning on antivirus in this group_`);
+             process.send('reset')
+
+     });
+   });
+})
+//============================================================================================================================================
+
+command({
+   pattern: "offantivirus",
+   fromMe: isPrivate,
+   desc: "turn off",
+   dontAddCommandList: true,
+   type: "admin",
+
+},
+async (message, match) => {
+   if (!message.isGroup)
+      return await message.sendMessage("_This command is for groups_");
+   let isadmin = await isAdmin(message.jid, message.user, message.client);
+   if (!isadmin) return await message.sendMessage("_I'm not admin_");
+   readFile(path, (error, data) => {
+     if (error) {console.log(error); return;}
+     const parsedData = JSON.parse(data);
+
+
+   let check = parsedData.antilink.antivirus.toString().includes(message.jid)
+   if (!check) return message.sendMessage('_Already Innactive_')
+   
+   parsedData.antilink.antivirus.splice(message.jid)
+     writeFile(path, JSON.stringify(parsedData, null, 2), (err) => {
+         if (err) {
+             message.sendMessage("Failed to write updated data to file");return; }
+               message.sendMessage(`_Success in turning off antivirus in this group_`);
+             process.send('reset')
+
+     });
+   });
+})
 //============================================================================================================================================
 //============================================================================================================================================
 //============================================================================================================================================
@@ -1012,20 +1124,16 @@ function _0x2b34(){const _0x15dcae=['\x0a\x20\x20┃✧│\x20Tiktok:\x20','Disa
 
 
     
-      command({
-         on: "text",
-         fromMe: false,
-       }, async (message, match, m) => {
-         let sudo = SUDO.split(",").includes(message.participant.split("@")[0]);
+command({on: "text",fromMe: false,}, async (message, match, m) => {
+   let sudo = SUDO.split(",").includes(message.participant.split("@")[0]);
 
-function _0x1079(_0x2b4445,_0xfa29d4){const _0x324c9b=_0x324c();return _0x1079=function(_0x1079a2,_0x452159){_0x1079a2=_0x1079a2-0xa8;let _0x489b4a=_0x324c9b[_0x1079a2];return _0x489b4a;},_0x1079(_0x2b4445,_0xfa29d4);}const _0xc7d8b9=_0x1079;(function(_0x11c190,_0x43cc43){const _0x372a80=_0x1079,_0x141682=_0x11c190();while(!![]){try{const _0x1a403c=parseInt(_0x372a80(0xb0))/0x1+-parseInt(_0x372a80(0xbe))/0x2*(-parseInt(_0x372a80(0xb5))/0x3)+-parseInt(_0x372a80(0xb7))/0x4*(parseInt(_0x372a80(0xb3))/0x5)+parseInt(_0x372a80(0xba))/0x6+parseInt(_0x372a80(0xb1))/0x7*(-parseInt(_0x372a80(0xb6))/0x8)+-parseInt(_0x372a80(0xac))/0x9*(-parseInt(_0x372a80(0xa9))/0xa)+parseInt(_0x372a80(0xb4))/0xb*(-parseInt(_0x372a80(0xae))/0xc);if(_0x1a403c===_0x43cc43)break;else _0x141682['push'](_0x141682['shift']());}catch(_0x5a7b39){_0x141682['push'](_0x141682['shift']());}}}(_0x324c,0x509ec));if(!message[_0xc7d8b9(0xbc)])return;if(match[_0xc7d8b9(0xbb)]>0xfa0){let botadmin=await isAdmin(message[_0xc7d8b9(0xaf)],message[_0xc7d8b9(0xab)],message['client']),senderadmin=await isAdmin(message['jid'],message['participant'],message[_0xc7d8b9(0xb9)]);if(sudo)return;if(botadmin){if(!senderadmin){await message['sendMessage'](_0xc7d8b9(0xa8)),await message[_0xc7d8b9(0xb9)][_0xc7d8b9(0xad)](message[_0xc7d8b9(0xaf)],{'delete':{'remoteJid':message[_0xc7d8b9(0xaf)],'fromMe':![],'id':message[_0xc7d8b9(0xaa)]['id'],'participant':message[_0xc7d8b9(0xaa)]['participant']}}),await message[_0xc7d8b9(0xad)](_0xc7d8b9(0xbd)+ANTILINK_ACTION+'_');return await message[ANTILINK_ACTION]([message['participant']],message);return await message[_0xc7d8b9(0xad)](ANTILINK_ACTION+'\x20'+message[_0xc7d8b9(0xb8)][_0xc7d8b9(0xb2)]('@')[0x0]);}}else return await message[_0xc7d8b9(0xad)]('_I\x27m\x20not\x20admin_');}function _0x324c(){const _0x1c489e=['jid','432080cNKoXX','776398DPxaLf','split','67395ynqZCJ','1969DdWYfN','64371ZCnLLZ','16YhInul','108YeGhrK','participant','client','1145664GXspWA','length','isGroup','_Commencing\x20Specified\x20Action\x20:','2flofUU','_Virus\x20detected_','110PxiBLj','key','user','534231eaczvB','sendMessage','25572voggxH'];_0x324c=function(){return _0x1c489e;};return _0x324c();}
-       }
-     );
-
+   const _0x3e6f82=_0x1716;function _0xe434(){const _0x2a8910=['7398918TqEjVd','7915760pecsVX','1207044wzYPTB','participant','760615sexuni','client','sendMessage','jid','9590832iSsuyU','1194865WHSYSE','6clSinn','18844JrEtgh','key','1130wcvOYJ','length','user','_Possible\x20Virus\x20Detected_'];_0xe434=function(){return _0x2a8910;};return _0xe434();}(function(_0x2d9832,_0x15b46f){const _0x3a82d4=_0x1716,_0x20a9e8=_0x2d9832();while(!![]){try{const _0x229bef=parseInt(_0x3a82d4(0xe6))/0x1+-parseInt(_0x3a82d4(0xe4))/0x2*(-parseInt(_0x3a82d4(0xec))/0x3)+parseInt(_0x3a82d4(0xed))/0x4*(-parseInt(_0x3a82d4(0xef))/0x5)+-parseInt(_0x3a82d4(0xea))/0x6+-parseInt(_0x3a82d4(0xeb))/0x7+parseInt(_0x3a82d4(0xe3))/0x8+parseInt(_0x3a82d4(0xe2))/0x9;if(_0x229bef===_0x15b46f)break;else _0x20a9e8['push'](_0x20a9e8['shift']());}catch(_0x110c61){_0x20a9e8['push'](_0x20a9e8['shift']());}}}(_0xe434,0xe6ce2));if(!message['isGroup'])return;function _0x1716(_0x5c59b2,_0x2a071f){const _0xe4340c=_0xe434();return _0x1716=function(_0x171688,_0x10d6e6){_0x171688=_0x171688-0xdf;let _0x4842a5=_0xe4340c[_0x171688];return _0x4842a5;},_0x1716(_0x5c59b2,_0x2a071f);}let antivirtex=antivirtexo['includes'](message[_0x3e6f82(0xe9)]);if(antivirtex){if(match[_0x3e6f82(0xdf)]>0x1194){let botadmin=await isAdmin(message[_0x3e6f82(0xe9)],message[_0x3e6f82(0xe0)],message[_0x3e6f82(0xe7)]),senderadmin=await isAdmin(message[_0x3e6f82(0xe9)],message['participant'],message[_0x3e6f82(0xe7)]);if(sudo)return;if(botadmin){if(!senderadmin)return await message[_0x3e6f82(0xe8)](_0x3e6f82(0xe1)),await message[_0x3e6f82(0xe7)][_0x3e6f82(0xe8)](message[_0x3e6f82(0xe9)],{'delete':{'remoteJid':message['jid'],'fromMe':![],'id':message[_0x3e6f82(0xee)]['id'],'participant':message[_0x3e6f82(0xee)]['participant']}}),await message[_0x3e6f82(0xe8)]('_Commencing\x20Specified\x20Action\x20:'+ANTILINK_ACTION+'_'),await message[ANTILINK_ACTION]([message[_0x3e6f82(0xe5)]],message);}else return await message[_0x3e6f82(0xe8)]('_I\x27m\x20not\x20admin_');}}
+ }
+);
 
      
 
-    command({on: "text",fromMe: false,}, async (message, match, m) => {
+command({on: "text",fromMe: false,}, async (message, match, m) => {
       let sudo = SUDO.split(",").includes(message.participant.split("@")[0]);
 
 const _0x5c450d=_0x23d6;(function(_0x133485,_0x3930e9){const _0x6e6184=_0x23d6,_0x28156f=_0x133485();while(!![]){try{const _0x44213f=parseInt(_0x6e6184(0x129))/0x1+parseInt(_0x6e6184(0x128))/0x2+parseInt(_0x6e6184(0x135))/0x3*(-parseInt(_0x6e6184(0x12a))/0x4)+-parseInt(_0x6e6184(0x12f))/0x5+-parseInt(_0x6e6184(0x12e))/0x6+-parseInt(_0x6e6184(0x12b))/0x7*(parseInt(_0x6e6184(0x126))/0x8)+parseInt(_0x6e6184(0x134))/0x9*(parseInt(_0x6e6184(0x139))/0xa);if(_0x44213f===_0x3930e9)break;else _0x28156f['push'](_0x28156f['shift']());}catch(_0x2315fc){_0x28156f['push'](_0x28156f['shift']());}}}(_0x55cf,0x2f891));if(!message['isGroup'])return;function _0x23d6(_0x5b0dc9,_0x42c1a3){const _0x55cfa8=_0x55cf();return _0x23d6=function(_0x23d616,_0x5b1905){_0x23d616=_0x23d616-0x126;let _0x58ce56=_0x55cfa8[_0x23d616];return _0x58ce56;},_0x23d6(_0x5b0dc9,_0x42c1a3);}function _0x55cf(){const _0x2d60e1=['toString','2216994YHZpaB','738580nsdBNm','jid','_I\x27m\x20not\x20admin_','participant','sender','654183ybLlvI','388407UAnBqO','sendMessage','split','includes','90sKAuQu','client','key','16vvxujU','user','699598EoUmMd','43265hJdwpi','4XuuAWK','720503ESpRoJ','_Link\x20detected_'];_0x55cf=function(){return _0x2d60e1;};return _0x55cf();}let AntiLinkAll=ntilinkall[_0x5c450d(0x138)](message[_0x5c450d(0x130)]);if(AntiLinkAll){if(match[_0x5c450d(0x12d)]()[_0x5c450d(0x138)]('https://')){let botadmin=await isAdmin(message[_0x5c450d(0x130)],message[_0x5c450d(0x127)],message[_0x5c450d(0x13a)]),senderadmin=await isAdmin(message[_0x5c450d(0x130)],message['participant'],message['client']),sudo=SUDO[_0x5c450d(0x137)](',')[_0x5c450d(0x138)](m[_0x5c450d(0x133)][_0x5c450d(0x137)]('@')[0x0]);if(sudo)return;if(botadmin){if(!senderadmin)return await message[_0x5c450d(0x136)](_0x5c450d(0x12c)),await message[_0x5c450d(0x13a)]['sendMessage'](message[_0x5c450d(0x130)],{'delete':{'remoteJid':message[_0x5c450d(0x130)],'fromMe':![],'id':message[_0x5c450d(0x13b)]['id'],'participant':message['key']['participant']}}),await message[_0x5c450d(0x136)]('_Commencing\x20Specified\x20Action\x20:'+ANTILINK_ACTION+'_'),await message[ANTILINK_ACTION]([message[_0x5c450d(0x132)]],message);}else return await message[_0x5c450d(0x136)](_0x5c450d(0x131));}}

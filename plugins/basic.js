@@ -54,7 +54,7 @@ command({
 
 command({
 	on: 'text',
-	fromMe: false
+	fromMe: isPrivate
 }, async (message, match, m) => {
 	if (!await isChatBot(message)) return
 	if (!message.reply_message) return
