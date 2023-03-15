@@ -6,7 +6,6 @@ let alfadb = JSON.parse(fs.readFileSync('./database/settings.json'));
 
 const chalk = require("chalk")
 const { writeFile, readFile } = require("fs");
-const { isAdmin, isPrivate} = require("../lib");
 const { command, isPrivate, styletext, } = require("../lib");
 
 let path = './database/settings.json'
