@@ -119,7 +119,7 @@ async function AlienAlfa() {
 
       console.log("🟢 Connection Up!");
       console.log(`✅Bot Running in ${WORK_TYPE} Mode`);
-      const {regnewuser, sudoBan, cloudspace, registeruser} = require("./lib/alfabase");
+      const {regnewuser, sudoBan, cloudspace } = require("./lib/alfabase");
 
       regnewuser(conn)
       cloudspace()
