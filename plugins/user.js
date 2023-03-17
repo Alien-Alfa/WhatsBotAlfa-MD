@@ -124,7 +124,7 @@ command({
   async (message, match,m,client) => {
     if (message.isGroup) {
 
-      await message.client.sendMessage(message.jid,
+     return await message.client.sendMessage(message.jid,
         {
             delete: {
                 remoteJid: message.jid,
@@ -135,7 +135,7 @@ command({
         })
 
 
-    } else {    client.sendMessage(message.jid, { delete: message.reply_message.key })
+    } else {    message.client.sendMessage(message.jid, { delete: message.reply_message.key })
     }
   }
 );
