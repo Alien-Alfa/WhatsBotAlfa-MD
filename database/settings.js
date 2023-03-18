@@ -40,6 +40,7 @@ module.exports = {
   WORK_TYPE: req.config.WORK_TYPE  === "" ?  "private" : req.config.WORK_TYPE,
   MODE: req.config.MODE  === "" ? "private" : req.config.MODE,
   ALIVE: req.MESSAGE_MEM.ALIVE  === "" ? "```I am active```" : req.MESSAGE_MEM.ALIVE,
+  DB_AUTH_TOKEN: req.config.DB_AUTH_TOKEN  === "" ? false : req.config.DB_AUTH_TOKEN,
 
   FOOTER:  req.config.FOOTER  === "" ?  "Alien-Alfa" : req.config.FOOTER,
   THEME: req.config.THEME  === "" ?  "alfa" : req.config.THEME,
