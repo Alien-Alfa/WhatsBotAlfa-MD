@@ -263,7 +263,7 @@ By establishing the Asena, you are deemed to have accepted these responsibilitie
 ## ⚠️ Developers
   <div align="center">
   
-| [![Alien-Alfa](https://github.com/Alien-alfa.png?size=200)](https://github.com/Alien-Alfa) |[![Neeraj-x0](https://avatars.githubusercontent.com/u/95992247?v=4?size=200)](https://github.com/Alien-Alfa)|
+| [![Alien-Alfa](https://github.com/Alien-alfa.png?size=200)](https://github.com/Alien-Alfa) |[![Neeraj-x0](https://github.com/Neeraj-x0.png?size=200)](https://github.com/Alien-Alfa)|
 |----|----|
 | [꧁𓊈𒆜ＡＬＩＥＮ ＡＬＦＡ𒆜𓊉꧂](https://github.com/AI-VIKI) | [꧁𓊈𒆜ＮＥＥＲＡＪ－ｘＯ𒆜𓊉꧂](https://github.com/Neeraj-x0) |
 |  𒆜Bug Fixes, Modules, updates𒆜 |  𒆜base, Modules, Fixes𒆜 |
