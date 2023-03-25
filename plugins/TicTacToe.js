@@ -42,7 +42,7 @@ command({
             [room.game.playerX, room.game.playerO].includes(m.sender)
         )
       )
-        return message.treply("_You're still in the game_");
+        return message.treply("_You're still in the game\n\nUse *skip* to quit_");
       let room = Object.values(this.game).find(
         (room) =>
           room.state === "WAITING" && (match ? room.name === match : true)
@@ -66,20 +66,19 @@ command({
             9: "9️⃣", 
           }[v];
         });
-        let str = `Room ID: ${room.id}
+        let str = `*TicTacToe*
+
+Turn: @${room.game.currentTurn.split("@")[0]}
 
 ${arr.slice(0, 3).join("")}
 ${arr.slice(3, 6).join("")}
 ${arr.slice(6).join("")}
 
-Current turn: @${room.game.currentTurn.split("@")[0]}
 `;
 
         return await message.client.sendMessage(message.jid, {
           text: str,
-          buttons: [
-            { buttonId: "give_up", buttonText: { displayText: "Give UP" } },
-          ],
+        //  buttons: [{ buttonId: "give_up", buttonText: { displayText: "Give UP" } },],
           mentions: parseJid(str),
         });
       } else {
@@ -91,7 +90,7 @@ Current turn: @${room.game.currentTurn.split("@")[0]}
           state: "WAITING",
         };
         if (match) room.name = match;
-        message.treply("_Waiting for partner_ ");
+        message.treply("_Waiting for partner\n\nUse *skip* to quit_ ");
         this.game[room.id] = room;
       }
     }
@@ -165,21 +164,22 @@ command({
         isWin = true;
       }
       let winner = isSurrender ? room.game.currentTurn : room.game.winner;
-      let str = `Room ID: ${room.id}
+      let str = `*TicTacToe*
+      
+      ${
+        isWin
+          ? `@${winner.split("@")[0]} 𝙒𝙊𝙉 𝙏𝙃𝙀 𝙂𝘼𝙈𝙀❗`
+          : isTie
+          ? `*𝙏𝙄𝙀*`
+          : `Move ${["❌", "⭕"][1 * room.game._currentTurn]} @${
+              room.game.currentTurn.split("@")[0]
+            }`
+      }
 
 ${arr.slice(0, 3).join("")}
 ${arr.slice(3, 6).join("")}
 ${arr.slice(6).join("")}
 
-${
-  isWin
-    ? `@${winner.split("@")[0]} Won !`
-    : isTie
-    ? `Tie`
-    : `Current Turn ${["❌", "⭕"][1 * room.game._currentTurn]} @${
-        room.game.currentTurn.split("@")[0]
-      }`
-}
 ❌: @${room.game.playerX.split("@")[0]}
 ⭕: @${room.game.playerO.split("@")[0]}`;
 
@@ -199,9 +199,7 @@ ${
       } else {
         await message.client.sendMessage(message.jid, {
           text: str,
-          buttons: [
-            { buttonId: "give_up", buttonText: { displayText: "Give UP" } },
-          ],
+        //  buttons: [{ buttonId: "give_up", buttonText: { displayText: "Give UP" } },],
           mentions: parseJid(str),
         });
       }
