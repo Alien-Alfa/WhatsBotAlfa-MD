@@ -42,7 +42,7 @@ command({
             [room.game.playerX, room.game.playerO].includes(m.sender)
         )
       )
-        return message.treply("_You're still in the game\n\nUse *skip* to quit_");
+        return message.treply("_You're still in the game_\n\n_Use *delttt* to quit_");
       let room = Object.values(this.game).find(
         (room) =>
           room.state === "WAITING" && (match ? room.name === match : true)
@@ -90,7 +90,7 @@ ${arr.slice(6).join("")}
           state: "WAITING",
         };
         if (match) room.name = match;
-        message.treply("_Waiting for partner\n\nUse *skip* to quit_ ");
+        message.treply("_Waiting for partner_\n\n_Use *delttt* to quit_ ");
         this.game[room.id] = room;
       }
     }
