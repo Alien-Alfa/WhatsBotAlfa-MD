@@ -64,15 +64,14 @@ fs.watchFile(file, () => {
 const axios = require("axios");
 
 
-  command({
-    pattern: "qc",
-    fromMe: isPrivate,
-    desc: "Show All commands",
-    dontAddCommandList: true,
-    type: "theme",
-  
-  }, async (message, match, m) => {
-function _0x52fd(){const _0x27a53c=['application/json','https://bot.lyo.su/quote/generate','eror','image','jid','client','sticker','7238547sqmJEo','41316pEKgvx','6176568ndUjit','32LSRiOh','2233170ruGfrc','160XREjfs','text','Please\x20quote\x20any\x20users\x20message.','sendMessage','from','reply','data','https://avatars.githubusercontent.com/u/64305844?v=4','#FFFFFF','webp','3517775MQzJOo','1025122fupeUl','result','65079yAUFeR','reply_message'];_0x52fd=function(){return _0x27a53c;};return _0x52fd();}const _0x3b6db2=_0x3316;(function(_0x3f56f2,_0x2fbbc1){const _0x8593da=_0x3316,_0x1a662d=_0x3f56f2();while(!![]){try{const _0x5dc3ea=parseInt(_0x8593da(0xd1))/0x1+-parseInt(_0x8593da(0xde))/0x2+-parseInt(_0x8593da(0xdb))/0x3*(-parseInt(_0x8593da(0xdf))/0x4)+parseInt(_0x8593da(0xce))/0x5+-parseInt(_0x8593da(0xdc))/0x6+-parseInt(_0x8593da(0xcf))/0x7*(-parseInt(_0x8593da(0xdd))/0x8)+parseInt(_0x8593da(0xda))/0x9;if(_0x5dc3ea===_0x2fbbc1)break;else _0x1a662d['push'](_0x1a662d['shift']());}catch(_0x1f3a20){_0x1a662d['push'](_0x1a662d['shift']());}}}(_0x52fd,0x89970));if(!message[_0x3b6db2(0xd2)][_0x3b6db2(0xe0)])return await message[_0x3b6db2(0xc9)](_0x3b6db2(0xc6));let pfp;try{pfp=await message[_0x3b6db2(0xd8)]['profilePictureUrl'](message[_0x3b6db2(0xd2)]['jid'],_0x3b6db2(0xd6));}catch(_0x180805){pfp=_0x3b6db2(0xcb);}var tname;try{tname=await getName(message['reply_message'][_0x3b6db2(0xd7)]);}catch(_0x6a2599){tname='user';}let qczi;qczi={'type':'quoted','format':_0x3b6db2(0xcd),'backgroudnColor':_0x3b6db2(0xcc),'width':0x200,'height':0x300,'scale':0x2,'messages':[{'avatar':!![],'from':{'first_name':tname,'language_code':'en','name':tname,'photo':{'url':pfp}},'text':message[_0x3b6db2(0xd2)][_0x3b6db2(0xe0)],'replyMessage':{}}]};const post=await axios['post'](_0x3b6db2(0xd4),qczi,{'headers':{'Content-Type':_0x3b6db2(0xd3)}});let buff=await Buffer[_0x3b6db2(0xc8)](post[_0x3b6db2(0xca)][_0x3b6db2(0xd0)][_0x3b6db2(0xd6)],'base64');function _0x3316(_0x44da99,_0x5cf007){const _0x52fdd0=_0x52fd();return _0x3316=function(_0x3316cd,_0x2dd123){_0x3316cd=_0x3316cd-0xc6;let _0x37b14f=_0x52fdd0[_0x3316cd];return _0x37b14f;},_0x3316(_0x44da99,_0x5cf007);}if(buff==undefined)return message['reply'](_0x3b6db2(0xd5));message[_0x3b6db2(0xc7)](buff,{'packname':PACKNAME,'author':AUTHOR},_0x3b6db2(0xd9));
-                  })
-  
-  
+
+command({
+  pattern: "qc",
+  fromMe: false,
+  desc: "Show All commands",
+  dontAddCommandList: true,
+  type: "theme",
+
+}, async (message, match, m) => {
+const _0x146677=_0xeb2d;(function(_0xeef856,_0x265415){const _0x2dc57a=_0xeb2d,_0x22dd82=_0xeef856();while(!![]){try{const _0x5320d7=-parseInt(_0x2dc57a(0x187))/0x1+-parseInt(_0x2dc57a(0x196))/0x2*(parseInt(_0x2dc57a(0x193))/0x3)+parseInt(_0x2dc57a(0x199))/0x4+parseInt(_0x2dc57a(0x17d))/0x5+-parseInt(_0x2dc57a(0x198))/0x6*(parseInt(_0x2dc57a(0x195))/0x7)+parseInt(_0x2dc57a(0x197))/0x8+parseInt(_0x2dc57a(0x182))/0x9;if(_0x5320d7===_0x265415)break;else _0x22dd82['push'](_0x22dd82['shift']());}catch(_0x3af39d){_0x22dd82['push'](_0x22dd82['shift']());}}}(_0x88fa,0x69f39));if(!message[_0x146677(0x186)][_0x146677(0x190)])return await message[_0x146677(0x17e)](_0x146677(0x18a));let pfp;try{pfp=await message[_0x146677(0x18c)][_0x146677(0x18e)](message[_0x146677(0x186)][_0x146677(0x18f)],'image');}catch(_0x20709f){pfp=_0x146677(0x18b);}var tname;function _0xeb2d(_0x398ab4,_0x291719){const _0x88fa6a=_0x88fa();return _0xeb2d=function(_0xeb2d16,_0x2ba9cd){_0xeb2d16=_0xeb2d16-0x17c;let _0x45e8c5=_0x88fa6a[_0xeb2d16];return _0x45e8c5;},_0xeb2d(_0x398ab4,_0x291719);}try{tname=await message[_0x146677(0x183)](message[_0x146677(0x186)]['jid']);}catch(_0x1a688d){tname=_0x146677(0x180);}function _0x88fa(){const _0x20df11=['1115934rjwumv','277588PHtBkG','quoted','application/json','2891585CqYgIR','reply','webp','User','result','2249082luAwav','getName','post','image','reply_message','777220rlIOOI','base64','https://bot.lyo.su/quote/generate','Please\x20quote\x20any\x20users\x20message.','https://avatars.githubusercontent.com/u/64305844?v=4','client','eror','profilePictureUrl','jid','text','sendMessage','data','6FBgLwl','#FFFFFF','7orQUMS','181178lSciLw','5446016bdnvDm'];_0x88fa=function(){return _0x20df11;};return _0x88fa();}let qczi;qczi={'type':_0x146677(0x19a),'format':_0x146677(0x17f),'backgroudnColor':_0x146677(0x194),'width':0x200,'height':0x300,'scale':0x2,'messages':[{'avatar':!![],'from':{'first_name':tname,'language_code':'en','name':tname,'photo':{'url':pfp}},'text':message[_0x146677(0x186)][_0x146677(0x190)],'replyMessage':{}}]};const post=await axios[_0x146677(0x184)](_0x146677(0x189),qczi,{'headers':{'Content-Type':_0x146677(0x17c)}});let buff=await Buffer['from'](post[_0x146677(0x192)][_0x146677(0x181)][_0x146677(0x185)],_0x146677(0x188));if(buff==undefined)return message[_0x146677(0x17e)](_0x146677(0x18d));message[_0x146677(0x191)](buff,{'packname':PACKNAME,'author':AUTHOR},'sticker');
+})
