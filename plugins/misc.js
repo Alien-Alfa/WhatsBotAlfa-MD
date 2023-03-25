@@ -1,4 +1,4 @@
-const { command, sleep, isPrivate } = require("../lib/");
+const { command, sleep, isPrivate, Gpt } = require("../lib/");
 
 command({
     pattern: "getqr ?(.*)",
@@ -18,3 +18,14 @@ command({
 );
 
   
+
+command({
+  pattern: "gpt",
+  fromMe: true,
+  desc: "ChatGPT",
+  type: "misc",
+
+},
+async (message, match, m) => {
+  Gpt(match)
+})

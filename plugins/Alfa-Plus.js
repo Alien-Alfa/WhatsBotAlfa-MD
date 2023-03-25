@@ -241,3 +241,80 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 })
+
+
+
+
+command({
+  pattern: "alive",
+  fromMe: true,
+  desc: "Download TikTok Videos",
+  dontAddCommandList: true,
+  type: "download",
+
+},
+async (message, match, m) => {
+message.sendMessage(config.ALIVE) 
+})
+
+
+/*
+let mP3 = "https://i.imgur.com/FP0Lavx.mp4"
+let jPg = "https://i.imgur.com/4rzJsNG.jpeg"
+const { mensionMp3, mensionImg } = require('../media/mension/setmension');
+const {getVar}=require('./database/variable');
+
+
+async function IsMension(m, conn){
+if(!m.isGroup) return;
+const { quoted } = require('./database/semifunction/is_ext');
+const { contact } = await quoted(m);
+let IsOwner, IsSudo, Owner, Sudo
+let NewMension = ["917593919575", "917025099154"],MENSION_DATA;
+let IsBot = conn.user.jid.split('@')[0];
+NewMension.push(IsBot);
+	let data = await getVar();
+	let {OWNER,SUDO,MENSION_TEXT,MENSION_IMG, MENSION_AUDIO} = data.data[0];
+  if(MENSION_AUDIO){
+    let {body} = await got(MENSION_AUDIO.trim());
+    mP3 = body.replaceAll(' ','')
+  }
+  if(MENSION_IMG){
+    let {body} = await got(MENSION_IMG.trim());
+    jPg = body.replaceAll(' ','')
+    }
+	if(!OWNER.includes(',')){
+		NewMension.push(OWNER.trim())
+		} else if(OWNER.includes(',')){
+		Owner = OWNER.split(',');
+		NewMension = Owner.concat(NewMension)
+		};
+		if(!SUDO.includes(',')){
+		NewMension.push(SUDO.trim());
+		} else if(SUDO.includes(',')){
+		Sudo = SUDO.split(',');
+		NewMension = Sudo.concat(NewMension)
+		};
+		MENSION_DATA = MENSION_TEXT;
+let matchs = m.client.displayText?.replaceAll(' ','') ||'inrl', isTrue = false;
+NewMension.map(async(cc)=>{
+if(!matchs.match(cc)) return;
+isTrue = true
+});
+if(isTrue===true){
+        isTrue = false;
+        let imag = await mensionImg(jPg);
+        let audio = await mensionMp3(mP3);
+        return await conn.sendMessage(m.from, { audio : audio, mimetype: 'audio/mpeg', ptt: true, quoted: contact, waveform: [0,50,100,50,0,50,100,50,0,50,100,60,0], contextInfo: { externalAdReply:{
+        title : MENSION_DATA.split(',')[0],
+        body : MENSION_DATA.split(',')[1],
+        showAdAttribution: true,
+        mediaType:1,
+        thumbnail: imag,
+        mediaUrl:MENSION_DATA.split(',')[2], 
+        sourceUrl:MENSION_DATA.split(',')[2] }}}, {quoted: contact })
+        }
+}
+
+
+*/

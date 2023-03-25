@@ -102,12 +102,14 @@ command({
 
 
 
-command({
+command(
+  {
     pattern: "song",
     fromMe: isPrivate,
     desc: "Downloads Song",
     type: "downloader",
-  }, async (message, match, m) => {
+  },
+  async (message, match) => {
     if (!(match || message.reply_message.text))
       return await message.reply("_Enter Song Name_");
     match = match || message.reply_message.text;
@@ -140,16 +142,15 @@ command({
   }
 );
 
-
-
-command({
+command(
+  {
     pattern: "video",
     fromMe: isPrivate,
     desc: "Downloads video",
     type: "downloader",
-  }, async (message, match, m) => {
-    if (!match)
-    if (!message.reply_message.text)
+  },
+  async (message, match) => {
+    if (!match || !message.reply_message.text)
       return await message.reply("_Enter Video Name_");
     match = match || message.reply_message.text;
     if (ytIdRegex.test(match)) {

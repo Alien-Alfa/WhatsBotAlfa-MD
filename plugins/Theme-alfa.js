@@ -81,27 +81,24 @@ if (THEME === "alfa") {
 
             }
             , async (message, match, m) => {
-                let {
-                    prefix
-                } = message;
+  
                 if (HANDLERS === "^")
                     var presix = ''
                 else
                     var presix = prefix
-                if (match) {
-
-                    for (let i of events.commands) {
-                        if (i.pattern.test(message.prefix + match))
-                            message.treply(`
-  ╭════〘 *Command Info* 〙════⊷❍
-  ┃✧╭─────────────────
-  ┃ \`\`\`Command : ${message.prefix}${match.trim()}\`\`\`
-  ┃ \`\`\`Description : ${i.desc}\`\`\`
-  ┃✧╰─────────────────
-  ╰══════════════════⊷❍`);
-                    }
-                }
-                if (!match) {
+                    if (match) {
+                        for (let i of events.commands) {
+                          if (i.pattern.test(message.prefix + match))
+                          message.treply(`
+                          ╭════〘 *Command Info* 〙════⊷❍
+                          ┃✧╭─────────────────
+                          ┃ \`\`\`Command : ${message.prefix}${match.trim()}\`\`\`
+                          ┃ \`\`\`Description : ${i.desc}\`\`\`
+                          ┃✧╰─────────────────
+                          ╰══════════════════⊷❍`);
+                        }
+                      } else {
+                    
 
                     let [date, time] = new Date()
                         .toLocaleString("en-IN", {
@@ -643,26 +640,19 @@ if (THEME === "alfa") {
                     };
                 }
                 var menu = `
-╭═══〘 ${BOT_NAME} 〙═══⊷❍
+╭═══ ${BOT_NAME} ═══⊷❍
 ┃✧╭──────────────
-┃✧│
+┃✧│ prefix :
 ┃✧│ Owner : ${OWNER_NAME}
-┃✧│ User : ${ await message.senderName}
+┃✧│ User : ${message.pushName}
 ┃✧│ Mode : ${WORK_TYPE}
 ┃✧│ Server : ${HEROKU_APP_NAME}
-┃✧│ Total RAM: 16GB
-┃✧│ Available RAM: Nill
-┃✧│ Disk Space: 620 GB
+┃✧│ Total RAM: ${avbMem.toFixed(2)} GB
+┃✧│ Commands: ${events.commands.length}
 ┃✧│ Version: ${require("../package.json").version}
-┃✧│
-┃✧│
-┃✧│  ▎▍▌▌▉▏▎▌▉▐▏▌▎
-┃✧│  ▎▍▌▌▉▏▎▌▉▐▏▌▎
-┃✧│   ${SUDO.split(",")[0]}
-┃✧│ 
 ┃✧╰───────────────
 ╰═════════════════⊷
-╭════〘 Group 〙════⊷❍
+╭════ Group ════⊷❍
 ┃✧╭─────────────────
 ┃✧│ 
 ${gmsg}
@@ -717,10 +707,7 @@ ${srmsg}
 
                 return await message.client.sendMessage(message.jid,
                 {
-                    image: {
-                        url: `https://github.com/Alien-Alfa/Alien-alfa/blob/beta/img/Alien-Alfa.png?raw=true`
-                    }
-                    , caption: styletext(menu, parseInt(
+                     text: styletext(menu, parseInt(
                         `${FONT_STYLE}`))
                     , footer: tiny(
                         `Alfa-Alien-Alfa ${WORK_TYPE} Bot\nVersion : ${require("../package.json").version}`
@@ -1256,3 +1243,5 @@ if (THEME === "normal") {
         })
 
 }
+
+
