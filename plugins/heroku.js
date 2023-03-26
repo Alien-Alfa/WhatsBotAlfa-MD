@@ -136,7 +136,7 @@ Remaning    : ${secondsToDHMS(remaining)}`;
           await message.sendMessage("```" + quota + "```");
         })
         .catch(async (error) => {
-          return await message.sendMessage(`HEROKU : ${error.body.message}`);
+          return await message.sendMessage(`HEROKU : ${error}`);
         });
     } catch (error) {
       await message.sendMessage(error);
