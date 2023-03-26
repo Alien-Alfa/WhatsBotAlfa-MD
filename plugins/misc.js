@@ -27,6 +27,5 @@ command({
 
 },
 async (message, match, m) => {
- let res = message.Gpt(match)
- return await message.treply(res);
+ message.Gpt(match, message)
 })
