@@ -48,7 +48,7 @@
     "@ffprobe-installer/ffprobe": "^1.4.1",
     "g-i-s": "^2.1.6",
     "got": "^11.8.2",
-    "heroku-client": "^3.1.0",
+    "heroku-client":"^3.1.0",
     "jimp": "^0.16.1",
     "jsdom": "^20.0.0",
     "koyeb-api": "^1.0.4",

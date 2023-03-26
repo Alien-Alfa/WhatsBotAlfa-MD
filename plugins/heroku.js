@@ -22,14 +22,14 @@ command(
 
   let buttonsntilink = [
      {
-        buttonId: `alfares`,
+        buttonId: `rs`,
         buttonText: {
            displayText: 'Restart'
         },
         type: 1
              },
      {
-        buttonId: `rs`,
+        buttonId: `reboot`,
         buttonText: {
            displayText: 'Reboot'
         },
@@ -52,7 +52,7 @@ Reboot service`,
 
 command(
   {
-    pattern: "alfars",
+    pattern: "reboot",
     fromMe: true,
     desc: "Restart Dyno",
     type: "heroku",
@@ -103,7 +103,7 @@ command(
       });
   }
 );
-/*
+
 command({
 	pattern: 'dyno',
 	fromMe: true,
@@ -138,10 +138,10 @@ command({
 });
 
 
-*/
+
 command(
   {
-    pattern: "dyno",
+    pattern: "2dyno",
     fromMe: true,
     desc: "Show Quota info",
     type: "heroku",

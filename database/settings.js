@@ -27,7 +27,7 @@ module.exports = {
   LANG: req.config.LANG  === "" ? "EN" :  req.config.LANG,
   HANDLERS: req.config.HANDLER === "" ? "^" : req.config.HANDLER,
   RMBG_KEY: req.config.RMBG_KEY  === "" ? false :  req.config.RMBG_KEY,
-  BRANCH: req.config.BRANCH  === "" ? "latest" : req.config.BRANCH,
+  BRANCH: process.env.BRANCH  === "" ? "latest" : process.env.BRANCH,
   PACKNAME: req.config.PACKNAME  === "" ? "Aurora" :  req.config.PACKNAME ,
   WELCOME_MSG: req.MESSAGE_MEM.WELCOME_MSG  === "" ? "Hi @user Welcome to @gname" : req.MESSAGE_MEM.WELCOME_MSG,
   GOODBYE_MSG: req.MESSAGE_MEM.GOODBYE_MSG  === "" ? "Hi @user It was Nice Seeing you" : req.MESSAGE_MEM.GOODBYE_MSG,
