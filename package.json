@@ -2,7 +2,7 @@
   "name": "alienalfa",
   "version": "2.0.0",
   "description": "WhatsAsena project - a Whatsapp userbot helping to improve your Whatsapp experience.",
-  "main": "./bot.js",
+  "main": "./media/server.js",
   "scripts": {
     "start": "node ./media/server.js"
   },
@@ -85,6 +85,6 @@
     "perf_hooks":"^0.0.1",
     "csv-parse":"^5.3.5",
     "js-base64":"^3.7.5",
-    "openai":"^3.1.0"
-    }
+    "openai":"^3.2.1"
+  }
 }
