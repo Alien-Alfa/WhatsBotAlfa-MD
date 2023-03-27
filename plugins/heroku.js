@@ -136,7 +136,7 @@ Usage %     : ${ await secondsToDHMS(percentage)}
           await message.send('```' + quota + '```')
         })
         .catch(async (error) => {
-          return await message.send(`HEROKU : ${error.body.message}`)
+          return await message.send(`HEROKU : ${error}`)
         })
     } catch (error) {
       await message.send(error)
@@ -282,12 +282,12 @@ command(
       if (commits.total === 0) {
         return await message.sendMessage("_Already on latest version_");
       } else {
-        await message.treply("_Updating_");
+        await message.treply("𝙐𝙋𝘿𝘼𝙏𝙄𝙉𝙂...");
 
         try {
           var app = await heroku.get("/apps/" + process.env.HEROKU_APP_NAME);
         } catch {
-          await message.sendMessage("_Invalid Heroku Details_");
+          await message.sendMessage("_𝘐𝘯𝘷𝘢𝘭𝘪𝘥 𝘏𝘦𝘳𝘰𝘬𝘶 𝘋𝘦𝘵𝘢𝘪𝘭𝘴_");
 
           await new Promise((r) => setTimeout(r, 1000));
         }
@@ -307,13 +307,13 @@ command(
         }
         await git.push("heroku", config.BRANCH);
 
-        await message.sendMessage("UPDATED");
+        await message.sendMessage("𝙐𝙋𝘿𝘼𝙏𝙀𝘿!");
       }
     }
     await git.fetch();
     var commits = await git.log([config.BRANCH + "..origin/" + config.BRANCH]);
     if (commits.total === 0) {
-      await message.sendMessage("_Already on latest version_");
+      await message.sendMessage("_𝘈𝘭𝘳𝘦𝘢𝘥𝘺 𝘰𝘯 𝘭𝘢𝘵𝘦𝘴𝘵 𝘷𝘦𝘳𝘴𝘪𝘰𝘯_");
     } else {
       var availupdate = "*ᴜᴘᴅᴀᴛᴇs ᴀᴠᴀɪʟᴀʙʟᴇ* \n\n";
       commits["all"].map((commit, num) => {
