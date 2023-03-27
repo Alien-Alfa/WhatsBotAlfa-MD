@@ -128,10 +128,10 @@ command(
           const quota_used = Math.floor(resp.quota_used)
           const percentage = Math.round((quota_used / total_quota) * 100);
           const remaining = total_quota - quota_used
-          const quota = `Total Quota : ${ await secondsToDHMS(total_quota)}
-Used  Quota : ${ await secondsToDHMS(quota_used)}
-Remaning    : ${ await secondsToDHMS(remaining)}
-Usage %     : ${ await secondsToDHMS(percentage)}
+          const quota = `Total Quota : ${ await secondsToDHMS(total_quota).toLowerCase().replace(" ","")}
+Used  Quota : ${ await secondsToDHMS(quota_used).toLowerCase().replace(" ","")}
+Remaning    : ${ await secondsToDHMS(remaining).toLowerCase().replace(" ","")}
+Usage %     : ${ await secondsToDHMS(percentage).toLowerCase().replace(" ","")}
 `
           await message.sendMessage('```' + quota + '```')
         })
@@ -272,175 +272,18 @@ command(
     desc: "check for update",
   },
   async (message, match, m) => {
-  //  let {prefix} = message
-    
     if (/now/.test(match)) {
-      await git.fetch();
-      var commits = await git.log([
-        config.BRANCH + "..origin/" + config.BRANCH,
-      ]);
-      if (commits.total === 0) {
-        return await message.sendMessage("_Already on latest version_");
-      } else {
-        await message.treply("𝙐𝙋𝘿𝘼𝙏𝙄𝙉𝙂...");
-
-        try {
-          var app = await heroku.get("/apps/" + process.env.HEROKU_APP_NAME);
-        } catch {
-          await message.sendMessage("_𝘐𝘯𝘷𝘢𝘭𝘪𝘥 𝘏𝘦𝘳𝘰𝘬𝘶 𝘋𝘦𝘵𝘢𝘪𝘭𝘴_");
-
-          await new Promise((r) => setTimeout(r, 1000));
-        }
-
-        git.fetch("upstream", config.BRANCH);
-        git.reset("hard", ["FETCH_HEAD"]);
-
-        var git_url = app.git_url.replace(
-          "https://",
-          "https://api:" + process.env.HEROKU_API_KEY + "@"
-        );
-
-        try {  
-          await git.addRemote("heroku", git_url);
-        } catch {
-          console.log("heroku remote error");
-        }
-        await git.push("heroku", config.BRANCH);
-
-        await message.sendMessage("𝙐𝙋𝘿𝘼𝙏𝙀𝘿!");
-      }
+      UpdateNow(message)
     }
     await git.fetch();
     var commits = await git.log([config.BRANCH + "..origin/" + config.BRANCH]);
     if (commits.total === 0) {
       await message.sendMessage("_𝘈𝘭𝘳𝘦𝘢𝘥𝘺 𝘰𝘯 𝘭𝘢𝘵𝘦𝘴𝘵 𝘷𝘦𝘳𝘴𝘪𝘰𝘯_");
     } else {
-      var availupdate = "*ᴜᴘᴅᴀᴛᴇs ᴀᴠᴀɪʟᴀʙʟᴇ* \n\n";
-      commits["all"].map((commit, num) => {
-        availupdate += num + 1 + " ●  " + tiny(commit.message) + "\n";
-      });
-      return await message.client.sendMessage(message.jid, {
-        text: availupdate,
-        footer: tiny("click here to update"),
-        buttons: [
-          {
-            buttonId: `${global.prefix}update now`,
-            buttonText: { displayText: tiny("update now") },
-          },
-        ],
-      });
+      CheckUpdate(message)
     }
   }
 );
-
-
-
-  command(
-    {
-      pattern: "updt",
-      fromMe: true,
-      desc: 'Checks or start bot updates',
-      type: 'heroku'
-        },
-    async (message, match, m) => {
-	if (!match || match === 'check') {
-		let n = await git.log([config.BRANCH + "..origin/" + config.BRANCH]);
-
-
-		if (n.total === 0) return await message.sendMessage('_Bot is completely up-to-date!_')
-		var up = 'ɴᴇᴡ ᴜᴘᴅᴀᴛᴇ ᴀᴠᴀɪʟᴀʙʟᴇ ғᴏʀ ʙᴏᴛ!\n\nᴄʜᴀɴɢᴇs:\n'
-		let no = 1
-		n['all'].map((c) => {
-			up += '' + no++ + '. ' + '[' + c.date.substring(0, 10) + ']: ' + c.message + '\n';
-		});
-		let buttons = [{
-			buttonId: prefix + 'updt now',
-			buttonText: {
-				displayText: 'UPDATE START'
-			},
-			type: 1
-		}, ]
-		const buttonMessage = {
-			text: up,
-			footer: 'Click the button to start update',
-			buttons: buttons,
-			headerType: 1
-		}
-		await message.client.sendMessage(message.jid, buttonMessage)
-	} else if (match === 'start' || match === 'now') {
-		let n = await git.log([config.BRANCH + "..origin/" + config.BRANCH]);
-		if (!process.env.HEROKU_API_KEY && !process.env.HEROKU_APP_NAME) {
-		await git.reset("hard",["HEAD"])
-        await git.pull()
-        await message.sendMessage('_Updated_')
-        await message.sendMessage('_Rebooting..._')
-        return require('pm2').restart('index.js');
-        }
-		if (n === 500) return await message.sendMessage('_Bot is completely up-to-date!_')
-		await message.sendMessage('_Build started_')
-
-
-
-try{
-
-        try {
-          var app = await heroku.get("/apps/" + process.env.HEROKU_APP_NAME);
-        } catch {
-          await message.sendMessage("_Invalid Heroku Details_");
-          await new Promise((r) => setTimeout(r, 1000));
-        }
-        git.fetch("upstream", config.BRANCH);
-        git.reset("hard", ["FETCH_HEAD"]);
-
-        var git_url = app.git_url.replace(
-          "https://",
-          "https://api:" + process.env.HEROKU_API_KEY + "@"
-        );
-
-        try {  
-          await git.addRemote("heroku", git_url);
-        } catch {
-          console.log("heroku remote error");
-        }
-        await git.push("heroku", config.BRANCH);
-
-        await message.sendMessage("UPDATED");
-      }catch(err){
-
-        message.sendMessage('*Your Heroku information is wrong!*')
-      }
-
-
-		if (n === 404) return await message.sendMessage('*Your Heroku information is wrong!*')
-		if (n === 408) return await message.sendMessage('_Your account has reached its concurrent builds limit!. Please wait for the other app to finish its deploy_')
-		if (n === 200) return await message.sendMessage('_Successfully Updated!_')
-	} else {
-		let n = await git.log([config.BRANCH + "..origin/" + config.BRANCH]);
-		let buttons = [{
-				buttonId: prefix + 'updt now',
-				buttonText: {
-					displayText: 'UPDATE START'
-				},
-				type: 1
-			},
-			{
-				buttonId: prefix + 'updt check',
-				buttonText: {
-					displayText: 'UPDATE CHECK'
-				},
-				type: 1
-			}
-		]
-		const buttonMessage = {
-			text: 'Update Manager',
-			footer: n == 500 ? '*Bot is up-to-date.*' : n.total + ' New Updates are available',
-			buttons: buttons,
-			headerType: 1
-		}
-		await message.client.sendMessage(message.jid, buttonMessage)
-	}
-});
-
 
 
 
