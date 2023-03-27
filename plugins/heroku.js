@@ -9,7 +9,7 @@ const git = simpleGit();
 const exec = require("child_process").exec;
 const config = require('../database/settings')
 
-  
+   
 command( 
   {
     pattern: "Restart",
