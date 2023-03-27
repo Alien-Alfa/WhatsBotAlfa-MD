@@ -106,43 +106,44 @@ command(
 
 command(
   {
-    pattern: "dyno",
-    fromMe: isPrivate,
-    desc: "Show Quota info",
-    type: "heroku",
+    pattern: 'dyno',
+    fromMe: true,
+    desc: 'Show Quota info',
+    type: 'heroku',
   },
-  async (message) => {
+  async (message, match) => {
     try {
       heroku
-        .get("/account")
+        .get('/account')
         .then(async (account) => {
-          const url = `https://api.heroku.com/accounts/${account.id}/actions/get-quota`;
+          const url = `https://api.heroku.com/accounts/${account.id}/actions/get-quota`
           headers = {
-            "User-Agent": "Chrome/80.0.3987.149 Mobile Safari/537.36",
-            Authorization: "Bearer " + process.env.HEROKU_API_KEY,
-            Accept: "application/vnd.heroku+json; version=3.account-quotas",
-          };
-          const res = await got(url, { headers });
-          const resp = JSON.parse(res.body);
-          const total_quota = Math.floor(resp.account_quota);
-          const quota_used = Math.floor(resp.quota_used);
+            'User-Agent': 'Chrome/80.0.3987.149 Mobile Safari/537.36',
+            Authorization: 'Bearer ' + config.HEROKU_API_KEY,
+            Accept: 'application/vnd.heroku+json; version=3.account-quotas',
+          }
+          const res = await got(url, { headers })
+          const resp = JSON.parse(res.body)
+          const total_quota = Math.floor(resp.account_quota)
+          const quota_used = Math.floor(resp.quota_used)
           const percentage = Math.round((quota_used / total_quota) * 100);
-          const remaining = total_quota - quota_used;
-          const quota = `
-Total Quota : ${secondsToDHMS(total_quota)}
-Used  Quota : ${secondsToDHMS(quota_used)}
-Usage %     : ${secondsToDHMS(percentage)}
-Remaning    : ${secondsToDHMS(remaining)}`;
-          await message.sendMessage("```" + quota + "```");
+          const remaining = total_quota - quota_used
+          const quota = `Total Quota : ${ await secondsToHms(total_quota)}
+Used  Quota : ${ await secondsToHms(quota_used)}
+Remaning    : ${ await secondsToHms(remaining)}
+Usage %     : ${ await secondsToDHMS(percentage)}
+`
+          await message.send('```' + quota + '```')
         })
         .catch(async (error) => {
-          return await message.sendMessage(`HEROKU : ${error.body.message}`);
-        });
+          return await message.send(`HEROKU : ${error.body.message}`)
+        })
     } catch (error) {
-      await message.sendMessage(error);
+      await message.send(error)
     }
   }
-);
+)
+
 
 
 command(
