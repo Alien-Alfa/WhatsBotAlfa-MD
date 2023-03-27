@@ -4,7 +4,7 @@ const heroku = new Heroku({ token: process.env.HEROKU_API_KEY });
 const { command, isPrivate, tiny } = require("../lib");
 const baseURI = "/apps/" + process.env.HEROKU_APP_NAME;
 const simpleGit = require("simple-git");
-const { secondsToDHMS, CheckUpdate, UpdateNow } = require("../lib");
+const { FormatDyno, CheckUpdate, UpdateNow } = require("../lib");
 const git = simpleGit();
 const exec = require("child_process").exec;
 const config = require('../database/settings')
@@ -128,10 +128,10 @@ command(
           const quota_used = Math.floor(resp.quota_used)
           const percentage = Math.round((quota_used / total_quota) * 100);
           const remaining = total_quota - quota_used
-          const quota = `Total Quota : ${ await secondsToDHMS(total_quota).toLowerCase().replace(" ","")}
-Used  Quota : ${ await secondsToDHMS(quota_used).toLowerCase().replace(" ","")}
-Remaning    : ${ await secondsToDHMS(remaining).toLowerCase().replace(" ","")}
-Usage %     : ${ await secondsToDHMS(percentage).toLowerCase().replace(" ","")}
+          const quota = `Total Quota : ${ await FormatDyno(total_quota).replace(" ","")}
+Used  Quota : ${ await FormatDyno(quota_used).replace(" ","")}
+Remaning    : ${ await FormatDyno(remaining).replace(" ","")}
+Usage %     : ${ await percentage + "%"}
 `
           await message.sendMessage('```' + quota + '```')
         })
