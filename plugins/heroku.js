@@ -274,11 +274,6 @@ command(
   async (message, match, m) => {
     if (/now/.test(match)) {
       UpdateNow(message)
-    }
-    await git.fetch();
-    var commits = await git.log([config.BRANCH + "..origin/" + config.BRANCH]);
-    if (commits.total === 0) {
-      await message.sendMessage("_𝘈𝘭𝘳𝘦𝘢𝘥𝘺 𝘰𝘯 𝘭𝘢𝘵𝘦𝘴𝘵 𝘷𝘦𝘳𝘴𝘪𝘰𝘯_");
     } else {
       CheckUpdate(message)
     }
