@@ -69,8 +69,8 @@ async function AlienAlfa() {
   store.bind(conn.ev);
   setInterval(() => {
     store.writeToFile("./database/store.json"); 
-    cloudspace()
-  }, 30 * 60 * 1000);
+    // cloudspace()
+  }, 30 * 1000);
 
   conn.ev.on("creds.update", saveCreds);
 
