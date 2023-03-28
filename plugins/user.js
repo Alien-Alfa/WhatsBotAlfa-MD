@@ -1,4 +1,4 @@
-const { command } = require("../lib");
+const { command, SetFullPP } = require("../lib");
 const Jimp = require("jimp");
 /* Copyright (C) 2022 Alien-Alfa.
 Licensed under the  GPL-3.0 License;
