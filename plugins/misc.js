@@ -27,5 +27,6 @@ command({
 
 },
 async (message, match, m) => {
-return await Gpt(match, message)
+let chat = await Gpt(match, message)
+return await message.sendMessage(chat)
 })

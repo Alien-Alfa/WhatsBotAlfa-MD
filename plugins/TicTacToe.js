@@ -181,19 +181,16 @@ ${arr.slice(3, 6).join("")}
 ${arr.slice(6).join("")}
 
 ❌: @${room.game.playerX.split("@")[0]}
-⭕: @${room.game.playerO.split("@")[0]}`;
+⭕: @${room.game.playerO.split("@")[0]}
+
+_Play again? type *ttt*_`;
 
       if ((room.game._currentTurn ^ isSurrender ? room.x : room.o) !== m.chat)
         room[room.game._currentTurn ^ isSurrender ? "x" : "o"] = m.chat;
       if (isWin || isTie) {
         await message.client.sendMessage(message.jid, {
           text: str,
-          buttons: [
-            {
-              buttonId: `${global.prefix}ttt`,
-              buttonText: { displayText: "Play again" },
-            },
-          ],
+      //    buttons: [{buttonId: `${global.prefix}ttt`,buttonText: { displayText: "Play again" },},],
           mentions: parseJid(str),
         });
       } else {
