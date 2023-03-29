@@ -249,27 +249,6 @@ command({
   }
 );
 
-
-
-command({
-    pattern: "tagall ?(.*)",
-    fromMe: true,
-    desc: "mention all users in group",
-    type: "group",
-  }, async (message, match, m) => {
-    if (!message.isGroup) return;
-    const { participants } = await message.client.groupMetadata(message.jid);
-    let teks = "";
-    for (let mem of participants) {
-      teks += ` @${mem.id.split("@")[0]}\n`;
-    }
-    message.sendMessage(teks.trim(), {
-      mentions: participants.map((a) => a.id),
-    });
-  }
-);
-
-
 command({
     pattern: "tag ?(.*)",
     fromMe: true,
@@ -287,6 +266,7 @@ command({
     });
   }
 );
+
 command({
     pattern: "poll ?(.*)",
     fromMe: true,

@@ -1,14 +1,13 @@
 const fs = require("fs")
 const chalk = require("chalk")
 const { writeFile, readFile } = require("fs");
-const { isAdmin, parsedJid, command, isPrivate, SetupNewUser } = require("../lib");
+const { isAdmin, parsedJid, command, isPrivate, SetupNewUser } = require("../lib/");
 //let data =  readFile('./database/settings.json')
 //let db = JSON.parse(data);
 //let bannnnnn = db.settings.banned
 let path = './database/settings.json'
 const relconfig = require('../config')
 const config = require('../database/settings.json')
-//const { registeruser } = require('../lib/alfabase')
 //============================================================================================================================================
 //============================================================================================================================================
 //============================================================================================================================================

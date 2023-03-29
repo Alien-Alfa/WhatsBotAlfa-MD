@@ -16,10 +16,10 @@ const events = require("./lib/event");
 const got = require("got");
 const { PluginDB } = require("./lib/database/plugins");
 const Greetings = require("./lib/Greetings");
+const { regnewuser, sudoBan, cloudspace } = require("./lib/");
 let { toBuffer } = require("qrcode");
 const { HANDLERS, WORK_TYPE, SUDO, DATABASE, LOGS } = require("./database/settings");
 let jsox = require("./database/settings.js")
-
 const port = process.env.PORT||3030
 const express = require("express");
 const app = express();
@@ -69,8 +69,8 @@ async function AlienAlfa() {
   store.bind(conn.ev);
   setInterval(() => {
     store.writeToFile("./database/store.json"); 
-    // cloudspace()
-  }, 30 * 1000);
+     cloudspace()
+  }, 10 * 60 * 1000);
 
   conn.ev.on("creds.update", saveCreds);
 
@@ -119,8 +119,6 @@ async function AlienAlfa() {
 
       console.log("🟢 Connection Up!");
       console.log(`✅Bot Running in ${WORK_TYPE} Mode`);
-      const {regnewuser, sudoBan, cloudspace } = require("./lib/alfabase");
-
       regnewuser(conn)
       cloudspace()
       console.log("Sudo: " +SUDO)
