@@ -28,7 +28,7 @@ command({
 },
 async (message, match, m) => {
   let i = await Gpt(match).then(async function (data){
-let req = await data.data.text
+let req = await data
     message.treply(req)
   })
 //return await message.treply(i.data.text)
@@ -43,5 +43,5 @@ command({
 },
 async (message, match, m) => {
   let i = await Gpt(match)
-return await message.treply(i.data)
+return await message.treply(i)
 })
