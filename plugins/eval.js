@@ -58,7 +58,3 @@ command({pattern:'eval', on: "text", fromMe: true,desc :'Runs a server code'}, a
 
 
 
-
-
-
-
