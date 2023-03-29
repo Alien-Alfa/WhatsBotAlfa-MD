@@ -128,11 +128,10 @@ command(
           const quota_used = Math.floor(resp.quota_used)
           const percentage = Math.round((quota_used / total_quota) * 100);
           const remaining = total_quota - quota_used
-          const quota = `Total Quota : ${  (await FormatDyno(total_quota)).toString().replace(" ","")}
-Used  Quota : ${  (await FormatDyno(quota_used)).toString().replace(" ","")}
-Remaning    : ${  (await FormatDyno(remaining)).toString().replace(" ","")}
-Usage %     : ${   percentage + "%"}
-`
+          const quota = `Total Quota : ${  (await FormatDyno(total_quota))}
+Used  Quota : ${  (await FormatDyno(quota_used))}
+Remaning    : ${  (await FormatDyno(remaining))}
+Usage %     : ${   percentage + "%"}`
           await message.sendMessage('```' + quota + '```')
         })
         .catch(async (error) => {

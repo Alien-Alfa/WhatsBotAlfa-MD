@@ -28,20 +28,6 @@ command({
 },
 async (message, match, m) => {
   let i = await Gpt(match).then(async function (data){
-let req = await data.data.text
-    message.treply(req)
+return await message.treply(data.data.text)
   })
-//return await message.treply(i.data.text)
-})
-
-command({
-  pattern: "2gpt",
-  fromMe: true,
-  desc: "ChatGPT",
-  type: "misc",
-
-},
-async (message, match, m) => {
-  let i = await Gpt(match)
-return await message.treply(i)
 })
