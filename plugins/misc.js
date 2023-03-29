@@ -29,5 +29,6 @@ command({
 async (message, match, m) => {
   if (!match) return await message.sendMessage("_Ask Somthing to chatGPT_");
   let response  = await getJson(`https://api-viper-x0.vercel.app/api/openai?openaiapikey=${process.env.chatGPT_API}&text=${match}`)
-  await message.reply(response.data.text);
+  let rezi = await response.data.text.toString().replace("\n\n","")
+  return await message.reply(rezi);
 })
