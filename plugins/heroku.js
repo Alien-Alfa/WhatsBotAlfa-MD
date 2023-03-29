@@ -40,7 +40,7 @@ command(
   let buttonMessage = {
      text: `Restart bot
 Reboot service`,
-     footer: 'process.env.FOOTER',
+     footer: process.env.FOOTER,
      buttons: buttonsntilink,
      headerType: 2
   }
