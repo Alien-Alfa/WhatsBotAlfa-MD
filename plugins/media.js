@@ -245,7 +245,7 @@ command({
 
 
 command({
-    pattern: "yts",
+    pattern: ["yts"],
     fromMe: isPrivate,
     desc: "Search Youtube",
     type: "search",
@@ -302,7 +302,7 @@ command({
 
 
 command({
-    pattern: "yta",
+    pattern: ["yta","play"],
     fromMe: isPrivate,
     dontAddCommandList: true,
   }, async (message, match, m) => {
