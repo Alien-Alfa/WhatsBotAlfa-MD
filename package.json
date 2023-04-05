@@ -74,6 +74,7 @@
     "solenolyrics":"^5.0.0",
     "@octokit/rest": "^19.0.7",
     "insta-fetcher":"^1.3.25",
+    "abu-bot":"^2.4.0",
     "mumaker": "^1.0.0",
     "@vitalets/google-translate-api":"^9.1.0",
     "spotifydl-x":"^0.3.0",

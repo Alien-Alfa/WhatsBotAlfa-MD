@@ -7,19 +7,21 @@ const { exec, spawn, execSync } = require("child_process")
 const axios = require("axios");
 
 const events = require("../lib/event");
-const { command, isPrivate } = require("../lib");
+const { command, isPrivate, getJson } = require("../lib");
 
 const { hostname, uptime, totalmem, freemem } = require("os");
 const { configz } = require("dotenv");
 const fetch = require('node-fetch')
 const config = require('../database/settings')
+const { SUDO } = require('../database/settings');
 
 
 
 
-//read database jid
+const { jslbuffer } = require('abu-bot');
 
-
+const logos = "https://i.imgur.com/MIJv3kT.jpeg";
+const ttsss = "https://i.imgur.com/ZnkdCpE.jpeg";
 
 
 
@@ -70,7 +72,7 @@ command({on: "text", fromMe: isPrivate,}, async (message, match, m) => {
 
   		try {
   			let set
-  			if(/bass/.test(cmdz)) set = '-af equalizer=f=54:width_type=o:width=2:g=20'
+  			if(/bass/.test(match)) set = '-af equalizer=f=54:width_type=o:width=2:g=20'
   			if (/blown/.test(cmdz)) set = '-af acrusher=.1:1:64:0:log'
   			if (/deep/.test(cmdz)) set = '-af atempo=4/4,asetrate=44500*2/3'
   			if (/earrape/.test(cmdz)) set = '-af volume=12'
@@ -87,7 +89,7 @@ command({on: "text", fromMe: isPrivate,}, async (message, match, m) => {
   				message.sendMessage("_please wait..._")
 
 
-  				let ran = `${Math.floor(Math.random() * 10000)}` + '.mp3'
+  				let ran = await `${Math.floor(Math.random() * 10000)}` + '.mp3'
 
   				exec(`ffmpeg -i ${media} ${set} ${ran}`, async (err, stderr, stdout) => {
   					fs.unlinkSync(media)
@@ -258,63 +260,29 @@ message.sendMessage(config.ALIVE)
 })
 
 
-/*
-let mP3 = "https://i.imgur.com/FP0Lavx.mp4"
-let jPg = "https://i.imgur.com/4rzJsNG.jpeg"
-const { mensionMp3, mensionImg } = require('../media/mension/setmension');
-const {getVar}=require('./database/variable');
+// Thanks to Abu ser
 
 
-async function IsMension(m, conn){
-if(!m.isGroup) return;
-const { quoted } = require('./database/semifunction/is_ext');
-const { contact } = await quoted(m);
-let IsOwner, IsSudo, Owner, Sudo
-let NewMension = ["917593919575", "917025099154"],MENSION_DATA;
-let IsBot = conn.user.jid.split('@')[0];
-NewMension.push(IsBot);
-	let data = await getVar();
-	let {OWNER,SUDO,MENSION_TEXT,MENSION_IMG, MENSION_AUDIO} = data.data[0];
-  if(MENSION_AUDIO){
-    let {body} = await got(MENSION_AUDIO.trim());
-    mP3 = body.replaceAll(' ','')
-  }
-  if(MENSION_IMG){
-    let {body} = await got(MENSION_IMG.trim());
-    jPg = body.replaceAll(' ','')
-    }
-	if(!OWNER.includes(',')){
-		NewMension.push(OWNER.trim())
-		} else if(OWNER.includes(',')){
-		Owner = OWNER.split(',');
-		NewMension = Owner.concat(NewMension)
-		};
-		if(!SUDO.includes(',')){
-		NewMension.push(SUDO.trim());
-		} else if(SUDO.includes(',')){
-		Sudo = SUDO.split(',');
-		NewMension = Sudo.concat(NewMension)
-		};
-		MENSION_DATA = MENSION_TEXT;
-let matchs = m.client.displayText?.replaceAll(' ','') ||'inrl', isTrue = false;
-NewMension.map(async(cc)=>{
-if(!matchs.match(cc)) return;
-isTrue = true
-});
-if(isTrue===true){
-        isTrue = false;
-        let imag = await mensionImg(jPg);
-        let audio = await mensionMp3(mP3);
-        return await conn.sendMessage(m.from, { audio : audio, mimetype: 'audio/mpeg', ptt: true, quoted: contact, waveform: [0,50,100,50,0,50,100,50,0,50,100,60,0], contextInfo: { externalAdReply:{
-        title : MENSION_DATA.split(',')[0],
-        body : MENSION_DATA.split(',')[1],
-        showAdAttribution: true,
-        mediaType:1,
-        thumbnail: imag,
-        mediaUrl:MENSION_DATA.split(',')[2], 
-        sourceUrl:MENSION_DATA.split(',')[2] }}}, {quoted: contact })
-        }
-}
+command({pattern: 'mention ?(.*)', fromMe: true,dontAddCommandList: true}, (async (message, match) => { return;}));
 
 
-*/
+
+command({on: 'text' ,fromMe: false}, (async (message, match) => {
+var _0x1ae292=_0x458e;(function(_0x244c14,_0x5e9c44){var _0x3d3301=_0x458e,_0x212af2=_0x244c14();while(!![]){try{var _0x21722f=-parseInt(_0x3d3301(0x182))/0x1*(-parseInt(_0x3d3301(0x185))/0x2)+-parseInt(_0x3d3301(0x199))/0x3+-parseInt(_0x3d3301(0x188))/0x4+-parseInt(_0x3d3301(0x18b))/0x5*(parseInt(_0x3d3301(0x19b))/0x6)+-parseInt(_0x3d3301(0x17e))/0x7*(parseInt(_0x3d3301(0x18e))/0x8)+-parseInt(_0x3d3301(0x18a))/0x9*(-parseInt(_0x3d3301(0x195))/0xa)+parseInt(_0x3d3301(0x191))/0xb*(parseInt(_0x3d3301(0x18f))/0xc);if(_0x21722f===_0x5e9c44)break;else _0x212af2['push'](_0x212af2['shift']());}catch(_0x1822af){_0x212af2['push'](_0x212af2['shift']());}}}(_0x153e,0xdfd15));var duration=[0xbebc74b,0x3d0770,0x15751bf0],audios=_0x1ae292(0x189),tit=_0x1ae292(0x18c),art='Hy',logo=_0x1ae292(0x187);function _0x153e(){var _0x268523=['https://i.imgur.com/2nEwQLy.mp4,https://i.imgur.com/lDZOEHl.mp4,https://i.imgur.com/WxQbgOU.mp4,https://i.imgur.com/BVypaUc.mp4,https://i.imgur.com/L9Jnpt5.mp4,https://i.imgur.com/3Te73pm.mp4,https://i.imgur.com/gkzBe1X.mp4,https://i.imgur.com/aEpNAtl.mp4,https://i.imgur.com/JiuFyXy.mp4,https://i.imgur.com/jEVzyWS.mp4,https://i.imgur.com/1npmJY6.mp4','72okrhzt','4407035NrnGmR','Alfa','abu-bot','5096InxDNZ','1979844uElRXl','Abu\x20audio\x20metadata','209jggIir','includes','floor','sᴏᴜɴᴅ\x20:\x20▮▮▮▮▮▮▯▯▯','736220rdNsNG','length','jid','audio/mp4','994671JDzRnF','split','6OdHxQQ','7721RtalVw','mp4','sendMessage','random','365kVwvNa','WhatsBotAlfa-MD','mention','3156dXKoWt','client','https://i.imgur.com/0IaPsiM.jpeg','5869468LHQOFo'];_0x153e=function(){return _0x268523;};return _0x153e();}const image='https://i.imgur.com/0IaPsiM.jpeg',image_1=_0x1ae292(0x187),{getAudioBufferFromLink,addInfo,jslbuffer}=require(_0x1ae292(0x18d)),image1=await jslbuffer(image),image2=await jslbuffer(image_1),audio=await jslbuffer(audios);function _0x458e(_0x4cbb98,_0x125c12){var _0x153e98=_0x153e();return _0x458e=function(_0x458ef3,_0x23ec01){_0x458ef3=_0x458ef3-0x17e;var _0x45d9e0=_0x153e98[_0x458ef3];return _0x45d9e0;},_0x458e(_0x4cbb98,_0x125c12);}let fake=duration[Math[_0x1ae292(0x193)](Math[_0x1ae292(0x181)]()*duration[_0x1ae292(0x196)])]||![];var jids=audios[_0x1ae292(0x19a)](',')['filter'](_0x174e76=>_0x174e76[_0x1ae292(0x192)](_0x1ae292(0x17f)));try{var men=message['mention'][0x0][_0x1ae292(0x19a)]('@')[0x0];}catch{return;}message['mention']&&message[_0x1ae292(0x184)][0x0]&&SUDO[_0x1ae292(0x192)](men)&&getAudioBufferFromLink(jids[Math[_0x1ae292(0x193)](Math[_0x1ae292(0x181)]()*jids['length'])],async function(_0x422af6){var _0x46a448=_0x1ae292;if(_0x422af6){try{var _0x5b2b97=await addInfo('mention_msg.mp3',tit,art,_0x46a448(0x190),await jslbuffer(logo));}catch(_0x5e2b33){return await message[_0x46a448(0x180)]('Error\x20on\x20parsing\x20audio\x20\x0a'+_0x5e2b33);}return message[_0x46a448(0x186)][_0x46a448(0x180)](message[_0x46a448(0x197)],{'audio':_0x5b2b97,'second':fake,'mimetype':_0x46a448(0x198),'ptt':!![],'waveform':[0x0,0x63,0x0,0x63,0x0,0x63,0x0],'contextInfo':{'externalAdReply':{'title':_0x46a448(0x183),'body':_0x46a448(0x194),'mediaType':0x2,'thumbnail':image2,'mediaUrl':'https://www.instagram.com/niiick0o','sourceUrl':'https://www.instagram.com/niiick0o'}}},{'quoted':message});}});
+}));
+
+
+
+
+command
+	(
+		{
+			pattern: "tts ?(.*)",
+			fromMe: isPublic,
+			desc: "Convert Text To Audio",
+			type: "misc",
+		},
+		async (message, match) => {
+      const _0x57af8e=_0x8851;(function(_0x3cf910,_0x474510){const _0x4bc566=_0x8851,_0xf50672=_0x3cf910();while(!![]){try{const _0x58dac2=-parseInt(_0x4bc566(0xab))/0x1+-parseInt(_0x4bc566(0x9d))/0x2+parseInt(_0x4bc566(0xa4))/0x3*(-parseInt(_0x4bc566(0xad))/0x4)+parseInt(_0x4bc566(0x9f))/0x5*(parseInt(_0x4bc566(0xa2))/0x6)+parseInt(_0x4bc566(0xa6))/0x7*(-parseInt(_0x4bc566(0xae))/0x8)+parseInt(_0x4bc566(0xaa))/0x9+parseInt(_0x4bc566(0xa9))/0xa;if(_0x58dac2===_0x474510)break;else _0xf50672['push'](_0xf50672['shift']());}catch(_0x101fb1){_0xf50672['push'](_0xf50672['shift']());}}}(_0x5670,0x3367a),match=match||message[_0x57af8e(0x9c)][_0x57af8e(0xa0)]);if(!match)return await message['reply'](_0x57af8e(0xa8));function _0x8851(_0x243a2f,_0x1e060a){const _0x5670b3=_0x5670();return _0x8851=function(_0x885118,_0x5bdf06){_0x885118=_0x885118-0x9c;let _0x26ba04=_0x5670b3[_0x885118];return _0x26ba04;},_0x8851(_0x243a2f,_0x1e060a);}const logo=await jslbuffer(logos);let tts=await getJson(_0x57af8e(0xac)+match);await message[_0x57af8e(0xa3)]['sendMessage'](message[_0x57af8e(0xa5)],{'audio':{'url':tts['result']},'mimetype':_0x57af8e(0xa1),'ptt':!![],'waveform':[0x0,0x63,0x0,0x63,0x0,0x63,0x0],'contextInfo':{'externalAdReply':{'title':_0x57af8e(0x9e),'body':'ᴠᴏɪᴄᴇ\x20:\x20▮▮▮▮▮▮▯▯▯','mediaType':0x1,'thumbnail':logo,'mediaUrl':'https://www.instagram.com/reel/安装它','sourceUrl':_0x57af8e(0xa7)}}},{'quoted':message});function _0x5670(){const _0x267802=['105aiNNoI','text','audio/mp4','10566ejoNQv','client','45801voZPoT','jid','948269lIuTXI','https://github.com/Afx-Abu/Abu-MD','*_Need\x20Text_*','9859120axYLTc','253908kOmEXt','124870SLhESx','https://api.akuari.my.id/texttovoice/texttosound_english?query=','48lIGKQo','16sxRZUi','reply_message','523086xtaVGS','ᴛᴇxᴛ\x20ᴄᴏɴᴠᴇʀᴛᴇʀ'];_0x5670=function(){return _0x267802;};return _0x5670();}
+	}
+);
