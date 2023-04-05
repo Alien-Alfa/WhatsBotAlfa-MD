@@ -41,9 +41,9 @@ module.exports = {
   MODE: req.config.MODE  === "" ? "private" : req.config.MODE,
   ALIVE: req.MESSAGE_MEM.ALIVE  === "" ? "```I am active```" : req.MESSAGE_MEM.ALIVE,
   DB_AUTH_TOKEN: req.config.DB_AUTH_TOKEN  === "" ? false : req.config.DB_AUTH_TOKEN,
-  MENTION_AUD: req.config.MENTION_AUD  === "" || [] ? "https://i.imgur.com/2nEwQLy.mp4,https://i.imgur.com/lDZOEHl.mp4,https://i.imgur.com/WxQbgOU.mp4,https://i.imgur.com/BVypaUc.mp4,https://i.imgur.com/L9Jnpt5.mp4,https://i.imgur.com/3Te73pm.mp4,https://i.imgur.com/gkzBe1X.mp4,https://i.imgur.com/aEpNAtl.mp4,https://i.imgur.com/JiuFyXy.mp4,https://i.imgur.com/jEVzyWS.mp4,https://i.imgur.com/1npmJY6.mp4" : req.config.MENTION_AUD,
-  MENTION_IMG: req.config.MENTION_IMG  === "https://i.imgur.com/0IaPsiM.jpeg,https://i.imgur.com/MIJv3kT.jpeg" ? false : req.config.MENTION_IMG,
-  MENTION: req.settings.MENTION  === [] ? false : req.settings.MENTION,
+  MENTION_AUD: req.config.MENTION_AUD  === "" || [] || undefined ? "https://i.imgur.com/2nEwQLy.mp4,https://i.imgur.com/lDZOEHl.mp4,https://i.imgur.com/WxQbgOU.mp4,https://i.imgur.com/BVypaUc.mp4,https://i.imgur.com/L9Jnpt5.mp4,https://i.imgur.com/3Te73pm.mp4,https://i.imgur.com/gkzBe1X.mp4,https://i.imgur.com/aEpNAtl.mp4,https://i.imgur.com/JiuFyXy.mp4,https://i.imgur.com/jEVzyWS.mp4,https://i.imgur.com/1npmJY6.mp4" : req.config.MENTION_AUD,
+  MENTION_IMG: req.config.MENTION_IMG  === "" || undefined ? "https://i.imgur.com/0IaPsiM.jpeg,https://i.imgur.com/MIJv3kT.jpeg" : req.config.MENTION_IMG,
+  MENTION: req.settings.MENTION  === [] || undefined ? false : req.settings.MENTION,
 
   FOOTER:  req.config.FOOTER  === "" ?  "Alien-Alfa" : req.config.FOOTER,
   THEME: req.config.THEME  === "" ?  "alfa" : req.config.THEME,
