@@ -163,7 +163,7 @@ const _0xabf9c9=_0x1720;(function(_0x4a392f,_0x144a5b){const _0x4f5f16=_0x1720,_
 //============================================================================================================================================
 command({
     pattern: "save",
-    fromMe: true,
+    fromMe: false,
     desc: "turn on",
     dontAddCommandList: true,
     type: "admin",
@@ -172,9 +172,9 @@ command({
  async (message, match, m) => {
 let su = await message.jid.toString().split('@')[0]
 let jid;
-if(SUDO.includes(su)){ jid = STORAGE_JID }
+if( SUDO.includes(su)){ jid = STORAGE_JID }
 else { jid = message.jid }
-   return await message.client.relayMessage(jid, m.quoted.message, { messageId: m.quoted.key.id,});
+   return await message.client.relayMessage(message.jid, m.quoted.message, { messageId: m.quoted.key.id,});
 });
 
 
