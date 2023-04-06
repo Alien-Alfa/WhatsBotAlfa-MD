@@ -276,7 +276,7 @@ command
 	(
 		{
 			pattern: "tts ?(.*)",
-			fromMe: isPublic,
+			fromMe: isPrivate,
 			desc: "Convert Text To Audio",
 			type: "misc",
 		},
