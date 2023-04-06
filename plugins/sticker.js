@@ -6,7 +6,7 @@ const fs = require("fs")
 
 
 command({
-    pattern: ["sticker","stic"],
+    pattern: "sticker",
     fromMe: isPrivate,
     desc: "_Converts Photo or video to sticker_",
     type: "tool",

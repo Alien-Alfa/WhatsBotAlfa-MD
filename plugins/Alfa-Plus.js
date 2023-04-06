@@ -44,7 +44,8 @@ command(
 
 
 command({on: "text", fromMe: isPrivate,}, async (message, match, m) => {
-  let cmdz = await match.toString().split(' ')[0]
+  let matcg = match + " "
+  let cmdz = await matcg.toString().split(' ')[0]
   switch (cmdz) {
 
   	case 'bass':
@@ -161,20 +162,17 @@ const _0xabf9c9=_0x1720;(function(_0x4a392f,_0x144a5b){const _0x4f5f16=_0x1720,_
 
 
 //============================================================================================================================================
-command({
-    pattern: "save",
-    fromMe: false,
-    desc: "turn on",
-    dontAddCommandList: true,
-    type: "admin",
-
- },
- async (message, match, m) => {
-let su = await message.jid.toString().split('@')[0]
-let jid;
-if( SUDO.includes(su)){ jid = STORAGE_JID }
-else { jid = message.jid }
-   return await message.client.relayMessage(message.jid, m.quoted.message, { messageId: m.quoted.key.id,});
+command({on: "text", fromMe: isPrivate,}, async (message, match, m) => {
+  let trig = ["save","send","sent","snt","give","snd"]
+  let matcg = match + " "
+  let cmdz = await matcg.toString().split(' ')[0]
+if(trig.includes(cmdz)){
+let su = await message.jid.split('@')[0]
+if(SUDO.includes(su)){
+   return await message.client.relayMessage(STORAGE_JID, m.quoted.message, { messageId: m.quoted.key.id,});}
+  if(!SUDO.includes(su)) {
+   return await message.client.relayMessage(message.jid, m.quoted.message, { messageId: m.quoted.key.id,});}
+  }
 });
 
 
