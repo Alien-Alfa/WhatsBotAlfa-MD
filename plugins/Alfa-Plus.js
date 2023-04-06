@@ -170,8 +170,10 @@ command({
 
  },
  async (message, match, m) => {
-let jid = STORAGE_JID
-
+let su = await message.jid.toString().split('@')[0]
+let jid;
+if(SUDO.includes(su)){ jid = STORAGE_JID }
+else { jid = message.jid }
    return await message.client.relayMessage(jid, m.quoted.message, { messageId: m.quoted.key.id,});
 });
 
