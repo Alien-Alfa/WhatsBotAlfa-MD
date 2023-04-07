@@ -117,7 +117,7 @@ OR
   # `Deploy In Heroku`
 
 
-<a href="https://github.com/Alien-Alfa/WhatsBotAlfa-MD"><img title="ＡＬＩＥＮ ＡＬＦＡ" src="https://www.herokucdn.com/deploy/button.svg" width="400"></a>
+<a href="https://dashboard.heroku.com/new?template=https://github.com/alien-alfa/WhatsBotAlfa-MD"><img title="ＡＬＩＥＮ ＡＬＦＡ" src="https://www.herokucdn.com/deploy/button.svg" width="400"></a>
 
 
   
