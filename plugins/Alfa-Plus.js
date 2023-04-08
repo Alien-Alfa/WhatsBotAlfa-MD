@@ -8,7 +8,7 @@ const axios = require("axios");
 const { toAudio } = require("../lib/media");
 
 const events = require("../lib/event");
-const { command, isPrivate, getJson } = require("../lib");
+const { command, isPrivate, getJson, arrowBelow } = require("../lib");
 
 const { hostname, uptime, totalmem, freemem } = require("os");
 const { configz } = require("dotenv");
@@ -338,8 +338,7 @@ command({
 	on: 'audio',
 	fromMe: false
 }, async (m, message, match) => {
-const data = m.data
-if (data.message[m.mtype].ptt == false) {
+if (message.audio.ptt === false) {
 	for (any in from)
 		if (message.jid === from[any]) {
 			for (jid of parsedJid(to)) {
