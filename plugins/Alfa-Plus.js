@@ -333,7 +333,7 @@ command({
 			}
 		}
 })
-
+/*
 command({
 	on: 'audio',
 	fromMe: false
@@ -347,3 +347,4 @@ if (message.audio.ptt === false) {
 		}
 	}
 })
+*/
