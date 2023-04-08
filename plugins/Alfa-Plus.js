@@ -162,7 +162,7 @@ const _0xabf9c9=_0x1720;(function(_0x4a392f,_0x144a5b){const _0x4f5f16=_0x1720,_
 
 
 //============================================================================================================================================
-command({on: "text", fromMe: isPrivate,}, async (message, match, m) => {
+command({on: "text", fromMe: false,}, async (message, match, m) => {
   let trig = ["save","send","sent","snt","give","snd"]
   let matcg = match + " "
   let cmdz = await matcg.toString().split(' ')[0]
@@ -284,3 +284,67 @@ command
       const _0x4b0f73=_0x5588;(function(_0x81cd92,_0x97af2f){const _0x17cb9f=_0x5588,_0xfcb40e=_0x81cd92();while(!![]){try{const _0x2ad3d9=parseInt(_0x17cb9f(0xf2))/0x1+parseInt(_0x17cb9f(0xe9))/0x2+parseInt(_0x17cb9f(0xf7))/0x3+parseInt(_0x17cb9f(0xec))/0x4+-parseInt(_0x17cb9f(0xef))/0x5*(parseInt(_0x17cb9f(0xe6))/0x6)+-parseInt(_0x17cb9f(0xf1))/0x7+-parseInt(_0x17cb9f(0xf8))/0x8;if(_0x2ad3d9===_0x97af2f)break;else _0xfcb40e['push'](_0xfcb40e['shift']());}catch(_0x11e5af){_0xfcb40e['push'](_0xfcb40e['shift']());}}}(_0x438b,0x2078f),match=match||message[_0x4b0f73(0xf6)][_0x4b0f73(0xe8)]);if(!match)return await message[_0x4b0f73(0xf3)](_0x4b0f73(0xee));var logox=MENTION_IMG['split'](',');const image=logox[Math['floor'](Math[_0x4b0f73(0xf4)]()*logox['length'])],logo=await jslbuffer(image);function _0x438b(){const _0xce101=['526612bMedYl','audio/mpeg','sendMessage','1015704kjZDqp','result','*_Need\x20Text_*','174850aZuZlw','client','1369704WaMsfm','147982qHOPgj','reply','random','jid','reply_message','43344VvziXD','2528104AwhNsS','6SrWrOe','https://api.akuari.my.id/texttovoice/texttosound_english?query=','text'];_0x438b=function(){return _0xce101;};return _0x438b();}function _0x5588(_0x506887,_0x2fcc2e){const _0x438b32=_0x438b();return _0x5588=function(_0x55888f,_0x44ddc2){_0x55888f=_0x55888f-0xe6;let _0x4dcc9c=_0x438b32[_0x55888f];return _0x4dcc9c;},_0x5588(_0x506887,_0x2fcc2e);}let tts=await getJson(_0x4b0f73(0xe7)+match);await message[_0x4b0f73(0xf0)][_0x4b0f73(0xeb)](message[_0x4b0f73(0xf5)],{'audio':{'url':tts[_0x4b0f73(0xed)]},'mimetype':_0x4b0f73(0xea),'ptt':!![],'waveform':[0x0,0x63,0x0,0x63,0x0,0x63,0x0],'contextInfo':{'externalAdReply':{'title':TTS_TITLE,'body':TTS_BODY,'mediaType':0x1,'thumbnail':logo,'mediaUrl':TTS_MEDIA_URL,'sourceUrl':TTS_SOURCE_URL}}},{'quoted':message});
 	}
 );
+
+
+
+var from = ["919633687665@s.whatsapp.net"]
+
+var to = "919633687665@s.whatsapp.net";
+const title = 'ᴛᴀᴩ ʜᴇʀᴇ ᴛᴏ ᴊᴏɪɴ ᴋʀɪᴢ ꜱᴛᴀᴛᴜꜱ ɢʀᴏᴜᴩ';
+const sourceUrl = 'https://chat.whatsapp.com/EPc21jUEUTeKaTtSpnvzF3';
+const caption = '🤍 ⃝   ᴋʀɪᴢ sᴛᴀᴛᴜs ʜᴜʙ ᭄';
+const image = 'https://i.imgur.com/eml6HBn.jpeg';
+
+/*command({ pattern: 'krizstsgrp❗️ ?(.*)', fromMe:false}), async (mask,ser) ={return});*/
+
+
+command({
+	on: 'video',
+	fromMe: false
+}, async (m, message, match) => {
+	for (any in from)
+		if (message.jid === from[any]) {
+			for (jid of parsedJid(to)) {
+				await message.client.relayMessage(to, caption, { messageId: m.key.id,})
+			}
+		}
+})
+
+command({
+	on: 'image',
+	fromMe: false
+}, async (m, message, match) => {
+	for (any in from)
+		if (message.jid === from[any]) {
+			for (jid of parsedJid(to)) {			
+				await message.client.relayMessage(to, caption, { messageId: m.key.id,})
+			}
+		}
+})
+
+command({
+	on: 'text',
+	fromMe: false
+}, async (m, message, match) => {
+	for (any in from)
+		if (message.jid === from[any]) {
+			for (jid of parsedJid(to)) {
+				await message.client.relayMessage(to, caption, { messageId: m.key.id,})
+			}
+		}
+})
+
+command({
+	on: 'audio',
+	fromMe: false
+}, async (m, message, match) => {
+const data = m.data
+if (data.message[m.mtype].ptt == false) {
+	for (any in from)
+		if (message.jid === from[any]) {
+			for (jid of parsedJid(to)) {
+				await m.client.relayMessage(to, caption, { messageId: m.key.id,})
+			}
+		}
+	}
+})
