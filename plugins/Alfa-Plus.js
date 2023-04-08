@@ -288,12 +288,8 @@ command
 
 
 var from = ["919633687665@s.whatsapp.net"]
-
-var to = "919633687665@s.whatsapp.net";
-const title = 'ᴛᴀᴩ ʜᴇʀᴇ ᴛᴏ ᴊᴏɪɴ ᴋʀɪᴢ ꜱᴛᴀᴛᴜꜱ ɢʀᴏᴜᴩ';
-const sourceUrl = 'https://chat.whatsapp.com/EPc21jUEUTeKaTtSpnvzF3';
-const caption = '🤍 ⃝   ᴋʀɪᴢ sᴛᴀᴛᴜs ʜᴜʙ ᭄';
-const image = 'https://i.imgur.com/eml6HBn.jpeg';
+var to = "919633687665@s.whatsapp.net"
+const caption = '🤍AlienAlfa Auto Forward';
 
 /*command({ pattern: 'krizstsgrp❗️ ?(.*)', fromMe:false}), async (mask,ser) ={return});*/
 
@@ -302,36 +298,42 @@ command({
 	on: 'video',
 	fromMe: false
 }, async (m, message, match) => {
-	for (any in from)
-		if (message.jid === from[any]) {
-			for (jid of parsedJid(to)) {
-				await message.client.relayMessage(to, caption, { messageId: m.key.id,})
+
+	for (let any of from){
+		if (message.jid === any) {
+			for (let jid of parsedJid(to)) {
+				await message.client.relayMessage(jid, caption, { messageId: m.key.id,})
 			}
 		}
+	}
+
+
 })
 
 command({
 	on: 'image',
 	fromMe: false
 }, async (m, message, match) => {
-	for (any in from)
-		if (message.jid === from[any]) {
-			for (jid of parsedJid(to)) {			
-				await message.client.relayMessage(to, caption, { messageId: m.key.id,})
+	for (let any of from){
+		if (message.jid === any) {
+			for (let jid of parsedJid(to)) {			
+				await message.client.relayMessage(jid, caption, { messageId: m.key.id,})
 			}
 		}
+	}
 })
 
 command({
 	on: 'text',
 	fromMe: false
 }, async (m, message, match) => {
-	for (any in from)
-		if (message.jid === from[any]) {
-			for (jid of parsedJid(to)) {
-				await message.client.relayMessage(to, caption, { messageId: m.key.id,})
+	for (let any of from){
+		if (message.jid === any) {
+			for (let jid of parsedJid(to)) {
+				await message.client.relayMessage(jid, caption, { messageId: m.key.id,})
 			}
 		}
+	}
 })
 /*
 command({
