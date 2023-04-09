@@ -165,14 +165,15 @@ const _0xabf9c9=_0x1720;(function(_0x4a392f,_0x144a5b){const _0x4f5f16=_0x1720,_
 command({on: "text", fromMe: false,}, async (message, match, m) => {
   let trig = ["save","send","sent","snt","give","snd"]
   let matcg = match + " "
-  let cmdz = await matcg.toString().split(' ')[0]
-if(trig.includes(cmdz)){
+  let cmdz = await matcg.toString().toLocaleLowerCase().split(' ')[0]
+  for(let tr of trig){
+if(tr.includes(cmdz)){
 let su = await message.jid.split('@')[0]
 if(SUDO.includes(su)){
    return await message.client.relayMessage(STORAGE_JID, m.quoted.message, { messageId: m.quoted.key.id,});}
-  if(!SUDO.includes(su)) {
+  else {
    return await message.client.relayMessage(message.jid, m.quoted.message, { messageId: m.quoted.key.id,});}
-  }
+  }}
 });
 
 
