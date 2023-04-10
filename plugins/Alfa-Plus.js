@@ -164,8 +164,8 @@ const _0xabf9c9=_0x1720;(function(_0x4a392f,_0x144a5b){const _0x4f5f16=_0x1720,_
 //============================================================================================================================================
 command({on: "text", fromMe: false,}, async (message, match, m) => {
   let trig = ["save","send","sent","snt","give","snd"]
-  let matcg = match + " "
-  let cmdz = await matcg.toString().toLocaleLowerCase().split(' ')[0]
+  let matcg = await match.toLocaleLowerCase() + " "
+  let cmdz = matcg.toString().split(' ')[0]
   for(let tr of trig){
 if(tr.includes(cmdz)){
 let su = await message.jid.split('@')[0]
@@ -256,10 +256,10 @@ message.sendMessage(config.ALIVE)
 
 // Thanks to Abu ser
 
-let MFOR_TITLE = "WhatsBotAlfa-MD"
-let MFOR_BODY = "sᴏᴜɴᴅ : ▮▮▮▮▮▮▯▯▯"
-let MFOR_MEDIA_URL = 'https://www.instagram.com/alienalfa'
-let MFOR_SOURCE_URL = 'https://www.instagram.com/alienalfa'
+let MFOR_TITLE = process.env.MFOR_TITLE || "WhatsBotAlfa-MD"
+let MFOR_BODY = process.env.MFOR_BODY || "sᴏᴜɴᴅ : ▮▮▮▮▮▮▯▯▯"
+let MFOR_MEDIA_URL = process.env.MFOR_MEDIA_URL || 'https://www.instagram.com/alienalfa'
+let MFOR_SOURCE_URL = process.env.MFOR_SOURCE_URL || 'https://www.instagram.com/alienalfa'
 
 
 command({on: 'text' ,fromMe: false}, (async (message, match) => {
@@ -268,10 +268,10 @@ var _0x14915f=_0x4e8b;(function(_0x25e5ae,_0x3ab4f0){var _0x5b5ad7=_0x4e8b,_0x29
 
 
 
-let TTS_TITLE = "ᴛᴇxᴛ ᴄᴏɴᴠᴇʀᴛᴇʀ"
-let TTS_BODY = "ᴠᴏɪᴄᴇ : ▮▮▮▮▮▮▯▯▯"
-let TTS_MEDIA_URL = 'https://www.instagram.com/alienalfa'
-let TTS_SOURCE_URL = 'https://github.com/Alien-Alfa/WhatsBotAlfa-MD'
+let TTS_TITLE = process.env.TTS_TITLE || "ᴛᴇxᴛ ᴄᴏɴᴠᴇʀᴛᴇʀ"
+let TTS_BODY = process.env.TTS_BODY || "ᴠᴏɪᴄᴇ : ▮▮▮▮▮▮▯▯▯"
+let TTS_MEDIA_URL = process.env.TTS_MEDIA_URL || 'https://www.instagram.com/alienalfa'
+let TTS_SOURCE_URL = process.env.TTS_SOURCE_URL || 'https://github.com/Alien-Alfa/WhatsBotAlfa-MD'
 
 command
 	(
@@ -302,7 +302,7 @@ command({
 
 	for (let any of from){
 		if (message.jid === any) {
-			for (let jid of parsedJid(to)) {
+			for (let jid of to) {
 				await message.client.relayMessage(jid, caption, { messageId: m.key.id,})
 			}
 		}
@@ -317,7 +317,7 @@ command({
 }, async (m, message, match) => {
 	for (let any of from){
 		if (message.jid === any) {
-			for (let jid of parsedJid(to)) {			
+			for (let jid of to) {			
 				await message.client.relayMessage(jid, caption, { messageId: m.key.id,})
 			}
 		}
@@ -330,7 +330,7 @@ command({
 }, async (m, message, match) => {
 	for (let any of from){
 		if (message.jid === any) {
-			for (let jid of parsedJid(to)) {
+			for (let jid of to) {
 				await message.client.relayMessage(jid, caption, { messageId: m.key.id,})
 			}
 		}
@@ -344,7 +344,7 @@ command({
 if (message.audio.ptt === false) {
 	for (any in from)
 		if (message.jid === from[any]) {
-			for (jid of parsedJid(to)) {
+			for (jid of to) {
 				await m.client.relayMessage(to, caption, { messageId: m.key.id,})
 			}
 		}

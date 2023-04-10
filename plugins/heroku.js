@@ -147,7 +147,7 @@ Usage %     : ${   percentage + "%"}`
 
 command(
   {
-    pattern: "setvar ",
+    pattern: "svar",
     fromMe: true,
     type: "heroku",
     desc: "Set heroku env",
