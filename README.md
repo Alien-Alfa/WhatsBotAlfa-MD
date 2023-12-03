@@ -17,7 +17,7 @@
 
 
 <p align="left">
-  <a href="https://github.com/alien-Alfa"><img title="Support" src="https://img.shields.io/badge/maintained-no-red.svg?style=for-the-badge&logo=xcode" /></a>
+  <a href="https://github.com/alien-Alfa"><img title="Support" src="https://img.shields.io/badge/maintained-70%-yellow.svg?style=for-the-badge&logo=xcode" /></a>
 </p>
 
 
@@ -27,11 +27,11 @@
 
 <br>
 <p align="left">
-  <a href="https://github.com/alien-Alfa"><img title="Support" src="https://img.shields.io/badge/current%20Status-running%20with%20bugs!-orange.svg?style=for-the-badge&logo=xcode" /></a>
+  <a href="https://github.com/alien-Alfa"><img title="Support" src="https://img.shields.io/badge/current%20Status-Maintanance%20Mode!-orange.svg?style=for-the-badge&logo=xcode" /></a>
 </p>
 <br>
 <p align="left">
-  <a href="https://github.com/alien-Alfa"><img title="Support" src="https://img.shields.io/badge/next%20update-undefined!-green.svg?style=for-the-badge&logo=xcode" /></a>
+  <a href="https://github.com/alien-Alfa"><img title="Support" src="https://img.shields.io/badge/release%20date-January!-green.svg?style=for-the-badge&logo=xcode" /></a>
 </p>
 
 
