@@ -17,7 +17,7 @@
 
 
 <p align="left">
-  <a href="https://github.com/alien-Alfa"><img title="Support" src="https://img.shields.io/badge/maintained-70%-yellow.svg?style=for-the-badge&logo=xcode" /></a>
+  <a href="https://github.com/alien-Alfa"><img title="Support" src="https://img.shields.io/badge/maintained-working-yellow.svg?style=for-the-badge&logo=xcode" /></a>
 </p>
 
 
