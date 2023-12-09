@@ -99,8 +99,8 @@
 <br>
 # `Scan QR Code For Session`
 
-# `❗ QR REMOVED❗`
-<!-- <a href="https://qr-new.vercel.app"><img title="ＡＬＩＥＮ ＡＬＦＡ" src="https://repl.it/badge/github/quiec/whatsasena" width="300"></a>-->
+# `❗SCAN QR❗`
+ <a href="https://apex-alien-alfa.vercel.app"><img title="ＡＬＩＥＮ ＡＬＦＡ" src="https://repl.it/badge/github/quiec/whatsasena" width="300"></a>
   <br><br><br>
 # `Change Session In Github`
 
