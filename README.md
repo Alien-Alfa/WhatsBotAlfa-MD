@@ -60,9 +60,6 @@
 </p>
 
 <p align="center">
-<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FAlien-alfa%2FWhatsBotAlfa-MD?ref=badge_small" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FAlien-alfa%2FWhatsBotAlfa-MD.svg?type=small"/></a>
-</p>
-<p align="center">
 <a href="https://www.digitalocean.com/?refcode=57c76f5e35cf&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge"><img src="https://web-platforms.sfo2.digitaloceanspaces.com/WWW/Badge%203.svg" alt="DigitalOcean Referral Badge" /></a>
 </p>
 
