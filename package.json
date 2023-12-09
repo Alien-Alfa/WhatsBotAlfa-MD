@@ -1,0 +1,80 @@
+{
+  "name": "aurora-project",
+  "version": "4.0.0",
+  "description": "Aurora-Project.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alien-Alfa/Aurora-Project.git"
+  },
+  "keywords": [
+    "whatsapp",
+    "bot"
+  ],
+  "author": "Tshephang",
+  "developer": "Tshephang",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Alien-Alfa/Aurora-Project/issues"
+  },
+  "homepage": "https://github.com/Alien-Alfa/Aurora-Project#readme",
+  "dependencies": {
+    
+    
+    "@whiskeysockets/baileys": "6.5.0",
+    "@adiwajshing/keyed-db": "^0.2.4",
+    "awesome-phonenumber": "^3.4.0",
+    "@xaviabot/fb-downloader": "^1.0.14",
+    "@vitalets/google-translate-api":"^9.2.0",
+    "instagram-url-direct":"^1.0.13",
+    "spotifydl-x":"^0.3.5",
+    "acrcloud": "^1.4.0",
+    "axios": "^0.27.2",
+    "form-data": "^4.0.0",
+    "fs-extra": "^10.0.1",
+    "cheerio": "^1.0.0-rc.10",
+    "cookie": "^0.5.0",
+    "bitly": "^7.1.2",
+    "ffmpeg": "^0.0.4",
+    "node-id3": "^0.2.5",
+    "file-type": "^16.5.3",
+    "fluent-ffmpeg": "^2.1.2",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe":"^2.1.2",
+    "g-i-s": "^2.1.6",
+    "got": "^11.8.2",
+    "google-tts-api": "^2.0.2",
+    "jimp": "^0.16.1",
+    "jsdom": "^20.0.0",
+    "node-cron": "^3.0.2",
+    "node-fetch": "2.6.7",
+    "node-webpmux": "^3.1.0",
+    "pastebin-js": "^1.0.6",
+    "openai": "^3.1.0",
+    "pg": "^8.8.0",
+    "pino": "^8.1.0",
+    "pm2": "^5.2.0",
+    "path": "^0.12.7",
+    "qrcode": "^1.5.1",
+    "qrcode-reader": "^1.0.4",
+    "scraper-x0": "^1.0.6",
+    "spotifydl-core":"^0.2.0",
+    "canvacord": "^5.4.10",
+    "sequelize": "^6.13.0",
+    "sharp": "^0.30.7",
+    "simple-git": "^3.13.0",
+    "stream": "^0.0.2",
+    "sqlite3": "^5.0.0",
+    "ytsr": "^3.8.4",
+    "socket.io-client": "^4.5.0",
+    "express": "latest",
+    "youtubei.js": "5.1.0",
+    "os":"^0.1.2",
+    "heroku-client":"^3.1.0",
+    "cfonts":"^3.2.0",
+    "yt-search":"^2.10.4"
+  }
+}
