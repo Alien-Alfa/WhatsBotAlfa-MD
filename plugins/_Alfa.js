@@ -4,6 +4,7 @@ const fs = require("fs")
 const { exec, spawn, execSync } = require("child_process")
 const fetch = require('node-fetch')
 const ffmpeg = require("../lib/myffmpeg");
+const googleTTS = require('google-tts-api');
 const getRandom = (text) => {
     return `${Math.floor(Math.random() * 10000)}${text}`
 }
@@ -74,48 +75,51 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
    })
   
 
+/*
 
-   command
-       (
-           {
-               pattern: "tts ?(.*)",
-               fromMe: isPrivate,
-               desc: "Convert Text To Audio",
-               type: "misc",
-           },
-           async (message, match) => {
-               match = match || message.reply_message.text;
-       if (!match) return await message.reply("*_Need Text_*");
-       //var logox = MENTION_IMG.split(',') ;
-       //const image = logox[Math.floor(Math.random()*logox.length)];
-
-               
-               let tts = await getJson(`https://api.akuari.my.id/texttovoice/texttosound_english?query=${match}`)
-
-        const logo = await getBuffer("https://avatars.githubusercontent.com/u/64305844?v=4") 	
-        await message.client.sendMessage(message.jid, {
-               audio: { url: tts.result },
-               mimetype: 'audio/mpeg',
-               ptt: true,
-               waveform: ["00","99","00","99","00","99","00"],
-               contextInfo: {
-                   externalAdReply: {
-                       title: "ᴛᴇxᴛ ᴄᴏɴᴠᴇʀᴛᴇʀ",
-                       body: "ᴠᴏɪᴄᴇ : ▮▮▮▮▮▮▯▯▯",
-                       mediaType: 1,
-                       thumbnail: logo,
-                       mediaUrl: 'https://www.instagram.com/alienalfa',
-                       sourceUrl: 'https://www.instagram.com/alienalfa',
-                       }
+   command ({
+    pattern: "tts",
+    fromMe: isPrivate,  
+    desc: "google-tts",
+    type: "tool"
+    },
+    async (message,match) => {
+      if(!match) return await message.reply("waiting for a query")
+    let url = await googleTTS.getAudioUrl(match, {
+      lang: 'en',
+      slow: false,
+      host: 'https://translate.google.com',
+    });
+    let add = process.env.EXTADREPLY === undefined ? process.env.EXTADREPLY : false
+    if(!add){
+    message.client.sendMessage(message.jid,{audio: {url: url}, mimetype: "audio/mpeg", fileName:"Aurora-Project-Tts.m4a"});
+    }
+    if(add){
+      
+    const logo = await getBuffer("https://avatars.githubusercontent.com/u/64305844?v=4") 	
+    return await message.client.sendMessage(message.jid, {
+           audio: { url: url },
+           mimetype: 'audio/mpeg',
+           ptt: true,
+           waveform: ["00","99","00","99","00","99","00"],
+           contextInfo: {
+               externalAdReply: {
+                   title: process.env.ADTITLE === undefined ? process.env.ADTITLE : "ᴛᴇxᴛ ᴄᴏɴᴠᴇʀᴛᴇʀ",
+                   body: process.env.ADBODY === undefined ? process.env.ADBODY : "ᴠᴏɪᴄᴇ : ▮▮▮▮▮▮▯▯▯",
+                   mediaType: 1,
+                   thumbnail: process.env.ADLOGO === undefined ? process.env.ADLOGO : logo,
+                   mediaUrl: process.env.ADURL === undefined ? process.env.ADURL : 'https://www.instagram.com/alienalfa',
+                   sourceUrl: process.env.ADSCURL === undefined ? process.env.ADSCURL : 'https://www.instagram.com/alienalfa',
                    }
                }
-           )	
-       }
-   );
+           }
+       )
+          }	
+      
+      });
+    
 
 
-
-/*
    command({ on: "text", fromMe: isPrivate }, async (message, match, m) => {
     let cmdz = await match.split(' ')[0].toLowerCase();
     let media;

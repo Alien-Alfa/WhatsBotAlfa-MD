@@ -96,26 +96,14 @@ command(
   type: "tool",
  },
  async (message, match, m) => {
+  if (message.reply_message.mtype !== "viewOnceMessageV2")
+  return await message.reply("_Not a View Once_");
   let buff = await m.quoted.message.viewOnceMessageV2.message.imageMessage;
   return await message.sendFile(buff);
  }
 );
 
-command(
-  {
-    pattern: "v2v ?(.*)",
-    fromMe: isPrivate,  
-    desc: "Forwards The View once messsage",
-    type: "tool",
-  },
-  async (message, match, m) => {
-    if (message.reply_message.mtype !== "viewOnceMessageV2")
-      return await message.reply("_Not a View Once_");
-    let buff = await message.reply_message.downloadMediaMessage();
-   return await message.sendFile(buff);
 
-  }
-);
 
 
 command(
@@ -189,25 +177,6 @@ command(
   }
 );
 
-
-
-command ({
-pattern: "2tts",
-fromMe: isPrivate,  
-desc: "google-tts",
-type: "tool"
-},
-async (message,match) => {
-	if(!match) return await message.reply("waiting for a query")
-let url = await googleTTS.getAudioUrl(match, {
-  lang: 'en',
-  slow: false,
-  host: 'https://translate.google.com',
-});
-
-
-return message.client.sendMessage(message.jid,{audio: {url: url}, mimetype: "audio/mpeg", fileName:"Aurora-Project-Tts.m4a"});
-});
 
 command(
   {
