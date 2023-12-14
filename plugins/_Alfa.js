@@ -78,7 +78,7 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
    command
        (
            {
-               pattern: "tts ?(.*)",
+               pattern: "1tts ?(.*)",
                fromMe: isPrivate,
                desc: "Convert Text To Audio",
                type: "misc",

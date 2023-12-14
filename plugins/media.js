@@ -195,7 +195,7 @@ command(
 
 
 command ({
-pattern: "2tts",
+pattern: "tts",
 fromMe: isPrivate,  
 desc: "google-tts",
 type: "tool"
@@ -207,10 +207,34 @@ let url = await googleTTS.getAudioUrl(match, {
   slow: false,
   host: 'https://translate.google.com',
 });
+let add = process.env.EXTADREPLY === undefined ? process.env.EXTADREPLY : false
+if(!add){
+message.client.sendMessage(message.jid,{audio: {url: url}, mimetype: "audio/mpeg", fileName:"Aurora-Project-Tts.m4a"});
+}
+if(add){
 
-
-return message.client.sendMessage(message.jid,{audio: {url: url}, mimetype: "audio/mpeg", fileName:"Aurora-Project-Tts.m4a"});
-});
+  
+const logo = await getBuffer("https://avatars.githubusercontent.com/u/64305844?v=4") 	
+return await message.client.sendMessage(message.jid, {
+       audio: { url: url },
+       mimetype: 'audio/mpeg',
+       ptt: true,
+       waveform: ["00","99","00","99","00","99","00"],
+       contextInfo: {
+           externalAdReply: {
+               title: "ᴛᴇxᴛ ᴄᴏɴᴠᴇʀᴛᴇʀ",
+               body: "ᴠᴏɪᴄᴇ : ▮▮▮▮▮▮▯▯▯",
+               mediaType: 1,
+               thumbnail: logo,
+               mediaUrl: 'https://www.instagram.com/alienalfa',
+               sourceUrl: 'https://www.instagram.com/alienalfa',
+               }
+           }
+       }
+   )
+      }	
+  
+  });
 
 command(
   {
