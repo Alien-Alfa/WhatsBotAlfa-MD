@@ -24,7 +24,6 @@ const stream = require("stream");
 const { promisify } = require("util");
 const pipeline = promisify(stream.pipeline);
 const fs = require("fs");
-const googleTTS = require('google-tts-api');
 const { spotifydl } = require('../lib/spotify')
 
 command(
@@ -192,49 +191,6 @@ command(
   }
 );
 
-
-
-command ({
-pattern: "tts",
-fromMe: isPrivate,  
-desc: "google-tts",
-type: "tool"
-},
-async (message,match) => {
-	if(!match) return await message.reply("waiting for a query")
-let url = await googleTTS.getAudioUrl(match, {
-  lang: 'en',
-  slow: false,
-  host: 'https://translate.google.com',
-});
-let add = process.env.EXTADREPLY === undefined ? process.env.EXTADREPLY : false
-if(!add){
-message.client.sendMessage(message.jid,{audio: {url: url}, mimetype: "audio/mpeg", fileName:"Aurora-Project-Tts.m4a"});
-}
-if(add){
-
-  
-const logo = await getBuffer("https://avatars.githubusercontent.com/u/64305844?v=4") 	
-return await message.client.sendMessage(message.jid, {
-       audio: { url: url },
-       mimetype: 'audio/mpeg',
-       ptt: true,
-       waveform: ["00","99","00","99","00","99","00"],
-       contextInfo: {
-           externalAdReply: {
-               title: "ᴛᴇxᴛ ᴄᴏɴᴠᴇʀᴛᴇʀ",
-               body: "ᴠᴏɪᴄᴇ : ▮▮▮▮▮▮▯▯▯",
-               mediaType: 1,
-               thumbnail: logo,
-               mediaUrl: 'https://www.instagram.com/alienalfa',
-               sourceUrl: 'https://www.instagram.com/alienalfa',
-               }
-           }
-       }
-   )
-      }	
-  
-  });
 
 command(
   {
