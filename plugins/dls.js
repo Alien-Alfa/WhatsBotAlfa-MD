@@ -1,6 +1,6 @@
 const { command, isPrivate , Writer , getBuffer, getJson} = require("../lib");
 const fs = require("fs-extra");
-const yts  = require('ytdl-core');
+const yts  = require("yt-search");
 const ytdl = require('ytdl-core');
 const { Readable } = require('stream');
 const ffmpeg = require("../lib/myffmpeg");
