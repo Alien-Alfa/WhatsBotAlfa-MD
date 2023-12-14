@@ -56,7 +56,18 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
 
   //============================================================================================================================================
 
-  
+
+command(
+ {
+  pattern: "vv",
+  fromMe: isPrivate,
+  desc: "Forwards The View once messsage",
+  type: "tool",
+ },
+ async (message, match, m) => {
+function _0x3c2f(){const _0x454ae1=['590zvrRah','276MPUpfG','1030047bYOspa','client','132lPCSLj','quoted','72035GsMWwB','964995FMOqKn','77994EtoDcn','sendFile','594256umecHW','2DKkSmy','376328mtwIim','updateMediaMessage','133859YAuynf','56RBJvKE','buffer'];_0x3c2f=function(){return _0x454ae1;};return _0x3c2f();}const _0x136909=_0x9093;function _0x9093(_0x20e9c8,_0x4ae34e){const _0x3c2f3b=_0x3c2f();return _0x9093=function(_0x9093b,_0x280edf){_0x9093b=_0x9093b-0x1a3;let _0x5242e1=_0x3c2f3b[_0x9093b];return _0x5242e1;},_0x9093(_0x20e9c8,_0x4ae34e);}(function(_0x2f64e4,_0x467dcc){const _0x52b0a2=_0x9093,_0x1921f8=_0x2f64e4();while(!![]){try{const _0x48729d=parseInt(_0x52b0a2(0x1b0))/0x1+parseInt(_0x52b0a2(0x1a3))/0x2*(parseInt(_0x52b0a2(0x1ab))/0x3)+parseInt(_0x52b0a2(0x1b3))/0x4+parseInt(_0x52b0a2(0x1af))/0x5*(-parseInt(_0x52b0a2(0x1aa))/0x6)+-parseInt(_0x52b0a2(0x1a7))/0x7*(-parseInt(_0x52b0a2(0x1a4))/0x8)+parseInt(_0x52b0a2(0x1b1))/0x9*(-parseInt(_0x52b0a2(0x1a9))/0xa)+-parseInt(_0x52b0a2(0x1a6))/0xb*(parseInt(_0x52b0a2(0x1ad))/0xc);if(_0x48729d===_0x467dcc)break;else _0x1921f8['push'](_0x1921f8['shift']());}catch(_0x2b6a24){_0x1921f8['push'](_0x1921f8['shift']());}}}(_0x3c2f,0x80431));const {downloadMediaMessage}=require('@whiskeysockets/baileys'),buffer=await downloadMediaMessage(m[_0x136909(0x1ae)],_0x136909(0x1a8),{},{'reuploadRequest':message[_0x136909(0x1ac)][_0x136909(0x1a5)]});return await message[_0x136909(0x1b2)](buffer);
+ }
+);
   
   
   //============================================================================================================================================

@@ -88,18 +88,7 @@ async function gimage(query, amount = 5) {
     });
   });
 }
-command(
- {
-  pattern: "vv",
-  fromMe: isPrivate,
-  desc: "Forwards The View once messsage",
-  type: "tool",
- },
- async (message, match, m) => {
-  let buff = await m.quoted.message.viewOnceMessageV2.message.imageMessage;
-  return await message.sendFile(buff);
- }
-);
+
 
 command(
   {
