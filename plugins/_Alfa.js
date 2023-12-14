@@ -63,7 +63,7 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
   
   //============================================================================================================================================
   command({
-    pattern: "tk",
+    pattern: "ttk",
     fromMe: isPrivate,  
     desc: "Download TikTok Videos",
     dontAddCommandList: true,
@@ -75,7 +75,7 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
    })
   
 
-
+/*
 
    command ({
     pattern: "tts",
@@ -119,7 +119,7 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
       });
     
 
-/*
+
    command({ on: "text", fromMe: isPrivate }, async (message, match, m) => {
     let cmdz = await match.split(' ')[0].toLowerCase();
     let media;

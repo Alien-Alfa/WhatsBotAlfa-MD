@@ -52,7 +52,15 @@ command({
     }
 });
 
-command({pattern: 'updatenow',type: 'owner', fromMe: isPrivate,  dontAddCommandList: true, desc: "Updates bot"}, (async (message, match) => {
+command({
+    pattern: 'updatenow',
+    fromMe: isPrivate,
+    desc: "Updates bot",
+    dontAddCommandList: true,
+    type: 'owner'
+}, async (message, match) => {
+
+
 let isHeroku = false
 isHeroku ? UpdateHeroku() : UpdateLocal();
 
@@ -121,6 +129,6 @@ async function UpdateHeroku(){
 }
 }
 
-));
+);
 
 
