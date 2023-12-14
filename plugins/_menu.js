@@ -28,7 +28,7 @@ function formatTime(seconds) {
   const timeArray = [];
 
   if (months > 0) {
-    timeArray.push(months + (months === 1 ? " month" : " months")); 
+    timeArray.push(months + (months === 1 ? " month" : " months"));
   }
   if (days > 0) {
     timeArray.push(days + (days === 1 ? " day" : " days"));

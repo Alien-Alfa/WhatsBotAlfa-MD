@@ -7,7 +7,6 @@ const {
   isPrivate,
   asMp3
 } = require("../lib/");
-const fetch = require("node-fetch");
 const { yta, ytIdRegex, ytv } = require("../lib/yotube");
 const { search } = require("yt-search");
 const { toAudio } = require("../lib/media");
@@ -24,6 +23,7 @@ const stream = require("stream");
 const { promisify } = require("util");
 const pipeline = promisify(stream.pipeline);
 const fs = require("fs");
+const googleTTS = require('google-tts-api');
 const { spotifydl } = require('../lib/spotify')
 
 command(
@@ -88,36 +88,22 @@ async function gimage(query, amount = 5) {
     });
   });
 }
-const { downloadMediaMessage } = require("@whiskeysockets/baileys");
 command(
-  {
-    pattern: "vv",
-    fromMe: isPrivate,
-    desc: "Forwards The View once messsage",
-    type: "tool",
-  },
-  async (message, match, m) => {
-    let buff = await m.quoted.download();
-    return await message.sendFile(buff);
-  }
+ {
+  pattern: "vv",
+  fromMe: isPrivate,
+  desc: "Forwards The View once messsage",
+  type: "tool",
+ },
+ async (message, match, m) => {
+  if (message.reply_message.mtype !== "viewOnceMessageV2")
+  return await message.reply("_Not a View Once_");
+  let buff = await m.quoted.message.viewOnceMessageV2.message.imageMessage;
+  return await message.sendFile(buff);
+ }
 );
 
 
-command(
-  {
-    pattern: "v2v ?(.*)",
-    fromMe: isPrivate,  
-    desc: "Forwards The View once messsage",
-    type: "tool",
-  },
-  async (message, match, m) => {
-    if (message.reply_message.mtype !== "viewOnceMessageV2")
-      return await message.reply("_Not a View Once_");
-    let buff = await message.reply_message.downloadMediaMessage();
-   return await message.sendFile(buff);
-
-  }
-);
 
 
 command(
