@@ -74,7 +74,6 @@
     "youtubei.js": "5.1.0",
     "os":"^0.1.2",
     "heroku-client":"^3.1.0",
-    "cfonts":"^3.2.0",
-    "yt-search":"^2.10.4"
+    "cfonts":"^3.2.0"
   }
 }

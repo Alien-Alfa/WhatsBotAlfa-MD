@@ -51,7 +51,7 @@ command({
         await message.reply('An error occurred during the update process.');
     }
 });
-  
+
 command({pattern: 'updatenow',type: 'owner', fromMe: isPrivate,  dontAddCommandList: true, desc: "Updates bot"}, (async (message, match) => {
 let isHeroku = false
 isHeroku ? UpdateHeroku() : UpdateLocal();

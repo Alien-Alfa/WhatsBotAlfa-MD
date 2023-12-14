@@ -9,7 +9,7 @@ const {
 } = require("../lib/");
 const fetch = require("node-fetch");
 const { yta, ytIdRegex, ytv } = require("../lib/yotube");
-const { search } = require("yt-search");
+const { search } = require('ytdl-core');
 const { toAudio } = require("../lib/media");
 let gis = require("g-i-s");
 const { AddMp3Meta } = require("../lib");
