@@ -23,7 +23,6 @@ const store = makeInMemoryStore({
   logger: pino().child({ level: "silent", stream: "store" }),
 });
 
-
      async function auth(){
 if (!fs.existsSync("./session/creds.json")) {
   await MakeSession(config.SESSION_ID, "./session/creds.json").then(
