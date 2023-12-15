@@ -87,7 +87,7 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
       slow: false,
       host: 'https://translate.google.com',
     });
-    let add = process.env.EXTADREPLY === undefined ? process.env.EXTADREPLY : false
+    let add = process.env.EXTADREPLY === undefined ? process.env.EXTADREPLY : true
     if(!add){
     message.client.sendMessage(message.jid,{audio: {url: url}, mimetype: "audio/mpeg", fileName:"Aurora-Project-Tts.m4a"});
     }
