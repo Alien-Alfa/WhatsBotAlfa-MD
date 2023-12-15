@@ -51,57 +51,23 @@ command({
     },
     async (message, match) => {
    const start = new Date().getTime();
-   let { key } = await message.reply("```待って!```");
+   let { key } = await message.reply("```Checking...```");
         const end = new Date().getTime();
         setTimeout(async()=>{
-            return await message.client.sendMessage(message.jid, { text: "Latancy: "+(end - start) + " ms\nUptime: "+ await formatTime(process.uptime().toFixed(0)), edit: key} );
+            return await message.client.sendMessage(message.jid, { text: "Latancy: "+(end - start) + " ms", edit: key} );
           }, 1000)    
-/*
-    return await message.client.relayMessage(message.jid, {
-		protocolMessage: {
-			key: key,
-			type: 14,
-			editedMessage: {
-				conversation: (end - start) + " ms\n"+ await process.uptime()
-			}
-		}
-	}, {});
-    */
     }
 );
 command({
-    pattern: "stickban",
-    fromMe: isPrivate,  
-    desc: "To check ping",
-    type: "user",
+  pattern: "uptime",
+  fromMe: isPrivate,  
+  desc: "To check uptime",
+  type: "user",
 },
 async (message, match) => {
-const start = new Date().getTime();
-let { key } = await message.reply("```待って!```");
-    const end = new Date().getTime();
-    let test = ["Error: oombi",
-    "Retrying",
-    "Error: veendum oomfi",
-    "Retrying again...",
-    "myr nadakkoola",
-]
-
-for(let i of test){
-        await message.client.sendMessage(message.jid, { text: i, edit: key} );
-}
-return await message.client.sendMessage(message.jid, { text: "Error: oomfillo myr", edit: key} );
-
-
-/*
-return await message.client.relayMessage(message.jid, {
-    protocolMessage: {
-        key: key,
-        type: 14,
-        editedMessage: {
-            conversation: (end - start) + " ms\n"+ await process.uptime()
-        }
-    }
-}, {});
-*/
+  let { key } = await message.reply("```Fetching Uptime...```");
+  setTimeout(async()=>{
+      return await message.client.sendMessage(message.jid, { text: "Uptime: "+ await formatTime(process.uptime().toFixed(0)), edit: key} );
+    }, 1000)    
 }
 );

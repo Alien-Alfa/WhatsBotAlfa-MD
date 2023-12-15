@@ -1,4 +1,4 @@
-const {command, isPrivate, sleep} = require("../lib")
+/*const {command, isPrivate, sleep} = require("../lib")
 
 command({
         pattern: "pdm",
@@ -23,5 +23,5 @@ command({
               }, 1000)    
         }
     }
-);
+);*/
 
