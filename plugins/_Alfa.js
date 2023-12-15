@@ -53,6 +53,17 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
 });
 
 
+command(
+ {
+  pattern: "fwd",
+  fromMe: isPrivate,
+  desc: "Forwards the messsage to jid",
+  type: "tool",
+ },
+ async (message, match, m) => {
+    const relayOptions = { messageId: m.quoted.key.id };
+      await message.client.relayMessage(match, m.quoted.message, relayOptions);
+});
 
   //============================================================================================================================================
 
