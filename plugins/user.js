@@ -92,7 +92,7 @@ command(
 
 command(
   {
-    pattern: "jid ?(.*)",
+    pattern: "jid",
     fromMe: isPrivate,  
     desc: "Give jid of chat/user",
     type: "user",
