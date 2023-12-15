@@ -4,7 +4,7 @@
   "description": "Aurora-Project.",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node --inspect server.js"
   },
   "repository": {
     "type": "git",
