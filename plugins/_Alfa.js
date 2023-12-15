@@ -75,123 +75,47 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
   
 
 
-   command
-       (
-           {
-               pattern: "tts ?(.*)",
-               fromMe: isPrivate,
-               desc: "Convert Text To Audio",
-               type: "misc",
-           },
-           async (message, match) => {
-               match = match || message.reply_message.text;
-       if (!match) return await message.reply("*_Need Text_*");
-       //var logox = MENTION_IMG.split(',') ;
-       //const image = logox[Math.floor(Math.random()*logox.length)];
-
-               
-               let tts = await getJson(`https://api.akuari.my.id/texttovoice/texttosound_english?query=${match}`)
-
-        const logo = await getBuffer("https://avatars.githubusercontent.com/u/64305844?v=4") 	
-        await message.client.sendMessage(message.jid, {
-               audio: { url: tts.result },
-               mimetype: 'audio/mpeg',
-               ptt: true,
-               waveform: ["00","99","00","99","00","99","00"],
-               contextInfo: {
-                   externalAdReply: {
-                       title: "ᴛᴇxᴛ ᴄᴏɴᴠᴇʀᴛᴇʀ",
-                       body: "ᴠᴏɪᴄᴇ : ▮▮▮▮▮▮▯▯▯",
-                       mediaType: 1,
-                       thumbnail: logo,
-                       mediaUrl: 'https://www.instagram.com/alienalfa',
-                       sourceUrl: 'https://www.instagram.com/alienalfa',
-                       }
+   command ({
+    pattern: "tts",
+    fromMe: isPrivate,  
+    desc: "google-tts",
+    type: "tool"
+    },
+    async (message,match) => {
+      if(!match) return await message.reply("waiting for a query")
+    let url = await googleTTS.getAudioUrl(match, {
+      lang: 'en',
+      slow: false,
+      host: 'https://translate.google.com',
+    });
+    let add = process.env.EXTADREPLY === undefined ? process.env.EXTADREPLY : false
+    if(!add){
+    message.client.sendMessage(message.jid,{audio: {url: url}, mimetype: "audio/mpeg", fileName:"Aurora-Project-Tts.m4a"});
+    }
+    if(add){
+      
+    const logo = await getBuffer("https://avatars.githubusercontent.com/u/64305844?v=4") 	
+    return await message.client.sendMessage(message.jid, {
+           audio: { url: url },
+           mimetype: 'audio/mpeg',
+           ptt: true,
+           waveform: ["00","99","00","99","00","99","00"],
+           contextInfo: {
+               externalAdReply: {
+                   title: process.env.ADTITLE === undefined ? process.env.ADTITLE : "ᴛᴇxᴛ ᴄᴏɴᴠᴇʀᴛᴇʀ",
+                   body: process.env.ADBODY === undefined ? process.env.ADBODY : "ᴠᴏɪᴄᴇ : ▮▮▮▮▮▮▯▯▯",
+                   mediaType: 1,
+                   thumbnail: process.env.ADLOGO === undefined ? process.env.ADLOGO : logo,
+                   mediaUrl: process.env.ADURL === undefined ? process.env.ADURL : 'https://www.instagram.com/alienalfa',
+                   sourceUrl: process.env.ADSCURL === undefined ? process.env.ADSCURL : 'https://www.instagram.com/alienalfa',
                    }
                }
-           )	
-       }
-   );
-
-
-
-/*
-   command({ on: "text", fromMe: isPrivate }, async (message, match, m) => {
-    let cmdz = await match.split(' ')[0].toLowerCase();
-    let media;
+           }
+       )
+          }	
+      
+      });
     
-    switch (cmdz) {
-        case 'bass':
-        case 'blown':
-        case 'deep':
-        case 'earrape':
-        case 'fast':
-        case 'fat':
-        case 'nightcore':
-        case 'reverse':
-        case 'robot':
-        case 'slow':
-        case 'smooth':
-        case 'squirrel':
-            if (!message.reply_message.audio) {return message.sendMessage("_please reply to an audio..._");}
 
-
-            let ran = await getRandom(".mp3")
-            media = await m.quoted.download();
-                let set;
-                if (/bass/.test(cmdz)) set = '-af equalizer=f=54:width_type=o:width=2:g=20';
-                else if (/blown/.test(cmdz)) set = '-af acrusher=.1:1:64:0:log';
-                else if (/deep/.test(cmdz)) set = '-af atempo=4/4,asetrate=44500*2/3';
-                else if (/earrape/.test(cmdz)) set = '-af volume=12';
-                else if (/fast/.test(cmdz)) set = '-filter:a "atempo=1.63,asetrate=44100"';
-                else if (/fat/.test(cmdz)) set = '-filter:a "atempo=1.6,asetrate=22100"';
-                else if (/nightcore/.test(cmdz)) set = '-filter:a atempo=1.06,asetrate=44100*1.25';
-                else if (/reverse/.test(cmdz)) set = '-filter_complex "areverse"';
-                else if (/robot/.test(cmdz)) set = '-filter_complex "afftfilt=real=\'hypot(re,im)*sin(0)\':imag=\'hypot(re,im)*cos(0)\':win_size=512:overlap=0.75"';
-                else if (/slow/.test(cmdz)) set = '-filter:a "atempo=0.7,asetrate=44100"';
-                else if (/smooth/.test(cmdz)) set = '-filter:v "minterpolate=\'mi_mode=mci:mc_mode=aobmc:vsbmc=1:fps=120\'"';
-                else if (/tupai/.test(cmdz)) set = '-filter:a "atempo=0.5,asetrate=65100"';
-
-                message.quoted.sendMessage("_please wait..._");
-
-
-                exec(`ffmpeg -i ${media} ${set} ${ran}`, async (err, stderr, stdout) => {
-                    fs.unlinkSync(media);
-                    if (err) return message.sendMessage(err);
-let args = match.split(' ')
-let title = args.slice(1).join(' ')
-let filedd = fs.readFileSync(ran)
-let im = await getBuffer("https://avatars.githubusercontent.com/u/64305844?v=4")
-let results = await Writer(title, im, filedd)
-
-                    await message.client.sendMessage(message.jid, {
-                        audio: results,
-                        mimetype: 'audio/mpeg',
-                    }, {quoted : message})
-
-                    fs.unlinkSync(ran);
-                });
-
-
-            break;
-
-        // Add your other cases here...
-
-        default:
-            if (cmdz.startsWith('sound')) {
-                // Handle sound cases
-                media = await fetch(`https://github.com/DGXeon/Tiktokmusic-API/raw/master/tiktokmusic/${match}.mp3`);
-                await message.client.sendMessage(message.jid, { audio: media, mimetype: 'audio/mpeg', ptt: true });
-            }
-            break;
-    }
-});
-*/
-  //============================================================================================================================================
-  
-  
-
-  
-  
   //============================================================================================================================================
   
