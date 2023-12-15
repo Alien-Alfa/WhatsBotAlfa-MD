@@ -4,6 +4,7 @@ const fs = require("fs")
 const { exec, spawn, execSync } = require("child_process")
 const fetch = require('node-fetch')
 const ffmpeg = require("../lib/myffmpeg");
+const googleTTS = require('google-tts-api');
 
 const getRandom = (text) => { return `${Math.floor(Math.random() * 10000)}${text}` }
 
