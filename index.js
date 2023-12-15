@@ -193,7 +193,7 @@ async function Tsp() {
     await console.log("\n\n\n\n"+err+"\n\n\n\n");
   });
 }
-pp.get("/", (req, res) => {res.send("code: 200! (>.<)");});
+app.get("/", (req, res) => {res.send("code: 200! (>.<)");});
 app.listen(port, () => console.log(`cortana Server listening on port http://localhost:${port}`));
 
 setTimeout(() => {
