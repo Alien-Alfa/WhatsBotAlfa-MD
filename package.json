@@ -24,7 +24,7 @@
   "dependencies": {
     
     
-    "@whiskeysockets/baileys": "6.0.0",
+    "@whiskeysockets/baileys": "6.5.0",
     "@adiwajshing/keyed-db": "^0.2.4",
     "awesome-phonenumber": "^3.4.0",
     "@xaviabot/fb-downloader": "^1.0.14",
