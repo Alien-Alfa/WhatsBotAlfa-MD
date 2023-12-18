@@ -1,10 +1,6 @@
-const simpleGit = require('simple-git');
-const git = simpleGit();
 const { command, isPrivate } = require('../lib/');
 const Config = require('../config');
-const { exec } = require('child_process');
 const Heroku = require('heroku-client');
-const { PassThrough } = require('stream');
 
 const heroku = new Heroku({ token: Config.HEROKU_API_KEY });
 
