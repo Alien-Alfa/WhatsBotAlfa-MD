@@ -1,3 +1,5 @@
+/*
+
 const { command } = require("../lib");
 const { setMessage, getMessage, delMessage, getStatus, toggleStatus } =
   require("../database").Greetings;
@@ -97,3 +99,5 @@ command(
     return await message.reply("_Goodbye set successfully_");
   }
 );
+
+*/

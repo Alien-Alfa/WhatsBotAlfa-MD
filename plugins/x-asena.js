@@ -1,3 +1,5 @@
+/*
+
 const { command, isAdmin ,parsedJid} = require("../lib");
 const { exec } = require("child_process");
 const { PausedChats, WarnDB } = require("../database");
@@ -137,3 +139,4 @@ command(
     );
   }
 );
+*/
