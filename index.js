@@ -118,11 +118,27 @@ async function Tsp() {
         });
         conn.ev.on("messages.upsert", async (m) => {
           if (m.type !== "notify") return;
-          let ms = m.messages[0];
-          let msg = await serialize(JSON.parse(JSON.stringify(ms)), conn);
-        /*  let owners = conn.user.id || config.SUDO*/
-          if (!msg.message) return;
+          let msg = await serialize(
+            JSON.parse(JSON.stringify(m.messages[0])),
+            conn
+          );
           let text_msg = msg.body;
+          if (!msg) return;
+          const regex = new RegExp(`${config.HANDLERS}( ?resume)`, "is");
+          isResume = regex.test(text_msg);
+          const chatId = msg.from;
+          try {
+            const pausedChats = await PausedChats.getPausedChats();
+            if (
+              pausedChats.some(
+                (pausedChat) => pausedChat.chatId === chatId && !isResume
+              )
+            ) {
+              return;
+            }
+          } catch (error) {
+            console.error(error);
+          }
           if (text_msg) {
             const from = msg.from.endsWith("@g.us") ? `[ ${(await conn.groupMetadata(msg.from)).subject} ] : ${msg.pushName}` : msg.pushName;
             const sender = msg.sender;
