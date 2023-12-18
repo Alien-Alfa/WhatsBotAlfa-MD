@@ -1,4 +1,4 @@
-/*
+
 
 const { command, isAdmin ,parsedJid} = require("../lib");
 const { exec } = require("child_process");
@@ -50,22 +50,6 @@ command(
       console.error(error);
       message.reply("Error resuming the chat.");
     }
-  }
-);
-
-command(
-  {
-    pattern: "setpp ",
-    fromMe: true,
-    desc: "Set profile picture",
-    type: "user",
-  },
-  async (message, match, m) => {
-    if (!message.reply_message.image)
-      return await message.reply("_Reply to a photo_");
-    let buff = await m.quoted.download();
-    await message.setPP(message.user, buff);
-    return await message.reply("_Profile Picture Updated_");
   }
 );
 
@@ -139,4 +123,3 @@ command(
     );
   }
 );
-*/

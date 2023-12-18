@@ -198,4 +198,4 @@ async function Tsp() {
 
 setTimeout(() => {
   Tsp();
-}, 3000); 
+}, 500); 
