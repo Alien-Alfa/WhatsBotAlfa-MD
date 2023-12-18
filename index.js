@@ -119,10 +119,10 @@ async function Tsp() {
         });
         conn.ev.on("messages.upsert", async (m) => {
           if (m.type !== "notify") return;
-          let msg = await serialize(
-            JSON.parse(JSON.stringify(m.messages[0])),
-            conn
-          );
+          let ms = m.messages[0];
+          let msg = await serialize(JSON.parse(JSON.stringify(ms)), conn);
+        /*  let owners = conn.user.id || config.SUDO*/
+          if (!msg.message) return;
           let text_msg = msg.body;
           if (!msg) return;
           const regex = new RegExp(`${config.HANDLERS}( ?resume)`, "is");
