@@ -1,4 +1,3 @@
-/*
 
 const { command, isAdmin ,parsedJid} = require("../lib");
 const { PausedChats, WarnDB } = require("../database");
@@ -122,4 +121,3 @@ command(
     );
   }
 );
-*/
