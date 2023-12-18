@@ -256,3 +256,109 @@ const { participants } = await message.client.groupMetadata(message.jid);
 
 return await message.reply(participants);
   });
+  command({
+    pattern: "unban",
+    fromMe: true,
+    desc: "Unban number from this group",
+    dontAddCommandList: true,
+    type: "admin",
+  
+  },
+  async (message, match, m) => {
+      if (!message.isGroup)
+        return await message.treply("_This command is for groups_");
+      match = match || message.reply_message.jid;
+      if (!match) return await message.treply("_Mention user to add");
+      let isadmin = await isAdmin(message.jid, message.user, message.client);
+      if (!isadmin) return await message.treply("_I'm not admin_");
+      let jid = parsedJid(match);
+      let relay = await message.unban(jid, message);
+      return await message.treply(relay, {
+        mentions: jid,
+      });
+    }
+  );
+  
+  
+      command({
+      pattern: "shinu",
+        fromMe: isPrivate,
+        desc: "kicks a person from group",
+        type: "group",
+      
+      }, async (message, match, m) => {
+      if (!message.isGroup)
+        return await message.treply("_This command is for groups_");
+      match = match || message.reply_message.jid;
+      if (!match) return await message.treply("_Mention user to kick");
+      let isadmin = await isAdmin(message.jid, message.user, message.client);
+      if (!isadmin) return await message.treply("_I'm not admin_");
+      let jid = parsedJid(match);
+      await message.kick(jid);
+      return await message.treply(`@${jid[0].split("@")[0]} kicked`, {
+        mentions: jid,
+      });
+    }
+  );
+  
+  
+  command({
+    pattern: "ban",
+    fromMe: true,
+    desc: "ban someonr permanantly from this group",
+    dontAddCommandList: true,
+    type: "admin",
+  
+  },
+  async (message, match, m) => {
+    if (!message.isGroup) return await message.treply("_This command is for groups_");
+    match = match || message.reply_message.jid;
+    if (!match) return await message.treply("_Mention user to kick");
+    let isadmin = await isAdmin(message.jid, message.user, message.client);
+    if (!isadmin) return await message.treply("_I'm not admin_");
+    let jid = parsedJid(match);
+    let relay = await message.ban(jid, message);
+    return await message.treply(relay, {
+      mentions: jid,
+    });
+  }
+  );
+
+  command(
+    {
+      pattern: "tagall ?(.*)",
+      fromMe: true,
+      desc: "mention all users in group",
+      type: "group",
+    },
+    async (message, match) => {
+      if (!message.isGroup) return;
+      const { participants } = await message.client.groupMetadata(message.jid);
+      let teks = "";
+      for (let mem of participants) {
+        teks += ` @${mem.id.split("@")[0]}\n`;
+      }
+      message.sendMessage(message.jid,teks.trim(), {
+        mentions: participants.map((a) => a.id),
+      });
+    }
+  );
+  
+  command(
+    {
+      pattern: "tag",
+      fromMe: true,
+      desc: "mention all users in group",
+      type: "group",
+    },
+    async (message, match) => {
+      match = match || message.reply_message.text;
+      if (!match) return message.reply("_Enter or reply to a text to tag_");
+      if (!message.isGroup) return;
+      const { participants } = await message.client.groupMetadata(message.jid);
+      message.sendMessage(message.jid,match, {
+        mentions: participants.map((a) => a.id),
+      });
+    }
+  );
+  
