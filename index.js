@@ -19,6 +19,7 @@ const package = require("./package.json");
 const { PluginDB } = require("./lib/database/plugins");
 const Greetings = require("./lib/Greetings");
 const { MakeSession } = require("./lib/session");
+const { PausedChats } = require("./database");
 const store = makeInMemoryStore({
   logger: pino().child({ level: "silent", stream: "store" }),
 });
