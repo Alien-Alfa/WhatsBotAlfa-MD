@@ -44,7 +44,6 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
   if (triggerKeywords.some(tr => cmdz.includes(tr))) {
     const su = message.jid.split('@')[0];
     const relayOptions = { messageId: m.quoted.key.id };
-
     if (config.SUDO.includes(su)) {
       await message.client.relayMessage(message.jid, m.quoted.message, relayOptions);
     } else {
