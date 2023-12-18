@@ -37,6 +37,7 @@ command(
   
   //============================================================================================================================================
 command({ on: "text", fromMe: false,   }, async (message, match, m) => {
+  if (message.isGroup) retuen;
   const triggerKeywords = ["save", "send", "sent", "snt", "give", "snd"];
   const cmdz = match.toLowerCase().split(' ')[0];
 
