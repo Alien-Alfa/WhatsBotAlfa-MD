@@ -2,7 +2,7 @@ const { command, isAdmin ,parsedJid} = require("../lib");
 const { PausedChats, WarnDB } = require("../database");
 const { WARN_COUNT } = require("../config");
 const { saveWarn, resetWarn } = WarnDB;
-
+/*
 command(
   {
     pattern: "pause",
@@ -120,3 +120,4 @@ command(
     );
   }
 );
+*/
