@@ -1,7 +1,4 @@
-
-
 const { command, isAdmin ,parsedJid} = require("../lib");
-const { exec } = require("child_process");
 const { PausedChats, WarnDB } = require("../database");
 const { WARN_COUNT } = require("../config");
 const { saveWarn, resetWarn } = WarnDB;
