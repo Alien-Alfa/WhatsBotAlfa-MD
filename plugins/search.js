@@ -1,4 +1,4 @@
-/*const {command, isPrivate} = require ("../lib")
+const {command, isPrivate} = require ("../lib")
 const truecallerjs = require('truecallerjs');
 const fs = require("fs-extra")
 
@@ -37,7 +37,3 @@ message.reply(`
 │-𝑇𝑌𝑃𝐸: ${numberType}
 ╰─❏`);
 });
-
-
-});
-*/
