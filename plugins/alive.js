@@ -10,7 +10,7 @@ command(
         async (message,match) => {
      let user = `${message.pushName}` 	
         
-await message.reply(`Hello ${user} all systems are functional`)
+await message.reply(`Hey ${user}\nAlive for ${await process.send("uptime")}`)
 }
 )
 
