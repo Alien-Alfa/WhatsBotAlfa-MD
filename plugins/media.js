@@ -90,22 +90,6 @@ async function gimage(query, amount = 5) {
 }
 
 
-command(
-  {
-    pattern: "v2v ?(.*)",
-    fromMe: isPrivate,  
-    desc: "Forwards The View once messsage",
-    type: "tool",
-  },
-  async (message, match, m) => {
-    if (message.reply_message.mtype !== "viewOnceMessageV2")
-      return await message.reply("_Not a View Once_");
-    let buff = await message.reply_message.downloadMediaMessage();
-   return await message.sendFile(buff);
-
-  }
-);
-
 
 command(
   {
