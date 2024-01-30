@@ -31,6 +31,7 @@ const getInstagramId = (query) => {
 
 //
 
+
 command(
   {
     pattern: "song",
@@ -41,19 +42,26 @@ command(
     match = match || message.reply_message.text;
 
     if (!match) return await message.reply("_Enter Song Name_");
-   //await message.reply(`User: ${message.pushName}\nRequest: ${match}`)
 
-	  
-let mes = await message.reply(message.jid, { text : _Searching..._ })
-   const res = await axios.get(https://api-viper-x.koyeb.app/api/song?name=${match})
-    let response = await res.data
-	message.client.sendMessage(message.jid, { text : _Downloading : ${response.data.title}_ , edit : mes.key })
-   const songbuff = await (await fetch(${response.data.downloadUrl})).buffer()
-   
-	return await message.client.sendMessage(message.jid , {audio : songbuff ,  mimetype : 'audio/mpeg'} , { quoted : m })
+    // await message.reply(`User: ${message.pushName}\nRequest: ${match}`);
+    let mes = await message.reply(message.jid, { text: "_Searching..._" });
 
-}
+    try {
+      const res = await axios.get(`https://api-viper-x.koyeb.app/api/song?name=${match}`);
+      const response = res.data;
+
+      message.client.sendMessage(message.jid, { text: `_Downloading: ${response.data.title}_`, edit: mes.key });
+
+      const songbuff = await (await fetch(response.data.downloadUrl)).buffer();
+
+      await message.client.sendMessage(message.jid, { audio: songbuff, mimetype: 'audio/mpeg' }, { quoted: mes });
+    } catch (error) {
+      console.error(error);
+      await message.client.sendMessage(message.jid, { text: "_Error downloading the song_" }, { quoted: mes });
+    }
+  }
 );
+
 command(
   {
     pattern: "video",
