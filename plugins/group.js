@@ -45,28 +45,8 @@ command(
   }
 );
 
-command({ fromMe: false }, async (message, m, match) => {
-  let ZchatId = m.key.remoteJid;
-  console.log(ZchatId)
+command({ on: "stickerMessage", fromMe: false }, async (message, m, match) => {
 
-  if (ZchatId.endsWith("g.us"))
-  
-  var filtreler = await stickban.getStickBan(ZchatId);
-  if (!filtreler) return;
-  filtreler.map(async (filter) => {
-    pattern = new RegExp(
-      filter.dataValues.regex
-        ? filter.dataValues.pattern
-        : "\\b(" + filter.dataValues.pattern + ")\\b",
-      "gm"
-    );
-    const StickId = m.key.id;
-    const zjid = m.key.participant
-    if (pattern.test(StickId)) {
-      await message.groupParticipantsUpdate(ZchatId, zjid, "remove")
-      await message.sendMessage(ZchatId, {text: "_Banned Sticker_",});
-    }
-  });
 });
 
                     
