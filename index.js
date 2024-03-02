@@ -18,6 +18,7 @@ const {
     Sticker
 } = require("./lib/Base");
 const pino = require("pino");
+logger = pino({ level: "silent" });
 const path = require("path");
 const events = require("./lib/event");
 const got = require("got");
