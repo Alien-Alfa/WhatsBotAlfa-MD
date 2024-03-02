@@ -9,7 +9,7 @@ const { saveWarn, resetWarn } = WarnDB;
 
 command(
   {
-    pattern: "StickBan",
+    pattern: "stickban",
     fromMe: true,
     desc: "Ban a sticker in group",
     dontAddCommandList: true,
