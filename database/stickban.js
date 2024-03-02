@@ -1,4 +1,4 @@
-const config = require("../../config");
+const config = require("../config");
 const { DataTypes } = require("sequelize");
 
 const StickBan = config.DATABASE.define("StickBan", {
