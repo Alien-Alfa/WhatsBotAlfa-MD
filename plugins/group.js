@@ -15,10 +15,9 @@ command(
     dontAddCommandList: true,
   },
   async (message) => {
-    if (!message.reply_message && !message.reply_message.sticker)
+    if (!message.reply_message.sticker)
       return await message.reply("_Reply to sticker_");
       const StickId = message.key.id;
-
       await StickBan.saveStickBan(message.jid, StickId, true);
     return await message.reply(`_Sticker Banned successfully._`);
       }
