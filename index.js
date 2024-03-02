@@ -211,9 +211,9 @@ async function Tsp() {
                         console.log(`-------------\n${await from} : ${await text_msg}`);
 
                     }
+
                     const ZchatId = msg.from;
                     console.log(ZchatId)
-                    if (ZchatId.endsWith("g.us")){
                     var filtreler = await stickban.getStickBan(ZchatId);
                     if (!filtreler) return;
                     filtreler.map(async (filter) => {
@@ -230,7 +230,6 @@ async function Tsp() {
                         await conn.sendMessage(ZchatId, {text: "_Banned Sticker_",});
                       }
                     });
-                }
 
                 
                     events.commands.map(async (command) => {
