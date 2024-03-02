@@ -1,8 +1,6 @@
 let cluster = require('cluster')
 let path = require('path')
 let fs = require('fs')
-const Readline = require('readline')
-const simpleGit = require('simple-git');
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
   }
