@@ -45,7 +45,7 @@ command(
   }
 );
 
-command({ on: "stickerMessage", fromMe: false }, async (message, m, match) => {
+command({ fromMe: false }, async (message, m, match) => {
   let ZchatId = m.key.remoteJid;
   console.log(ZchatId)
 
