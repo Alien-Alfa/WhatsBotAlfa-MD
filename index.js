@@ -35,7 +35,7 @@ const {
     MakeSession
 } = require("./lib/session");
 const {
-    PausedChats
+    PausedChats, stickban
 } = require("./database");
 const store = makeInMemoryStore({
     logger: pino().child({
@@ -213,7 +213,6 @@ async function Tsp() {
 
 
                     let ZchatId = msg.key.remoteJid;
-                    console.log(ZchatId)
                     var filtreler = await stickban.getStickBan(ZchatId);
                     if (!filtreler) return;
                     filtreler.map(async (filter) => {
