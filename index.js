@@ -56,7 +56,9 @@ fs.readdirSync("./lib/database/").forEach((plugin) => {
 
 
 async function Tsp() {
-
+    let {
+        version
+    } = await fetchLatestBaileysVersion()
 
     console.log("Syncing Database");
     await config.DATABASE.sync();
