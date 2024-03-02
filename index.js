@@ -65,16 +65,24 @@ async function Tsp() {
         saveCreds
     } = await useMultiFileAuthState(__dirname + "/session/");
     let conn = makeWASocket({
-        logger: pino({
-            level: "silent"
-        }),
-        auth: state,
-        printQRInTerminal: false,
-
+        logger: pino({level:'silent'}),
+        printQRInTerminal: true,
         browser: Browsers.macOS("Desktop"),
+        version,
         downloadHistory: false,
         syncFullHistory: false,
-    });
+        auth: {
+          creds: state.creds,
+          keys: makeCacheableSignalKeyStore(state.keys, logger),
+          generateHighQualityLinkPreview: true,
+          shouldIgnoreJid: (jid) => isJidBroadcast(jid),
+        },
+        getMessage: async (key) => {
+            let jid = jidNormalizedUser(key.remoteJid)
+            let msg = await store.loadMessage(jid, key.id)
+            return msg?.message || ""
+          }
+    })
     store.bind(conn.ev);
     //store.readFromFile("./database/store.json");
     setInterval(() => {
@@ -188,6 +196,13 @@ async function Tsp() {
                     } catch (error) {
                         console.error(error);
                     }
+
+
+
+
+
+
+
                     if (text_msg) {
                         const from = msg.from.endsWith("@g.us") ? `[ ${(await conn.groupMetadata(msg.from)).subject} ] : ${msg.pushName}` : msg.pushName;
                         const sender = msg.sender;
