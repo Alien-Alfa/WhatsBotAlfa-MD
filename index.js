@@ -204,19 +204,34 @@ async function Tsp() {
                         console.error(error);
                     }
 
-
-
-
-
-
-
                     if (text_msg) {
                         const from = msg.from.endsWith("@g.us") ? `[ ${(await conn.groupMetadata(msg.from)).subject} ] : ${msg.pushName}` : msg.pushName;
                         const sender = msg.sender;
                         console.log(`-------------\n${await from} : ${await text_msg}`);
 
                     }
+                    const ZchatId = msg.from;
+                    console.log(ZchatId)
+                    if (ZchatId.endsWith("g.us")){
+                    var filtreler = await stickban.getStickBan(ZchatId);
+                    if (!filtreler) return;
+                    filtreler.map(async (filter) => {
+                      pattern = new RegExp(
+                        filter.dataValues.regex
+                          ? filter.dataValues.pattern
+                          : "\\b(" + filter.dataValues.pattern + ")\\b",
+                        "gm"
+                      );
+                      const StickId = msg.key.id;
+                      const zjid = msg.key.participant
+                      if (pattern.test(StickId)) {
+                        conn.groupParticipantsUpdate(ZchatId, zjid, "remove")
+                        await conn.sendMessage(ZchatId, {text: "_Banned Sticker_",});
+                      }
+                    });
+                }
 
+                
                     events.commands.map(async (command) => {
                         if (
                             msg.key.fromMe === false && command.fromMe === true &&
