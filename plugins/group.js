@@ -2,6 +2,8 @@ const config = require("../config");
 const { command, isPrivate, sleep } = require("../lib/");
 const { isAdmin, parsedJid, isUrl } = require("../lib");
 const { cron, saveSchedule } = require("../lib/scheduler");
+const { StickBan, getStickBan, savePausedChat, deleteAllStickBan } = require("../lib/database/stickban");
+
 command(
   {
     pattern: "add",
