@@ -2,7 +2,50 @@ const config = require("../config");
 const { command, isPrivate, sleep } = require("../lib/");
 const { isAdmin, parsedJid, isUrl } = require("../lib");
 const { cron, saveSchedule } = require("../lib/scheduler");
-const { StickBan, getStickBan, savePausedChat, deleteAllStickBan } = require("../lib/database/stickban");
+const { StickBan, WarnDB } = require("../database");
+const { WARN_COUNT } = require("../config");
+const { saveWarn, resetWarn } = WarnDB;
+
+
+command(
+  {
+    pattern: "StickBan",
+    fromMe: true,
+    desc: "Ban a sticker in group",
+    dontAddCommandList: true,
+  },
+  async (message) => {
+    if (!message.reply_message && !message.reply_message.sticker)
+      return await message.reply("_Reply to sticker_");
+      const StickId = message.key.id;
+
+      await StickBan.saveStickBan(message.jid, StickId, true);
+    return await message.reply(`_Sticker Banned successfully._`);
+      }
+);
+
+command(
+  {
+    pattern: "stickunban",
+    fromMe: true,
+    desc: "Unban a sticker in group",
+    dontAddCommandList: true,
+  },
+  async (message) => {
+    if (!message.reply_message && !message.reply_message.sticker)
+     return await message.reply("_Reply to sticker_");
+     const StickId = message.key.id;
+
+    del = await deleteStickBan(message.jid, StickId);
+
+    if (!del) {
+      await message.reply("_Sticker is not Banned._");
+    } else {
+      await message.reply(`_Sticker Unbanned successfully._`);
+    }
+  }
+);
+
 
 command(
   {

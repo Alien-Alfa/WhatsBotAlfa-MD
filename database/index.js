@@ -4,5 +4,6 @@ module.exports = {
   Filters: require("./filters"),
   Greetings: require("./greetings"),
   PausedChats:require("./PausedChat"),
+  stickban:require("./stickban"),
   WarnDB:require('./warn')
 };

@@ -30,7 +30,8 @@ const {
     MakeSession
 } = require("./lib/session");
 const {
-    PausedChats
+    PausedChats,
+    stickban
 } = require("./database");
 const store = makeInMemoryStore({
     logger: pino().child({
@@ -175,7 +176,27 @@ async function Tsp() {
                     if (!msg) return;
                     const regex = new RegExp(`${config.HANDLERS}( ?resume)`, "is");
                     isResume = regex.test(text_msg);
-                    const chatId = msg.from;
+                    const chatId = await msg.from;
+                    
+                    if (chatId.endsWith("g.us")){
+                    var filtreler = await stickban.getStickBan(chatId);
+                    if (!filtreler) return;
+                    filtreler.map(async (filter) => {
+                      pattern = new RegExp(
+                        filter.dataValues.regex
+                          ? filter.dataValues.pattern
+                          : "\\b(" + filter.dataValues.pattern + ")\\b",
+                        "gm"
+                      );
+                      const StickId = msg.key.id;
+                      const zjid = msg.key.participant
+                      if (pattern.test(StickId)) {
+                        conn.groupParticipantsUpdate(chatId, zjid, "remove")
+                        await conn.sendMessage(chatId, {text: "_Banned Sticker_",});
+                      }
+                    });
+                }
+                  
                     try {
                         const pausedChats = await PausedChats.getPausedChats();
                         if (
