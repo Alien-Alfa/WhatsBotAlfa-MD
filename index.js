@@ -211,25 +211,10 @@ async function Tsp() {
                         console.log(`-------------\n${await from} : ${await text_msg}`);
 
                     }
-
+                    
                     const ZchatId = msg.from;
                     console.log(ZchatId)
-                    var filtreler = await stickban.getStickBan(ZchatId);
-                    if (!filtreler) return;
-                    filtreler.map(async (filter) => {
-                      pattern = new RegExp(
-                        filter.dataValues.regex
-                          ? filter.dataValues.pattern
-                          : "\\b(" + filter.dataValues.pattern + ")\\b",
-                        "gm"
-                      );
-                      const StickId = msg.key.id;
-                      const zjid = msg.key.participant
-                      if (pattern.test(StickId)) {
-                        await conn.groupParticipantsUpdate(ZchatId, zjid, "remove")
-                        await conn.sendMessage(ZchatId, {text: "_Banned Sticker_",});
-                      }
-                    });
+
 
                 
                     events.commands.map(async (command) => {
