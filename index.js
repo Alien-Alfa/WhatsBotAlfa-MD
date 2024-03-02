@@ -176,8 +176,8 @@ async function Tsp() {
                     if (!msg) return;
                     const regex = new RegExp(`${config.HANDLERS}( ?resume)`, "is");
                     isResume = regex.test(text_msg);
-                    const chatId = await msg.from;
-                    console.log(msg)
+                    const chatId = await msg.key.remoteJid;
+
                     if (chatId.endsWith("g.us")){
                     var filtreler = await stickban.getStickBan(chatId);
                     if (!filtreler) return;
