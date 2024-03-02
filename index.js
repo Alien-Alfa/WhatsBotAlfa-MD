@@ -35,8 +35,7 @@ const {
     MakeSession
 } = require("./lib/session");
 const {
-    PausedChats,
-    stickban
+    PausedChats
 } = require("./database");
 const store = makeInMemoryStore({
     logger: pino().child({
@@ -211,9 +210,6 @@ async function Tsp() {
                         console.log(`-------------\n${await from} : ${await text_msg}`);
 
                     }
-                    
-                    const ZchatId = msg.from;
-                    console.log(ZchatId)
 
 
                 

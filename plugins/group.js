@@ -2,7 +2,7 @@ const config = require("../config");
 const { command, isPrivate, sleep } = require("../lib/");
 const { isAdmin, parsedJid, isUrl } = require("../lib");
 const { cron, saveSchedule } = require("../lib/scheduler");
-const { StickBan, WarnDB } = require("../database");
+const { stickban, WarnDB } = require("../database");
 const { WARN_COUNT } = require("../config");
 const { saveWarn, resetWarn } = WarnDB;
 
@@ -18,7 +18,7 @@ command(
     if (!message.reply_message.sticker)
       return await message.reply("_Reply to sticker_");
       const StickId = message.key.id;
-      await StickBan.saveStickBan(message.jid, StickId, true);
+      await stickban.saveStickBan(message.jid, StickId, true);
     return await message.reply(`_Sticker Banned successfully._`);
       }
 );
@@ -35,7 +35,7 @@ command(
      return await message.reply("_Reply to sticker_");
      const StickId = message.key.id;
 
-    del = await deleteStickBan(message.jid, StickId);
+    del = await stickban.deleteStickBan(message.jid, StickId);
 
     if (!del) {
       await message.reply("_Sticker is not Banned._");
@@ -44,6 +44,33 @@ command(
     }
   }
 );
+
+command({ on: "sticker", fromMe: isPrivate,   }, async (message, m, match) => {
+  let ZchatId = m.key.remoteJid;
+
+  if (ZchatId.endsWith("g.us"))
+  console.log(ZchatId)
+  
+  var filtreler = await stickban.getStickBan(ZchatId);
+  if (!filtreler) return;
+  filtreler.map(async (filter) => {
+    pattern = new RegExp(
+      filter.dataValues.regex
+        ? filter.dataValues.pattern
+        : "\\b(" + filter.dataValues.pattern + ")\\b",
+      "gm"
+    );
+    const StickId = m.key.id;
+    const zjid = m.key.participant
+    if (pattern.test(StickId)) {
+      await message.groupParticipantsUpdate(ZchatId, zjid, "remove")
+      await message.sendMessage(ZchatId, {text: "_Banned Sticker_",});
+    }
+  });
+});
+
+                    
+
 
 
 command(
