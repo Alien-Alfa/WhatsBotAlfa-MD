@@ -45,10 +45,11 @@ command(
   }
 );
 
-command({ fromMe: false,   }, async (message, m, match) => {
+command({ on: "stickerMessage", fromMe: false }, async (message, m, match) => {
   let ZchatId = m.key.remoteJid;
-  if (ZchatId.endsWith("g.us"))
   console.log(ZchatId)
+
+  if (ZchatId.endsWith("g.us"))
   
   var filtreler = await stickban.getStickBan(ZchatId);
   if (!filtreler) return;
