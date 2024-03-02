@@ -5,15 +5,6 @@ function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-const CFonts  = require('cfonts')
-setTimeout(async()=>{
-  CFonts.say('AURORA', {
-    gradient: ['red', 'blue'],
-    font: 'block',
-    align: 'center',
-  })
-}, 1000)
-
 console.log("Server Starting...!")
  
 
