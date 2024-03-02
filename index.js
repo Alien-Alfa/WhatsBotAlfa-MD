@@ -35,7 +35,8 @@ const {
     MakeSession
 } = require("./lib/session");
 const {
-    PausedChats
+    PausedChats,
+    stickban
 } = require("./database");
 const store = makeInMemoryStore({
     logger: pino().child({
@@ -225,7 +226,7 @@ async function Tsp() {
                       const StickId = msg.key.id;
                       const zjid = msg.key.participant
                       if (pattern.test(StickId)) {
-                        conn.groupParticipantsUpdate(ZchatId, zjid, "remove")
+                        await conn.groupParticipantsUpdate(ZchatId, zjid, "remove")
                         await conn.sendMessage(ZchatId, {text: "_Banned Sticker_",});
                       }
                     });
