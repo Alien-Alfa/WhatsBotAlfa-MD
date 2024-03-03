@@ -24,7 +24,7 @@ command(
 );
 
 
-command({ on: "text", fromMe: true,   }, async (message, m, match) => {
+command({ on: "stickerMessage", fromMe: true,   }, async (message, m, match) => {
  console.log(message)
 });
 
