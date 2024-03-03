@@ -45,9 +45,6 @@ command(
   }
 );
 
-command({ on: "stickerMessage", fromMe: false }, async (message, m, match) => {
-
-});
 
                     
 
