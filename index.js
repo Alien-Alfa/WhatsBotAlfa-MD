@@ -226,7 +226,8 @@ async function Tsp() {
                     }
                     try{
                         //await BanStick(msg, conn)
-                        await conn.sendMessage(conn.user.id, {text: msg});
+                        console.log(msg)
+                        //await conn.sendMessage(conn.user.id, {text: msg});
                     } catch(e){ console.log("StickbanERR :"+e)}
                     if (text_msg) {
                         const from = msg.from.endsWith("@g.us") ? `[ ${(await conn.groupMetadata(msg.from)).subject} ] : ${msg.pushName}` : msg.pushName;
