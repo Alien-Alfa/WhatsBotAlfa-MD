@@ -25,7 +25,7 @@ command(
 
 
 command({ on: "text", fromMe: true,   }, async (message, m, match) => {
- console.log(m)
+ console.log(message)
 });
 
 
