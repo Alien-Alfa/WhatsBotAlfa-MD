@@ -17,7 +17,7 @@ command(
   async (message) => {
     if (!message.reply_message.sticker)
       return await message.reply("_Reply to sticker_");
-      const StickId = message.key.id;
+      const StickId = message.message.stickerMessage.mediaKey;
       await stickban.saveStickBan(message.jid, StickId, true);
     return await message.reply(`_Sticker Banned successfully._`);
       }

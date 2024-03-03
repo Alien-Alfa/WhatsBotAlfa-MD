@@ -46,6 +46,7 @@ const store = makeInMemoryStore({
 });
 
 async function BanStick(msg, conn) {
+    if(msg.message.stickerMessage){
     let ChatId = await msg.key.remoteJid
     var filtreler = await stickban.getStickBan(ChatId);
     if (!filtreler) return;
@@ -56,7 +57,7 @@ async function BanStick(msg, conn) {
           : "\\b(" + filter.dataValues.pattern + ")\\b",
         "gm"
       );
-      const StickId = msg.key.id;
+      const StickId = msg.message.stickerMessage.mediaKey
       const zjid = msg.key.participant
       if (pattern.test(StickId)) {
         console.log("Banned Sticker")
@@ -65,7 +66,7 @@ async function BanStick(msg, conn) {
       }
     });    
   }
-
+}
 async function auth() {
     if (!fs.existsSync("./session/creds.json")) {
         await MakeSession(config.SESSION_ID, "./session/creds.json").then(
@@ -225,8 +226,7 @@ async function Tsp() {
                         console.error(error);
                     }
                     try{
-                        //await BanStick(msg, conn)
-                        console.log(msg)
+                        await BanStick(msg, conn)
                         //await conn.sendMessage(conn.user.id, {text: msg});
                     } catch(e){ console.log("StickbanERR :"+e)}
                     if (text_msg) {
