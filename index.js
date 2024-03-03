@@ -47,6 +47,7 @@ const store = makeInMemoryStore({
 
 async function BanStick(msg, conn) {
     let ChatId = await msg.key.remoteJid
+    console.log(ChatId)
     var filtreler = await stickban.getStickBan(ChatId);
     if (!filtreler) return;
     filtreler.map(async (filter) => {
