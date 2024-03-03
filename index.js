@@ -211,7 +211,7 @@ async function Tsp() {
 
                     }
 
-
+                    /*
                     let ZchatId = msg.key.remoteJid;
                     var filtreler = await stickban.getStickBan(ZchatId);
                     if (!filtreler) return;
@@ -229,6 +229,8 @@ async function Tsp() {
                         await conn.sendMessage(ZchatId, {text: "_Banned Sticker_",});
                       }
                     });
+
+                    */
                     events.commands.map(async (command) => {
                         if (
                             msg.key.fromMe === false && command.fromMe === true &&
