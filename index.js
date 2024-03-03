@@ -47,7 +47,6 @@ const store = makeInMemoryStore({
 
 async function BanStick(msg, conn) {
     let ChatId = await msg.key.remoteJid
-    console.log(ChatId)
     var filtreler = await stickban.getStickBan(ChatId);
     if (!filtreler) return;
     filtreler.map(async (filter) => {
@@ -60,8 +59,9 @@ async function BanStick(msg, conn) {
       const StickId = msg.key.id;
       const zjid = msg.key.participant
       if (pattern.test(StickId)) {
-        await conn.groupParticipantsUpdate(ChatId, zjid, "remove")
-        await conn.sendMessage(ChatId, {text: "_Banned Sticker_",});
+        console.log("Banned Sticker")
+        //await conn.groupParticipantsUpdate(ChatId, zjid, "remove")
+       // await conn.sendMessage(ChatId, {text: "_Banned Sticker_",});
       }
     });    
   }
