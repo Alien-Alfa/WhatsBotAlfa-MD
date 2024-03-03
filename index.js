@@ -22,7 +22,7 @@ const pino = require("pino");
 logger = pino({ level: "silent" });
 const path = require("path");
 const events = require("./lib/event");
-const stickban = require("./lib");
+const BanStick = require("./lib");
 const got = require("got");
 const express = require("express");
 const app = express();
@@ -186,7 +186,7 @@ async function Tsp() {
                     if (m.type !== "notify") return;
                     let ms = m.messages[0];
                     let msg = await serialize(JSON.parse(JSON.stringify(ms)), conn);
-                    await stickban(msg)
+                    await BanStick(msg)
                     /*  let owners = conn.user.id || config.SUDO*/
                     if (!msg.message) return;
                     let text_msg = msg.body;
