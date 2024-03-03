@@ -15,12 +15,14 @@ const {
 const {
     Message,
     Image,
-    Sticker
+    Sticker,
 } = require("./lib/Base");
+
 const pino = require("pino");
 logger = pino({ level: "silent" });
 const path = require("path");
 const events = require("./lib/event");
+const stickban = require("./lib");
 const got = require("got");
 const express = require("express");
 const app = express();
@@ -184,6 +186,7 @@ async function Tsp() {
                     if (m.type !== "notify") return;
                     let ms = m.messages[0];
                     let msg = await serialize(JSON.parse(JSON.stringify(ms)), conn);
+                    await stickban(msg)
                     /*  let owners = conn.user.id || config.SUDO*/
                     if (!msg.message) return;
                     let text_msg = msg.body;
@@ -210,27 +213,6 @@ async function Tsp() {
                         console.log(`-------------\n${await from} : ${await text_msg}`);
 
                     }
-
-                    /*
-                    let ZchatId = msg.key.remoteJid;
-                    var filtreler = await stickban.getStickBan(ZchatId);
-                    if (!filtreler) return;
-                    filtreler.map(async (filter) => {
-                      pattern = new RegExp(
-                        filter.dataValues.regex
-                          ? filter.dataValues.pattern
-                          : "\\b(" + filter.dataValues.pattern + ")\\b",
-                        "gm"
-                      );
-                      const StickId = msg.key.id;
-                      const zjid = msg.key.participant
-                      if (pattern.test(StickId)) {
-                        await conn.groupParticipantsUpdate(ZchatId, zjid, "remove")
-                        await conn.sendMessage(ZchatId, {text: "_Banned Sticker_",});
-                      }
-                    });
-
-                    */
                     events.commands.map(async (command) => {
                         if (
                             msg.key.fromMe === false && command.fromMe === true &&
