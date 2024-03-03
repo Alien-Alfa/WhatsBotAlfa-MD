@@ -186,7 +186,6 @@ async function Tsp() {
                     if (m.type !== "notify") return;
                     let ms = m.messages[0];
                     let msg = await serialize(JSON.parse(JSON.stringify(ms)), conn);
-                    await BanStick(msg)
                     /*  let owners = conn.user.id || config.SUDO*/
                     if (!msg.message) return;
                     let text_msg = msg.body;
@@ -206,7 +205,9 @@ async function Tsp() {
                     } catch (error) {
                         console.error(error);
                     }
-
+                    try{
+                        await BanStick(msg)
+                    } catch(e){ console.log("StickbanERR :"+e)}
                     if (text_msg) {
                         const from = msg.from.endsWith("@g.us") ? `[ ${(await conn.groupMetadata(msg.from)).subject} ] : ${msg.pushName}` : msg.pushName;
                         const sender = msg.sender;
