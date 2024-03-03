@@ -22,7 +22,6 @@ const pino = require("pino");
 logger = pino({ level: "silent" });
 const path = require("path");
 const events = require("./lib/event");
-const BanStick = require("./lib");
 const got = require("got");
 const express = require("express");
 const app = express();
@@ -46,6 +45,25 @@ const store = makeInMemoryStore({
     }),
 });
 
+async function BanStick(msg, conn) {
+    let ChatId = await msg.key.remoteJid
+    var filtreler = await stickban.getStickBan(ChatId);
+    if (!filtreler) return;
+    filtreler.map(async (filter) => {
+      pattern = new RegExp(
+        filter.dataValues.regex
+          ? filter.dataValues.pattern
+          : "\\b(" + filter.dataValues.pattern + ")\\b",
+        "gm"
+      );
+      const StickId = msg.key.id;
+      const zjid = msg.key.participant
+      if (pattern.test(StickId)) {
+        await conn.groupParticipantsUpdate(ChatId, zjid, "remove")
+        await conn.sendMessage(ChatId, {text: "_Banned Sticker_",});
+      }
+    });    
+  }
 
 async function auth() {
     if (!fs.existsSync("./session/creds.json")) {
@@ -206,7 +224,7 @@ async function Tsp() {
                         console.error(error);
                     }
                     try{
-                        await BanStick(msg)
+                        await BanStick(msg, conn)
                     } catch(e){ console.log("StickbanERR :"+e)}
                     if (text_msg) {
                         const from = msg.from.endsWith("@g.us") ? `[ ${(await conn.groupMetadata(msg.from)).subject} ] : ${msg.pushName}` : msg.pushName;
