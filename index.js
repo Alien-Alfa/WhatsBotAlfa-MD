@@ -225,10 +225,10 @@ async function Tsp() {
                     } catch (error) {
                         console.error(error);
                     }
-                    try{
-                        await BanStick(msg, conn)
-                        //await conn.sendMessage(conn.user.id, {text: msg});
-                    } catch(e){ console.log("StickbanERR :"+e)}
+                 //   try{
+                 //       await BanStick(msg, conn)
+                 //       //await conn.sendMessage(conn.user.id, {text: msg});
+                 //   } catch(e){ console.log("StickbanERR :"+e)}
                     if (text_msg) {
                         const from = msg.from.endsWith("@g.us") ? `[ ${(await conn.groupMetadata(msg.from)).subject} ] : ${msg.pushName}` : msg.pushName;
                         const sender = msg.sender;
