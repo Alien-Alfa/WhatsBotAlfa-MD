@@ -109,7 +109,7 @@ async function Tsp() {
         getMessage: async (key) => {
             let jid = jidNormalizedUser(key.remoteJid)
             let msg = await store.loadMessage(jid, key.id)
-            return msg?.message || ""
+            return msg.message || ""
           }
     })
     store.bind(conn.ev);
