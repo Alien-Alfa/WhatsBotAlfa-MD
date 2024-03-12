@@ -142,11 +142,10 @@ async function Tsp() {
         if (connection === "open") {
 
             //conn.sendMessage(conn.user.id, { text: "connected✔︎✔︎" });
-        const totalPlugins = plugins.commands.length;
-        let creds = require("./session/creds.json")
-        await conn.sendMessage(conn.user.id, {
-          text: "```----- 𝞓𝙇𝞘𝞢𝞜-𝞓𝙇𝙁𝞓-𝞛𝘿 -----\n\nVersion : " + package.version + "\nStatus  : Connected!\nNumber  : " + conn.user.id.split(":")[0] + "\nPlatform: " + creds.platform +`\nTotal Plugins: ${totalPlugins}` + "\n\n----- 𝞓𝙇𝞘𝞢𝞜-𝞓𝙇𝙁𝞓-𝞛𝘿 -----```"
-      });
+            let creds = require("./session/creds.json")
+            await conn.sendMessage(conn.user.id, {
+                text: "```----- 𝞓𝙇𝞘𝞢𝞜-𝞓𝙇𝙁𝞓-𝞛𝘿 -----\n\nVersion : " + package.version + "\nStatus  : Connected!\nNumber  : " + conn.user.id.split(":")[0] + "\nPlatform: " + creds.platform + "\n\n----- 𝞓𝙇𝞘𝞢𝞜-𝞓𝙇𝙁𝞓-𝞛𝘿 -----```"
+            });
 
             console.log("✅ Login Successful!");
             console.log("⬇️ Installing External Plugins...");
