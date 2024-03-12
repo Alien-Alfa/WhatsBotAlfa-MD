@@ -24,14 +24,11 @@ const {
 
 
 
-    command({ on: "text", fromMe: isPrivate,   }, async (message, match) => {
+    command({ on: "text", dontAddCommandList: true, fromMe: true, }, async (message, match) => {
 
       if(message.jid === "120363039040066520@g.us"){
 
-        console.log(message)
-/*
         let { key } = await message.reply("```Checking...```");
-
 
         lang = "ru";
         text = match
@@ -41,9 +38,9 @@ const {
         'autoCorrect': true
       })["catch"](_0x152635 => null);
       
-      return await message.client.sendMessage(message.jid, { text: result.text, edit: key} );
+      return await message.client.sendMessage(message.jid, { text: result.text, edit: message.key} );
 
-*/
+
       }
 
 
