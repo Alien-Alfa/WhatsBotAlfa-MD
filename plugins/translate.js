@@ -28,8 +28,6 @@ const {
 
       if(message.jid === "120363039040066520@g.us"){
 
-        let { key } = await message.reply("```Checking...```");
-
         lang = "ru";
         text = match
       
