@@ -3,7 +3,7 @@ const { command, isPrivate} = require("../lib/");
 command(
   {
     pattern: "join",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "hem",
     type: "group",
   },

@@ -29,7 +29,7 @@ const { spotifydl } = require('../lib/spotify')
 command(
   {
     pattern: "qr ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Read/Write Qr.",
     type: "Tool",
   },
@@ -56,7 +56,7 @@ command(
 Function(
   {
     pattern: "img ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Google Image search",
     type: "downloader",
   },
@@ -94,7 +94,7 @@ async function gimage(query, amount = 5) {
 command(
   {
     pattern: "removebg ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "removes background of an image",
   },
   async (message, match) => {
@@ -130,7 +130,7 @@ command(
 command(
   {
     pattern: "photo ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Changes sticker to Photo",
     type: "converter",
   },
@@ -147,7 +147,7 @@ command(
 command(
   {
     pattern: "mp4 ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Changes sticker to Video",
     type: "converter",
   },
@@ -166,7 +166,7 @@ command(
 
 command ({
 pattern: "2tts",
-fromMe: isPrivate,  
+fromMe: true,  
 desc: "google-tts",
 type: "tool"
 },
@@ -185,7 +185,7 @@ return message.client.sendMessage(message.jid,{audio: {url: url}, mimetype: "aud
 command(
   {
     pattern: "fetch ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Downloads from a direct link",
     type: "downloader",
   },
@@ -214,7 +214,7 @@ command(
 command(
   {
     pattern: "yts ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Search Youtube",
     type: "Search",
   },
@@ -250,7 +250,7 @@ command(
 command(
   {
     pattern: "ytv ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     dontAddCommandList: true,
   },
   async (message, match) => {
@@ -271,7 +271,7 @@ command(
 command(
   {
     pattern: "yta ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     dontAddCommandList: true,
   },
   async (message, match) => {
@@ -295,7 +295,7 @@ command(
 command(
   {
     pattern: "spotify ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Spotify song Downloader",
     type: "downloader",
   },

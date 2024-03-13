@@ -6,7 +6,7 @@ const fs = require("fs-extra")
 command(
   {
     pattern: "sticker ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "_Converts Photo or video to sticker_",
     type: "converter",
   },
@@ -27,7 +27,7 @@ command(
 command(
   {
     pattern: "tgs ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Download Sticker From Telegram",
     type: "Tool",
   },
@@ -66,7 +66,7 @@ command(
 command(
   {
     pattern: "take ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Changes Exif data of stickers",
     type: "tool",
   },
@@ -89,7 +89,7 @@ command(
 command(
   {
     pattern: "getexif ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "description",
     type: "type",
   },

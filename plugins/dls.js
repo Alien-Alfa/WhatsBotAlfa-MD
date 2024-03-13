@@ -1,3 +1,5 @@
+/*
+
 const { command, isPrivate , Writer , getBuffer, getJson} = require("../lib");
 const fs = require("fs-extra");
 const yts  = require("yt-search");
@@ -35,7 +37,7 @@ const getInstagramId = (query) => {
 command(
   {
     pattern: "song",
-    fromMe: isPrivate,  
+    fromMe: true,  
     type: "downloader",
   },
   async (message, match) => {
@@ -65,7 +67,7 @@ command(
 command(
   {
     pattern: "video",
-    fromMe: isPrivate,  
+    fromMe: true,  
     type: "downloader",
   },
   async (message, match) => {
@@ -111,7 +113,7 @@ if (videoId !== null){
 
 command({
   pattern: "ig ?(.*)",
-  fromMe: isPrivate,  
+  fromMe: true,  
   desc: "downloads video from instagram",
   type: "downloader",
 }, async (message, match, m) => {
@@ -155,3 +157,6 @@ module.exports = {
   }
 })();
 }}
+
+
+*/

@@ -5,7 +5,7 @@ const acrcloud = require("acrcloud")
 command(
 {
 pattern : "find",
-fromMe: isPrivate,  
+fromMe: true,  
 desc : "yts player",
 type : "music",
  },
@@ -33,14 +33,10 @@ let {title , name , album} = res.metadata.music[0]
     
 const {tilte , url , bestThumbnail , id } = await syt(album?.name)
 let im = await getBuffer(bestThumbnail.url)
-    let  text = `
-╭━━〘 𝑀𝑈𝑆𝐼𝐶 𝐹𝐼𝑁𝐷𝐸𝑅 〙
-┃ 
-┠ Title : ${title}
-┠ Link : ${url}
-┠ ID : ${id}
-┃ 
-╰━━━━━━━━━━━──⊷`
+    let  text = ` 
+Title : ${title}
+Link : ${url}
+ID : ${id}`
 
  	return await message.client.sendMessage(message.jid, {image: im, caption: text}, {quoted: message})
  }catch(e){

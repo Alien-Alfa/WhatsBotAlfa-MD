@@ -6,7 +6,7 @@ const heroku = new Heroku({ token: Config.HEROKU_API_KEY });
 
 command({
     pattern: 'update',
-    fromMe: isPrivate,
+    fromMe: true,
     desc: "Updates bot",
     type: 'owner'
 }, async (message, match) => {
@@ -15,7 +15,7 @@ await message.CheckUpdate(message)
 
 command({
     pattern: 'updatenow',
-    fromMe: isPrivate,
+    fromMe: true,
     desc: "Updates bot",
     dontAddCommandList: true,
     type: 'owner'

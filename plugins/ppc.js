@@ -2,7 +2,7 @@
 
 command({
 pattern: "clone",
-fromMe: isPrivate,  
+fromMe: true,  
 desc: "profile cloning 👻"
 },
 async(message, match)=>{

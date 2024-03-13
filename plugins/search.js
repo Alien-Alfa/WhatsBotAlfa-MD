@@ -5,7 +5,7 @@ const fs = require("fs-extra")
 command(
         {
            pattern: 'true',
-           fromMe: isPrivate,  
+           fromMe: true,  
            desc: 'spoof',
            type: 'mics',
         },

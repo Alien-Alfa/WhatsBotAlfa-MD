@@ -3,7 +3,7 @@ const {command, isPrivate} = require ("../lib")
 command(
         {
            pattern: 'alive ?(.*)',
-           fromMe: isPrivate,  
+           fromMe: true,  
            desc: 'Aurora alive message',
            type: 'mics',
         },

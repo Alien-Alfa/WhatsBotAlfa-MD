@@ -30,7 +30,7 @@ command(
 command(
   {
     pattern: "ttt ?(.*)",
-    fromMe: isPrivate,
+    fromMe: true,
     desc: "Play TicTacToe",
     type: "game",
   },
@@ -101,7 +101,7 @@ Current turn: @${room.game.currentTurn.split("@")[0]}
 command(
   {
     on: "text",
-    fromMe: isPrivate,
+    fromMe: true,
     pattern: false,
     dontAddCommandList: true,
   },

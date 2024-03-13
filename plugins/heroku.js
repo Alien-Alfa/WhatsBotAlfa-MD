@@ -27,7 +27,7 @@ let baseURI = "/apps/" + Config.HEROKU_APP_NAME;
 command(
   {
     pattern: "restart",
-    fromMe: isPrivate,  
+    fromMe: true,  
     type: "heroku",
     desc: "Restart Dyno",
     type: "heroku",
@@ -44,7 +44,7 @@ command(
 command(
   {
     pattern: "shutdown",
-    fromMe: isPrivate,  
+    fromMe: true,  
     type: "heroku",
     desc: "Dyno off",
     type: "heroku",
@@ -70,7 +70,7 @@ command(
 command(
   {
     pattern: "dyno",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Show Quota info",
     type: "heroku",
   },
@@ -109,7 +109,7 @@ Remaning    : ${secondsToDhms(remaining)}`;
 command(
   {
     pattern: "setvar ",
-    fromMe: isPrivate,  
+    fromMe: true,  
     type: "heroku",
     desc: "Set heroku env",
     type: "heroku",
@@ -138,7 +138,7 @@ command(
 command(
   {
     pattern: "allvar",
-    fromMe: isPrivate,  
+    fromMe: true,  
     type: "heroku",
     desc: "Heroku all env",
     type: "heroku",
@@ -163,7 +163,7 @@ command(
 command(
 {
 pattern : "update",
-fromMe: isPrivate,  
+fromMe: true,  
 desc : "hem",
 type : "update",
  },

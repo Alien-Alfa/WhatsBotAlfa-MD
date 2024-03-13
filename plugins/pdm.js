@@ -2,7 +2,7 @@
 
 command({
         pattern: "pdm",
-        fromMe: isPrivate,  
+        fromMe: true,  
         desc: "To check ping",
         type: "user",
     },

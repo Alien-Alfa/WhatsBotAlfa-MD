@@ -6,7 +6,7 @@ const { PluginDB, installPlugin } = require("../lib/database/plugins");
 command(
   {
     pattern: "install ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Installs External plugins",
     type:'user'
   },
@@ -47,7 +47,7 @@ command(
 );
 
 command(
-  { pattern: "plugin", fromMe: isPrivate,   desc: "plugin list" ,type:'user'},
+  { pattern: "plugin", fromMe: true,   desc: "plugin list" ,type:'user'},
   async (message, match) => {
     var mesaj = "";
     var plugins = await PluginDB.findAll();
@@ -70,7 +70,7 @@ command(
 command(
   {
     pattern: "remove(?: |$)(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Remove external plugins",
     type:'user'
   },

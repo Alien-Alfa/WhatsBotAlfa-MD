@@ -59,7 +59,7 @@ command(
 command(
   {
     pattern: "add",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Adds a person to group",
     type: "group",
   },
@@ -81,7 +81,7 @@ command(
 command(
   {
     pattern: "kick",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "kicks a person from group",
     type: "group",
   },
@@ -131,7 +131,7 @@ command(
 command(
   {
     pattern: "promote",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "promote a member",
     type: "group",
   },
@@ -152,7 +152,7 @@ command(
 command(
   {
     pattern: "demote",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "demote a member",
     type: "group",
   },
@@ -174,7 +174,7 @@ command(
 command(
   {
     pattern: "mute",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "nute group",
     type: "group",
   },
@@ -191,7 +191,7 @@ command(
 command(
   {
     pattern: "unmute",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "unmute group",
     type: "group",
   },
@@ -207,7 +207,7 @@ command(
 command(
   {
     pattern: "amute ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "auto mutes group",
     type: "group",
   },
@@ -232,7 +232,7 @@ command(
 command(
   {
     pattern: "aunmute ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "auto unmutes group",
     type: "group",
   },
@@ -258,7 +258,7 @@ command(
 command(
   {
     pattern: "gjid",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "gets jid of all group members",
     type: "group",
   },
@@ -281,7 +281,7 @@ command(
 command(
   {
     on: "text",
-    fromMe: isPrivate,  
+    fromMe: true,  
   },
   async (message, match) => {
     if (!message.isGroup) return;
@@ -310,7 +310,7 @@ command(
 command(
   {
     pattern: "revoke",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "nute group",
     type: "group",
   },
@@ -325,7 +325,7 @@ command(
 command(
 {
 pattern : "ginfo",
-fromMe: isPrivate,  
+fromMe: true,  
 desc : "group info",
 type : "group",
  },

@@ -42,7 +42,7 @@ const axios = require('axios');
 const path = require('path');
 const got = require('got');
 
-command({pattern:'eval', on: "text", fromMe: isPrivate,  desc :'Runs a server code'}, async (message, match, m, client , conn) => {
+command({pattern:'eval', on: "text", fromMe: true,  desc :'Runs a server code'}, async (message, match, m, client , conn) => {
   if (match.startsWith(">")) {
     //const m = message;
     try {

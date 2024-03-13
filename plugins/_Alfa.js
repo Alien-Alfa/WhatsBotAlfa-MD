@@ -12,7 +12,7 @@ const getRandom = (text) => { return `${Math.floor(Math.random() * 10000)}${text
 command(
     {
       pattern: "decrypt",
-      fromMe: isPrivate,  
+      fromMe: true,  
       desc: "Deencrypt text base(alfa)",
       type: "tool",
     },
@@ -24,7 +24,7 @@ command(
   command(
     {
       pattern: "encrypt",
-      fromMe: isPrivate,  
+      fromMe: true,  
       desc: "Encrypt text base(alfa)",
       type: "tool",
     },
@@ -56,7 +56,7 @@ command({ on: "text", fromMe: false,   }, async (message, match, m) => {
 command(
  {
   pattern: "fwd",
-  fromMe: isPrivate,
+  fromMe: true,
   desc: "Forwards the messsage to jid",
   type: "tool",
  },
@@ -86,7 +86,7 @@ command(
 command(
  {
   pattern: "vv",
-  fromMe: isPrivate,
+  fromMe: true,
   desc: "Forwards The View once messsage",
   type: "tool",
  },
@@ -99,7 +99,7 @@ function _0x3c2f(){const _0x454ae1=['590zvrRah','276MPUpfG','1030047bYOspa','cli
   //============================================================================================================================================
   command({
     pattern: "ttk",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Download TikTok Videos",
     dontAddCommandList: true,
     type: "download",
@@ -113,7 +113,7 @@ function _0x3c2f(){const _0x454ae1=['590zvrRah','276MPUpfG','1030047bYOspa','cli
 
    command ({
     pattern: "tts",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "google-tts",
     type: "tool"
     },

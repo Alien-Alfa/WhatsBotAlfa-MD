@@ -2,8 +2,8 @@ const { command, SetFullPP, isPrivate } = require("../lib");
 
 command(
   {
-    pattern: "setpp ",
-    fromMe: isPrivate,  
+    pattern: "fullpp ",
+    fromMe: true,  
     desc: "Set profile picture",
     type: "user",
   },
@@ -18,8 +18,8 @@ command(
 
 command(
   {
-    pattern: "fullpp ",
-    fromMe: isPrivate,  
+    pattern: "pp ",
+    fromMe: true,  
     desc: "Set profile picture",
     type: "user",
   },
@@ -35,7 +35,7 @@ command(
 command(
   {
     pattern: "setname ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Set User name",
     type: "user",
   },
@@ -49,7 +49,7 @@ command(
 command(
   {
     pattern: "block ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Block a person",
     type: "user",
   },
@@ -71,7 +71,7 @@ command(
 command(
   {
     pattern: "unblock ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Unblock a person",
     type: "user",
   },
@@ -93,7 +93,7 @@ command(
 command(
   {
     pattern: "jid",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Give jid of chat/user",
     type: "user",
   },
@@ -107,7 +107,7 @@ command(
 command(
   {
     pattern: "bomb ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "deletes a message",
     type: "user",
   },

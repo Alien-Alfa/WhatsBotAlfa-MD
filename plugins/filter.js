@@ -21,7 +21,7 @@ const Lang = {
 command(
   {
     pattern: "filter ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: Lang.FILTER_DESC,
     usage: ".filter keyword:message",
   },
@@ -54,7 +54,7 @@ command(
 command(
   {
     pattern: "test21 ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "description",
     type: "type",
   },
@@ -66,7 +66,7 @@ command(
 command(
   {
     pattern: "stop ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: Lang.STOP_DESC,
     usage: '.stop "hello"',
   },
@@ -83,7 +83,7 @@ command(
   }
 );
 
-command({ on: "text", fromMe: isPrivate,   }, async (message, match) => {
+command({ on: "text", fromMe: true,   }, async (message, match) => {
   var filtreler = await getFilter(message.jid);
   if (!filtreler) return;
   filtreler.map(async (filter) => {

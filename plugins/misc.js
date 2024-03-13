@@ -2,7 +2,7 @@ const { command, sleep, isPrivate, isUrl, Bitly } = require("../lib/");
 command(
   {
     pattern: "getqr ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Get connection QR",
     type: "misc",
   },
@@ -20,7 +20,7 @@ command(
 command(
   {
     pattern: "bitly ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "Converts Url to bitly",
     type: "tool",
   },
@@ -36,7 +36,7 @@ command(
 command(
   {
     pattern: "restart ?(.*)",
-    fromMe: isPrivate,  
+    fromMe: true,  
     desc: "restart the bot",
     type: "misc",
   },
