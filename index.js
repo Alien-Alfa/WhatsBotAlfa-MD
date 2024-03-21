@@ -196,7 +196,7 @@ async function Tsp() {
 
                         await conn.rejectCall(id, from);
                         return conn.sendMessage(from, {
-                            text: "Sorry no calls. Please use Text or Voice Message/n~𝒜𝓊𝓉𝑜𝓂𝒶𝓉𝑒𝒹 𝑅𝑒𝓈𝓅𝑜𝓃𝓈𝑒"
+                            text: "Sorry no calls. Please use Text or Voice Message\n~𝒜𝓊𝓉𝑜𝓂𝒶𝓉𝑒𝒹 𝑅𝑒𝓈𝓅𝑜𝓃𝓈𝑒"
                         });
 
                     }
