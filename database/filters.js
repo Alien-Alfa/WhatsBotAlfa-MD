@@ -9,7 +9,7 @@ const FiltersDB = config.DATABASE.define("filters", {
   pattern: {
     type: DataTypes.TEXT,
     allowNull: false,
-  },
+  }, 
   text: {
     type: DataTypes.TEXT,
     allowNull: false,
@@ -19,29 +19,32 @@ const FiltersDB = config.DATABASE.define("filters", {
     allowNull: false,
     defaultValue: false,
   },
+ 
 });
 
 async function getFilter(jid = null, filter = null) {
-  const whereClause = { chat: jid };
-  if (filter !== null) {
-    whereClause.pattern = filter;
-  }
-  const filters = await FiltersDB.findAll({
-    where: whereClause,
+  var Wher = { chat: jid };
+  if (filter !== null) Wher.push({ pattern: filter });
+  var Msg = await FiltersDB.findAll({
+    where: Wher,
   });
 
-  return filters.length > 0 ? filters : false;
+  if (Msg.length < 1) {
+    return false;
+  } else {
+    return Msg;
+  }
 }
 
 async function setFilter(jid = null, filter = null, tex = null, regx = false) {
-  const existingFilter = await FiltersDB.findOne({
+  var Msg = await FiltersDB.findAll({
     where: {
       chat: jid,
       pattern: filter,
     },
   });
 
-  if (!existingFilter) {
+  if (Msg.length < 1) {
     return await FiltersDB.create({
       chat: jid,
       pattern: filter,
@@ -49,7 +52,7 @@ async function setFilter(jid = null, filter = null, tex = null, regx = false) {
       regex: regx,
     });
   } else {
-    return await existingFilter.update({
+    return await Msg[0].update({
       chat: jid,
       pattern: filter,
       text: tex,
@@ -59,23 +62,22 @@ async function setFilter(jid = null, filter = null, tex = null, regx = false) {
 }
 
 async function deleteFilter(jid = null, filter) {
-  const existingFilter = await FiltersDB.findOne({
+  var Msg = await FiltersDB.findAll({
     where: {
       chat: jid,
       pattern: filter,
     },
   });
-
-  if (!existingFilter) {
+  if (Msg.length < 1) {
     return false;
   } else {
-    return await existingFilter.destroy();
+    return await Msg[0].destroy();
   }
 }
 
 module.exports = {
-  FiltersDB,
-  getFilter,
-  setFilter,
-  deleteFilter,
+  FiltersDB: FiltersDB,
+  getFilter: getFilter,
+  setFilter: setFilter,
+  deleteFilter: deleteFilter,
 };

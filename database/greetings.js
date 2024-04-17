@@ -14,32 +14,33 @@ const GreetingsDB = config.DATABASE.define("Greetings", {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  status: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-  },
+  status: { type: DataTypes.BOOLEAN, allowNull: false },
 });
 
-async function getMessage(jid = null, type = null) {
-  const message = await GreetingsDB.findOne({
+async function getMessage(jid = null,type = null) {
+  var Msg = await GreetingsDB.findAll({
     where: {
       chat: jid,
-      type,
+      type: type,
     },
   });
 
-  return message ? message.dataValues : false;
+  if (Msg.length < 1) {
+    return false;
+  } else {
+    return Msg[0].dataValues;
+  }
 }
 
 async function setMessage(jid = null, type = null, text = null) {
-  const existingMessage = await GreetingsDB.findOne({
+  var Msg = await GreetingsDB.findAll({
     where: {
       chat: jid,
-      type,
+      type: type,
     },
   });
 
-  if (!existingMessage) {
+  if (Msg.length < 1) {
     return await GreetingsDB.create({
       chat: jid,
       message: text,
@@ -47,52 +48,58 @@ async function setMessage(jid = null, type = null, text = null) {
       status: true,
     });
   } else {
-    return await existingMessage.update({ chat: jid, message: text });
+    return await Msg[0].update({ chat: jid, message: text });
   }
 }
 
-async function toggleStatus(jid = null, type = null) {
-  const existingMessage = await GreetingsDB.findOne({
+async function toggleStatus(jid=null,type=null) {
+  var Msg = await GreetingsDB.findAll({
     where: {
       chat: jid,
-      type,
+      type: type,
     },
   });
 
-  if (!existingMessage) {
-    return false;
+  if (Msg.length < 1) return false;
+  if (Msg[0].dataValues.status) {
+    return await Msg[0].update({ chat: jid, status: false });
   } else {
-    const newStatus = !existingMessage.dataValues.status;
-    return await existingMessage.update({ chat: jid, status: newStatus });
+    return await Msg[0].update({ chat: jid, status: true });
   }
 }
 
-async function delMessage(jid = null, type = null) {
-  const existingMessage = await GreetingsDB.findOne({
+async function delMessage(jid = null,type=null) {
+  var Msg = await GreetingsDB.findAll({
     where: {
       chat: jid,
-      type,
+      type: type,
     },
   });
 
-  if (existingMessage) {
-    await existingMessage.destroy();
-  }
+  return await Msg[0].destroy();
 }
 
-async function getStatus(jid = null, type = null) {
-  try {
-    const existingMessage = await GreetingsDB.findOne({
-      where: {
-        chat: jid,
-        type,
-      },
-    });
 
-    return existingMessage ? existingMessage.dataValues.status : false;
-  } catch {
-    return false;
-  }
+
+async function getStatus(jid = null,type=null) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      var Msg = await GreetingsDB.findAll({
+        where: {
+          chat: jid,
+          type:type
+        },
+      });
+
+      if (Msg.length < 1) {
+        resolve(false);
+      } else {
+        resolve(Msg[0].dataValues.status);
+      }
+    } catch {
+      resolve(false);
+    }
+  });
 }
 
 module.exports = {

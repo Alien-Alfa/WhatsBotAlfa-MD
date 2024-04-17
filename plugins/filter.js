@@ -3,7 +3,7 @@ const {
   setFilter,
   deleteFilter,
   toggleFilter,
-} = require("../lib/database/filters");
+} = require("../database/filters");
 const { command, isPrivate, tiny, prefix } = require("../lib");
 const Lang = {
   FILTER_DESC:
