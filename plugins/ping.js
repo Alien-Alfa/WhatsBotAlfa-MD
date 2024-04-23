@@ -1,4 +1,4 @@
-const {command, isPrivate, sleep} = require("../lib")
+const {command, fromMe, sleep} = require("../lib")
 
 
 function formatTime(seconds) {
@@ -50,12 +50,17 @@ command({
         type: "user",
     },
     async (message, match) => {
+      if(!fromMe(message.user)) return;
+      try{
    const start = new Date().getTime();
-   let { key } = await message.reply("```Checking...```");
+   await message.client.sendMessage(message.jid, { text: "```Checking Server!```", edit: message.key} );
         const end = new Date().getTime();
         setTimeout(async()=>{
-            return await message.client.sendMessage(message.jid, { text: "Latancy: "+(end - start) + " ms", edit: key} );
+            return await message.client.sendMessage(message.jid, { text: "Ping: "+(end - start) + " ms", edit: message.key} );
           }, 1000)    
+        } catch (error) {
+          console.error("[Error]:", error);
+        }
     }
 );
 command({
@@ -65,9 +70,13 @@ command({
   type: "user",
 },
 async (message, match) => {
-  let { key } = await message.reply("```Fetching Uptime...```");
+  try{
+   await message.client.sendMessage(message.jid, { text: "```Fetching Uptime...```", edit: message.key} );
   setTimeout(async()=>{
-      return await message.client.sendMessage(message.jid, { text: "Uptime: "+ await formatTime(process.uptime().toFixed(0)), edit: key} );
+      return await message.client.sendMessage(message.jid, { text: "Uptime: "+ await formatTime(process.uptime().toFixed(0)), edit: message.key} );
     }, 1000)    
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
 }
 );

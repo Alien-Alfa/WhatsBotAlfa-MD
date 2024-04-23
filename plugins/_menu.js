@@ -55,6 +55,7 @@ command(
     type:"user",
   },
   async (message, match) => {
+    try{
     if (match) {
       let matchFound = false;
     
@@ -138,6 +139,9 @@ Description : ${i.desc}\`\`\``
       let fin = await menu.toUpperCase()
       return await message.sendMessage(typewriter(fin));
     }
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
   }
 );
 
@@ -150,6 +154,7 @@ command(
     dontAddCommandList: true,
   },
 async (message, match) => {
+  try{
   let menus = `---------------------------------
 \n`
   let menu = `╭────────────────╮
@@ -188,16 +193,20 @@ async (message, match) => {
   menu += `╰────────────────`
   let fin = await menu.toUpperCase()
   return await message.sendMessage(typewriter(fin));
+} catch (error) {
+  console.error("[Error]:", error);
+}
 }
 );
 
 
 command({
-  pattern: "list1"
+  pattern: "1list"
   , fromMe: true,  
    desc: "Show All commands"
   , dontAddCommandList: true
 , }, async (message, match, m) => {
+  try{
 
   let menus = `---------------------------------
 \n`
@@ -240,6 +249,9 @@ ${config.BOT_NAME}
   menu += `╰────────────────`
 
   message.sendMessage(menu);
+} catch (error) {
+  console.error("[Error]:", error);
+}
 
 });
 
@@ -247,13 +259,14 @@ ${config.BOT_NAME}
 
 command(
   {
-    pattern: "list2",
+    pattern: "2list",
     fromMe: true,  
     desc: "Show All commands",
     type:"user",
     dontAddCommandList: true,
   },
   async (message, match, { prefix }) => {
+    try{
     let menu = `╭───〔 ${tiny("x-asena command list")} 〕────\n`;
 
     let cmnd = [];
@@ -280,6 +293,9 @@ command(
     });
     menu += `╰──────────────────────────`;
     return await message.reply(menu);
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
   }
 );
 
@@ -291,6 +307,7 @@ command({
    dontAddCommandList: true
 , }
 , async (message, match, m) => {
+  try{
 
   let [date, time] = new Date()
       .toLocaleString("en-IN", {
@@ -354,5 +371,8 @@ command({
       listMessage, {
           quoted: message
       })
+    } catch (error) {
+      console.error("[Error]:", error);
+    }
 })
 

@@ -1,4 +1,4 @@
-/*
+
 
 const { command, isPrivate , Writer , getBuffer, getJson} = require("../lib");
 const fs = require("fs-extra");
@@ -41,6 +41,7 @@ command(
     type: "downloader",
   },
   async (message, match) => {
+    try{
     match = match || message.reply_message.text;
 
     if (!match) return await message.reply("_Enter Song Name_");
@@ -56,14 +57,17 @@ command(
 
       const songbuff = await (await fetch(response.data.downloadUrl)).buffer();
 
-      await message.client.sendMessage(message.jid, { audio: songbuff, mimetype: 'audio/mpeg' }, { quoted: mes });
+      await message.client.sendMessage(message.jid, { audio: songbuff, mimetype: "audio/mpeg" }, { quoted: mes });
     } catch (error) {
       console.error(error);
       await message.client.sendMessage(message.jid, { text: "_Error downloading the song_" }, { quoted: mes });
     }
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
   }
 );
-
+/*
 command(
   {
     pattern: "video",
@@ -71,6 +75,7 @@ command(
     type: "downloader",
   },
   async (message, match) => {
+    try{
     let vids = await yts(match)
     let { title , image } = await vids.all[0]
     match = match || message.reply_message.text;
@@ -106,6 +111,9 @@ if (videoId !== null){
 		let search = await yts(match)  
 		dMp4(search.all[0].url)
 	}
+        } catch (error) {
+        console.error("[Error]:", error);
+      }
 }
 );
 
@@ -117,6 +125,7 @@ command({
   desc: "downloads video from instagram",
   type: "downloader",
 }, async (message, match, m) => {
+  try{
   match = match || message.reply_message.text;
 if (!match) return await message.reply("*_Need Text_*");
 let img = await getBuffer("https://avatars.githubusercontent.com/u/64305844?v=4")
@@ -129,7 +138,9 @@ if (instagramId !== null) {
     await message.client.sendMessage(message.jid , {video:  { url: tts.respon[0] }, caption:"Instagram Downloader" , thumbnail: img });
   
 }
-
+      } catch (error) {
+        console.error("[Error]:", error);
+      }
 
 });
 

@@ -34,6 +34,7 @@ command(
     type: "Tool",
   },
   async (message, match) => {
+    try{
     match = match || message.reply_message.text;
     if (match) {
       let buff = await qrcode(match);
@@ -50,6 +51,11 @@ command(
     qr.callback = (err, value) =>
       message.sendMessage(err ?? value.result, { quoted: message.data });
     qr.decode(bitmap);
+    return await message.reply(participants);
+    } catch (error) {
+      console.error("[Error]:", error);
+    }
+    
   }
 );
 
@@ -61,6 +67,7 @@ Function(
     type: "downloader",
   },
   async (message, match) => {
+    try{
     if (!match) return await message.sendMessage("Enter Search Term,number");
     let [query, amount] = match.split(",");
     let result = await gimage(query, amount);
@@ -70,6 +77,11 @@ Function(
     for (let i of result) {
       await message.sendFromUrl(i);
     }
+    return await message.reply(participants);
+    } catch (error) {
+      console.error("[Error]:", error);
+    }
+    
   }
 );
 
@@ -98,6 +110,7 @@ command(
     desc: "removes background of an image",
   },
   async (message, match) => {
+    try{
     if (!message.reply_message || !message.reply_message.image)
       return await message.reply("_Reply to a photo_");
     if (RMBG_KEY === false)
@@ -124,6 +137,11 @@ command(
     await message.sendMessage(fs.readFileSync("rbg.png"), {}, "image");
     await unlink(location);
     return await unlink("rbg.png");
+    return await message.reply(participants);
+    } catch (error) {
+      console.error("[Error]:", error);
+    }
+    
   }
 );
 
@@ -135,12 +153,18 @@ command(
     type: "converter",
   },
   async (message, match, m) => {
+    try{
     if (!message.reply_message)
       return await message.reply("_Reply to a sticker_");
     if (message.reply_message.mtype !== "stickerMessage")
       return await message.reply("_Not a sticker_");
     let buff = await m.quoted.download();
     return await message.sendMessage(buff, {}, "image");
+    return await message.reply(participants);
+    } catch (error) {
+      console.error("[Error]:", error);
+    }
+    
   }
 );
 
@@ -152,6 +176,7 @@ command(
     type: "converter",
   },
   async (message, match, m) => {
+    try{
     if (!message.reply_message)
       return await message.reply("_Reply to a sticker_");
     if (message.reply_message.mtype !== "stickerMessage")
@@ -159,6 +184,11 @@ command(
     let buff = await m.quoted.download();
     let buffer = await webp2mp4(buff);
     return await message.sendMessage(buffer, {}, "video");
+    return await message.reply(participants);
+    } catch (error) {
+      console.error("[Error]:", error);
+    }
+    
   }
 );
 
@@ -171,6 +201,7 @@ desc: "google-tts",
 type: "tool"
 },
 async (message,match) => {
+  try{
 	if(!match) return await message.reply("waiting for a query")
 let url = await googleTTS.getAudioUrl(match, {
   lang: 'en',
@@ -180,6 +211,11 @@ let url = await googleTTS.getAudioUrl(match, {
 
 
 return message.client.sendMessage(message.jid,{audio: {url: url}, mimetype: "audio/mpeg", fileName:"Aurora-Project-Tts.m4a"});
+return await message.reply(participants);
+} catch (error) {
+  console.error("[Error]:", error);
+}
+
 });
 
 command(
@@ -190,6 +226,7 @@ command(
     type: "downloader",
   },
   async (message, match) => {
+    try{
     match = match || message.reply_message.text;
     if (!match)
       return message.reply(
@@ -209,6 +246,11 @@ command(
       console.log(e);
       message.reply("_No content found_");
     }
+    return await message.reply(participants);
+    } catch (error) {
+      console.error("[Error]:", error);
+    }
+    
   }
 );
 command(
@@ -219,6 +261,7 @@ command(
     type: "Search",
   },
   async (message, match) => {
+    try{
     if (!match) return await message.reply("_Enter a search term_");
     let rows = [];
     search(match).then(async ({ videos }) => {
@@ -244,6 +287,11 @@ command(
         ],
       });
     });
+    return await message.reply(participants);
+    } catch (error) {
+      console.error("[Error]:", error);
+    }
+    
   }
 );
 
@@ -254,6 +302,7 @@ command(
     dontAddCommandList: true,
   },
   async (message, match) => {
+    try{
     match = match || message.reply_message.text;
     if (!match) return await message.reply("_Enter a URL_");
 
@@ -265,6 +314,11 @@ command(
         quoted: message,
       });
     });
+    return await message.reply(participants);
+    } catch (error) {
+      console.error("[Error]:", error);
+    }
+    
   }
 );
 
@@ -275,6 +329,7 @@ command(
     dontAddCommandList: true,
   },
   async (message, match) => {
+    try{
     match = match || message.reply_message.text;
     if (!match) return await message.reply("_Enter a URL_");
     if (!ytIdRegex.test(match)) return await message.reply("_Invalid Url_");
@@ -289,6 +344,11 @@ command(
         "audio"
       );
     });
+    return await message.reply(participants);
+    } catch (error) {
+      console.error("[Error]:", error);
+    }
+    
   }
 ); 
 
@@ -300,6 +360,7 @@ command(
     type: "downloader",
   },
   async (message, match) => {
+    try{
 
 {
 if (!match) return message.client.sendMessage(message.jid,{text: "Please give me a valid link"});
@@ -338,4 +399,9 @@ await await message.client.sendMessage(
   )
 
 }
+return await message.reply(participants);
+} catch (error) {
+  console.error("[Error]:", error);
+}
+
 })

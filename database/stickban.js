@@ -6,60 +6,70 @@ const StickBan = config.DATABASE.define("StickBan", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  pattern: {
+  stickid: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  regex: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  },
- 
 });
 
-async function getStickBan(jid = null, filter = null) {
-  var Wher = { chat: jid };
-  if (filter !== null) Wher.push({ pattern: filter });
-  var Msg = await StickBan.findAll({
-    where: Wher,
-  });
 
-  if (Msg.length < 1) {
+async function getConfig() {
+  try {
+    // Retrieve all configurations from the SettingsDB table
+    const allConfigs = await SettingsDB.findAll();
+
+    if (allConfigs.length < 1) {
+      return false;
+    } else {
+      return allConfigs;
+    }
+  } catch (error) {
+    console.error("Error fetching configurations:", error);
     return false;
-  } else {
-    return Msg;
   }
 }
 
-async function saveStickBan(jid = null, filter = null, regx = false) {
+async function getStickBan(jid = null) {
+
+  var Where = { chat: jid };
+  var Msg = await StickBan.findAll({
+    where: Where,
+  });
+
+  if (Msg.length < 1) {
+    return null;
+  } else {
+    // Assuming StickBan model has a property named "stickid"
+    return Msg.map(item => item.stickid);
+  }
+}
+
+async function saveStickBan(jid = null, stickid = null) {
   var Msg = await StickBan.findAll({
     where: {
       chat: jid,
-      pattern: filter,
+      stickid: stickid,
     },
   });
 
   if (Msg.length < 1) {
     return await StickBan.create({
       chat: jid,
-      pattern: filter,
-      regex: regx,
+      stickid: stickid,
     });
   } else {
     return await Msg[0].update({
       chat: jid,
-      pattern: filter,
-      regex: regx,
+      stickid: stickid,
     });
   }
 }
 
-async function deleteStickBan(jid = null, filter) {
+async function deleteStickBan(jid = null, stickid) {
   var Msg = await StickBan.findAll({
     where: {
       chat: jid,
-      pattern: filter,
+      stickid: stickid,
     },
   });
   if (Msg.length < 1) {

@@ -11,6 +11,7 @@ command(
     type: "converter",
   },
   async (message, match, m , conn) => {
+    try{
     if (!(message.reply_message.video || message.reply_message.image))
       return await message.reply("_Reply to photo or video_");
     let buff = await m.quoted.download();
@@ -21,6 +22,9 @@ command(
       "sticker"
     );
    
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
   }
 );
 
@@ -32,6 +36,7 @@ command(
     type: "Tool",
   },
   async (message, match) => {
+    try{
     if (!match)
       return message.reply(
         "_Enter a tg sticker url_\nEg: https://t.me/addstickers/Oldboyfinal\nKeep in mind that there is a chance of ban if used frequently"
@@ -60,6 +65,9 @@ command(
       );
       sleep(1500);
     }
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
   }
 );
 
@@ -71,6 +79,7 @@ command(
     type: "tool",
   },
   async (message, match, m) => {
+    try{
     if (!message.reply_message && !message.reply_message.sticker)
       return await message.reply("_Reply to sticker_");
     let buff = await m.quoted.download();
@@ -83,6 +92,9 @@ command(
       },
       "sticker"
     );
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
   }
 );
 
@@ -94,11 +106,15 @@ command(
     type: "type",
   },
   async (message, match, m) => {
+    try{
     if (!message.reply_message || !message.reply_message.sticker)
       return await message.reply("_Reply to sticker_");
     let img = new Image();
     await img.load(await m.quoted.download());
     const exif = JSON.parse(img.exif.slice(22).toString());
     await message.reply(exif);
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
   }
 );

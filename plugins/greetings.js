@@ -12,6 +12,7 @@ command(
     type: "group",
   },
   async (message, match) => {
+    try{
     if (!message.isGroup) return;
     let { prefix } = message;
     let status = await getStatus(message.jid, "welcome");
@@ -52,6 +53,10 @@ command(
     }
     await setMessage(message.jid, "welcome", match);
     return await message.reply("_Welcome set successfully_");
+      } catch (error) {
+        console.error("[Error]:", error);
+      }
+
   }
 );
 
@@ -63,6 +68,7 @@ command(
     type: "group",
   },
   async (message, match) => {
+    try{
     if (!message.isGroup) return;
     let status = await getStatus(message.jid, "goodbye");
     let stat = status ? "on" : "off";
@@ -97,6 +103,10 @@ command(
 
     await setMessage(message.jid, "goodbye", match);
     return await message.reply("_Goodbye set successfully_");
+      } catch (error) {
+        console.error("[Error]:", error);
+      }
+
   }
 );
 

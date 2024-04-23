@@ -1,10 +1,10 @@
 {
   "name": "aurora-project",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Aurora-Project.",
   "main": "index.js",
   "scripts": {
-    "start": "node --inspect server.js"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",

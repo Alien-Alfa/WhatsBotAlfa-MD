@@ -11,6 +11,7 @@ command(
     type:'user'
   },
   async (message, match) => {
+    try{
     if (!match) return await message.sendMessage("_Send a plugin url_");
     for (let Url of getUrl(match)) {
       try {
@@ -43,12 +44,16 @@ command(
 
       }
     }
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
   }
 );
 
 command(
   { pattern: "plugin", fromMe: true,   desc: "plugin list" ,type:'user'},
   async (message, match) => {
+    try{
     var mesaj = "";
     var plugins = await PluginDB.findAll();
     if (plugins.length < 1) {
@@ -64,6 +69,9 @@ command(
       });
       return await message.sendMessage(mesaj);
     }
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
   }
 );
 
@@ -75,6 +83,7 @@ command(
     type:'user'
   },
   async (message, match) => {
+    try{
     if (!match) return await message.sendMessage("_Need a plugin name_");
 
     var plugin = await PluginDB.findAll({ where: { name: match } });
@@ -87,5 +96,8 @@ command(
       fs.unlinkSync("./plugins/" + match + ".js");
       await message.sendMessage(`Plugin ${match} deleted`);
     }
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
   }
 );

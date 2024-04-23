@@ -10,6 +10,7 @@ command(
            type: 'mics',
         },
         async (message,match) => {
+          try{
 if(!(match || message.reply_message.jid)) return await message.reply("i need something");
 if(match.includes(`@`)) return await match.replace(`@`, ``);
 let nums = match || (message.reply_message.jid).split("@")[0] || match
@@ -36,5 +37,9 @@ message.reply(`
 │-𝐶𝐴𝑅𝑅𝐼𝐸𝑅: ${carrier}
 │-𝑇𝑌𝑃𝐸: ${numberType}
 ╰─❏`);
+
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
 });
 */

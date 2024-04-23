@@ -7,7 +7,7 @@ const {
     isJidBroadcast,
     Browsers,
     delay
-  } = require("@whiskeysockets/baileys");
+} = require("@whiskeysockets/baileys");
 const fs = require("fs");
 const {
     serialize
@@ -17,9 +17,11 @@ const {
     Image,
     Sticker,
 } = require("./lib/Base");
-
 const pino = require("pino");
-logger = pino({ level: "silent" });
+logger = pino({
+    level: "silent"
+});
+const PDMFUNCTION = require("./lib")
 const path = require("path");
 const events = require("./lib/event");
 const got = require("got");
@@ -30,13 +32,20 @@ const config = require("./config");
 const package = require("./package.json");
 const {
     PluginDB
-} = require("./lib/database/plugins");
-const Greetings = require("./lib/Greetings");
+} = require("./database/plugins");
 const {
-    MakeSession
-} = require("./lib/session");
+    Greetings,
+    GroupUpdates,
+    BanStick,
+    pdmess
+} = require("./lib/Greetings");
 const {
-    PausedChats, stickban
+    getcall
+} = require("./database/callAction");
+
+const {
+    PausedChats,
+    stickban
 } = require("./database");
 const store = makeInMemoryStore({
     logger: pino().child({
@@ -45,39 +54,21 @@ const store = makeInMemoryStore({
     }),
 });
 
-async function BanStick(msg, conn) {
-    if(msg.message.stickerMessage){
-    let ChatId = await msg.key.remoteJid
-    var filtreler = await stickban.getStickBan(ChatId);
-    if (!filtreler) return;
-    filtreler.map(async (filter) => {
-      pattern = new RegExp(
-        filter.dataValues.regex
-          ? filter.dataValues.pattern
-          : "\\b(" + filter.dataValues.pattern + ")\\b",
-        "gm"
-      );
-      const StickId = msg.message.stickerMessage.mediaKey
-      const zjid = msg.key.participant
-      if (pattern.test(StickId)) {
-        console.log("Banned Sticker")
-        //await conn.groupParticipantsUpdate(ChatId, zjid, "remove")
-       // await conn.sendMessage(ChatId, {text: "_Banned Sticker_",});
-      }
-    });    
-  }
-}
+
 async function auth() {
     if (!fs.existsSync("./session/creds.json")) {
+        const {
+            MakeSession
+        } = require("./lib/session");
         await MakeSession(config.SESSION_ID, "./session/creds.json").then(
             console.log("Vesrion : " + require("./package.json").version)
         );
     }
 }
 auth()
-fs.readdirSync("./lib/database/").forEach((plugin) => {
+fs.readdirSync("./database/").forEach((plugin) => {
     if (path.extname(plugin).toLowerCase() == ".js") {
-        require("./lib/database/" + plugin);
+        require("./database/" + plugin);
     }
 });
 
@@ -94,30 +85,32 @@ async function Tsp() {
         saveCreds
     } = await useMultiFileAuthState(__dirname + "/session/");
     let conn = makeWASocket({
-        logger: pino({level:'silent'}),
+        logger: pino({
+            level: 'silent'
+        }),
         printQRInTerminal: true,
         browser: Browsers.macOS("Desktop"),
         version,
         downloadHistory: false,
         syncFullHistory: false,
         auth: {
-          creds: state.creds,
-          keys: makeCacheableSignalKeyStore(state.keys, logger),
-          generateHighQualityLinkPreview: true,
-          shouldIgnoreJid: (jid) => isJidBroadcast(jid),
+            creds: state.creds,
+            keys: makeCacheableSignalKeyStore(state.keys, logger),
+            generateHighQualityLinkPreview: true,
+            shouldIgnoreJid: (jid) => isJidBroadcast(jid),
         },
         getMessage: async (key) => {
             let jid = jidNormalizedUser(key.remoteJid)
             let msg = await store.loadMessage(jid, key.id)
             return msg.message || ""
-          }
+        }
     })
     store.bind(conn.ev);
     //store.readFromFile("./database/store.json");
     setInterval(() => {
         store.writeToFile("./database/store.json");
         console.log("saved store");
-    }, 30 * 60 * 1000);
+    }, 60 * 1000);
 
     conn.ev.on("connection.update", async (s) => {
         const {
@@ -178,10 +171,31 @@ async function Tsp() {
                 conn.ev.on("creds.update", saveCreds);
 
                 conn.ev.on("group-participants.update", async (data) => {
+                    pdmess(data, conn);
                     Greetings(data, conn);
                 });
+                conn.ev.on("groups.update", async (data) => {
+                    GroupUpdates(data, conn);
+                })
+                conn.ev.on("messages.upsert", async (m) => {
+                    if (m.type !== "notify") return;
+                    let ms = m.messages[0];
+                    let msg = await serialize(JSON.parse(JSON.stringify(ms)), conn);
+                    getStickerMessage(msg);
+                })
+
+                function getStickerMessage(stickerMessage) {
+                    if (stickerMessage && stickerMessage.message && stickerMessage.message.stickerMessage) {
+                        let mediakey = stickerMessage.message.stickerMessage.mediaKey;
+                        BanStick(mediakey, stickerMessage, conn)
+                    } else {
+                        return;
+                    }
+                }
+
 
                 conn.ev.on("call", async (c) => {
+                    const callList = await getcall();
 
                     c = c.map(c => c)
                     c = c[0]
@@ -190,18 +204,30 @@ async function Tsp() {
                         from,
                         id
                     } = c
+                    let frmid;
+                    if (from.includes(":")) {
+                        frmid = await from.split(":")[0]
+                    } else {
+                        frmid = await from.split("@")[0]
+                    }
+                    let res = callList.some(item => item.dataValues && item.dataValues.chatId.split("@")[0] === frmid);
 
-
+                    console.log(c)
+                    console.log("\n\n" + res)
                     if (status == "offer") {
-
-                        await conn.rejectCall(id, from);
-                        return conn.sendMessage(from, {
-                            text: "Sorry no calls. Please use Text or Voice Message\n~𝒜𝓊𝓉𝑜𝓂𝒶𝓉𝑒𝒹 𝑅𝑒𝓈𝓅𝑜𝓃𝓈𝑒"
-                        });
-
+                        if (!res) {
+                            await conn.rejectCall(id, from);
+                            return conn.sendMessage(from, {
+                                text: "Sorry no calls. Please use Text or Voice Message\n> Automated System"
+                            });
+                        }
                     }
 
                 })
+
+
+
+
                 conn.ev.on("messages.upsert", async (m) => {
                     if (m.type !== "notify") return;
                     let ms = m.messages[0];
@@ -225,10 +251,7 @@ async function Tsp() {
                     } catch (error) {
                         console.error(error);
                     }
-                 //   try{
-                 //       await BanStick(msg, conn)
-                 //       //await conn.sendMessage(conn.user.id, {text: msg});
-                 //   } catch(e){ console.log("StickbanERR :"+e)}
+
                     if (text_msg) {
                         const from = msg.from.endsWith("@g.us") ? `[ ${(await conn.groupMetadata(msg.from)).subject} ] : ${msg.pushName}` : msg.pushName;
                         const sender = msg.sender;

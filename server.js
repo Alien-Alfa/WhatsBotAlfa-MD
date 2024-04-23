@@ -1,63 +1,56 @@
+// Created and Modified by AlienAlfa
 let cluster = require('cluster')
 let path = require('path')
 let fs = require('fs')
-function sleep(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-  }
+
 
 console.log("Server Starting...!")
- 
 
-const workers = {}; // Store references to child processes
+
+const workers = {};
 
 function start(file) {
-  // Check if a child process is already running for the specified file
-  if (workers[file]) return;
+    if (workers[file]) return;
+    const args = [path.join(__dirname, file), ...process.argv.slice(2)];
 
-  // Create a child process for the specified file
-  const args = [path.join(__dirname, file), ...process.argv.slice(2)];
+    cluster.setupMaster({
+        exec: path.join(__dirname, file),
+        args: args.slice(1),
+    });
 
-  cluster.setupMaster({
-    exec: path.join(__dirname, file),
-    args: args.slice(1),
-  });
+    const p = cluster.fork();
+    p.on('message', async (data) => {
+        console.log(`[RECEIVED from ${file}]`, "Restart");
+        switch (data) {
+            case 'reset':
+                const worker = workers[file];
+                if (worker) {
+                    worker.kill();
+                } else {
+                    console.error(`No child process running for ${file}`);
+                }
+                break
+            case 'uptime':
+                p.send(process.uptime())
+                break
+        }
+    });
 
-  const p = cluster.fork();
+    p.on('exit', (code, signal) => {
+        console.error(`Child process for ${file} exited with code: ${code}, signal: ${signal}`);
+        if (!workers[file]) {
+            console.error(`No process reference found for ${file}`);
+            return;
+        }
 
-  // Set up event listeners for the child process
-  p.on('message', async (data) => {
-    console.log(`[RECEIVED from ${file}]`, "Restart");
-      switch (data) {
-        case 'reset':
-            const worker = workers[file];
-            if (worker) {
-                worker.kill();
-            } else {
-                console.error(`No child process running for ${file}`);
-            }
-            break
-        case 'uptime':
-            p.send(process.uptime())
-            break
-    }
-  });
+        delete workers[file];
 
-  p.on('exit', (code, signal) => {
-    console.error(`Child process for ${file} exited with code: ${code}, signal: ${signal}`);
-    if (!workers[file]) {
-      console.error(`No process reference found for ${file}`);
-      return;
-    }
+        console.log("Restarting the process immediately")
+        start(file);
+    });
 
-    // Remove reference to the child process
-    delete workers[file];
-
-    // Restart the child process immediately
-	console.log("Restarting the process immediately")
-    start(file);
-  });
-
-  workers[file] = p; // Store a reference to the child process
+    workers[file] = p;
 }
 
 start("index.js")
+

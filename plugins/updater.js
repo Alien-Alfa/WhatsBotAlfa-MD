@@ -20,6 +20,7 @@ command({
     dontAddCommandList: true,
     type: 'owner'
 }, async (message, match) => {
+    try{
     let isHeroku = false; // Adjust based on your conditions
 
     if (isHeroku) {
@@ -27,5 +28,8 @@ command({
     } else {
         await message.UpdateLocal(message);
     }
+} catch (error) {
+  console.error("[Error]:", error);
+}
 });
 

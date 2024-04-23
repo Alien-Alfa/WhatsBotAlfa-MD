@@ -51,17 +51,6 @@ command(
       }}
 );
 
-command(
-  {
-    pattern: "test21 ?(.*)",
-    fromMe: true,  
-    desc: "description",
-    type: "type",
-  },
-  async (message, match) => {
-    toggleFilter(message.jid);
-  }
-);
 
 command(
   {
@@ -71,6 +60,7 @@ command(
     usage: '.stop "hello"',
   },
   async (message, match) => {
+    try{
     if (!match) return await message.reply("\n*Example:* ```.stop hello```");
 
     del = await deleteFilter(message.jid, match);
@@ -80,10 +70,15 @@ command(
     } else {
       await message.reply(`_Filter ${match} deleted_`);
     }
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
+
   }
 );
 
 command({ on: "text", fromMe: true,   }, async (message, match) => {
+  try{
   var filtreler = await getFilter(message.jid);
   if (!filtreler) return;
   filtreler.map(async (filter) => {
@@ -99,4 +94,8 @@ command({ on: "text", fromMe: true,   }, async (message, match) => {
       });
     }
   });
+} catch (error) {
+  console.error("[Error]:", error);
+}
+
 });
