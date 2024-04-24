@@ -2,65 +2,7 @@
 let cluster = require('cluster')
 let path = require('path')
 let fs = require('fs')
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 8000;
-const config = require("./config");
-let html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reset Button</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
 
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  button:hover {
-    background-color: #45a049;
-  }
-</style>
-</head>
-<body>
-
-<button id="resetButton">Reset</button>
-
-<script>
-  // Add event listener to the button
-  document.getElementById('resetButton').addEventListener('click', function() {
-    // Send 'reset' action to the parent process
-    if (typeof process !== 'undefined' && process.send) {
-      process.send('reset');
-    } else {
-      console.error('Process is not defined.');
-    }
-  });
-</script>
-
-</body>
-</html>
-`
-app.get("/", (req, res) => {res.send(html);});
-app.listen(port, () => console.log(`cortana Server listening on port http://localhost:${port}`));
 
 console.log("Server Starting...!")
 
