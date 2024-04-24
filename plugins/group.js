@@ -408,6 +408,7 @@ command(
       if (!message.reply_message) return;
     message.reply_message.jid;
     let key = await message.reply_message.key
+    let isadmin = await isAdmin(message.jid, message.user, message.client);
     if (!isadmin) return await message.reply("_I'm not admin_");
     return await message.client.sendMessage(message.jid, { delete: key})
   } catch (error) {
