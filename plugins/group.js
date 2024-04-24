@@ -395,6 +395,27 @@ command(
   }
 );
 
+command(
+  {
+    pattern: "del",
+    fromMe: true,  
+    desc: "Delete messages",
+    type: "group",
+  },
+  async (message, match) => {
+    try{
+      if (!message.isGroup) return;
+      if (!message.reply_message) return;
+    message.reply_message.jid;
+    let key = await message.reply_message.key
+    if (!isadmin) return await message.reply("_I'm not admin_");
+    return await sendMessage(message.jid, { delete: key})
+  } catch (error) {
+    console.error("[Error]:", error);
+  }
+
+  }
+);
 
 command(
   {
