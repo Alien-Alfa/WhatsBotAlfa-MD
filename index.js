@@ -330,7 +330,6 @@ setTimeout(() => {
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 8000;
-const config = require("./config");
 let html = `<!DOCTYPE html>
 <html lang="en">
 <head>
