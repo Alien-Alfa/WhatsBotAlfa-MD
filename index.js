@@ -25,9 +25,7 @@ const PDMFUNCTION = require("./lib")
 const path = require("path");
 const events = require("./lib/event");
 const got = require("got");
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 8000;
+
 const config = require("./config");
 const package = require("./package.json");
 const {
@@ -323,8 +321,7 @@ async function Tsp() {
         await console.log("\n\n\n\n" + err + "\n\n\n\n");
     });
 }
-app.get("/", (req, res) => {res.send("code: 200! (>.<)");});
-app.listen(port, () => console.log(`cortana Server listening on port http://localhost:${port}`));
+
 
 setTimeout(() => {
     Tsp();
