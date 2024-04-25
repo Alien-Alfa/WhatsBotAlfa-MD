@@ -49,7 +49,7 @@ function formatTime(seconds) {
 command(
   {
     pattern: "menu",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Show All commands",
     dontAddCommandList: true,
     type:"user",
@@ -148,7 +148,7 @@ Description : ${i.desc}\`\`\``
 command(
   {
     pattern: "list",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Show All commands",
     type:"user",
     dontAddCommandList: true,
@@ -202,7 +202,7 @@ async (message, match) => {
 
 command({
   pattern: "1list"
-  , fromMe: true,  
+  , fromMe: isPublic,  
    desc: "Show All commands"
   , dontAddCommandList: true
 , }, async (message, match, m) => {
@@ -260,7 +260,7 @@ ${config.BOT_NAME}
 command(
   {
     pattern: "2list",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Show All commands",
     type:"user",
     dontAddCommandList: true,
@@ -303,7 +303,7 @@ command(
 
 command({
   pattern: "help"
-  , fromMe: true,  
+  , fromMe: isPrivate,  
    dontAddCommandList: true
 , }
 , async (message, match, m) => {

@@ -144,7 +144,7 @@ command(
 command(
   {
     pattern: "jid",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Give jid of chat/user",
     type: "user",
   },

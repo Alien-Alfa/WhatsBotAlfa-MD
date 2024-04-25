@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
  command({
  pattern: "fb",
  on: "text",
- fromMe: true,  
+ fromMe: isPrivate,  
  desc: "fb downloader"
 },
 

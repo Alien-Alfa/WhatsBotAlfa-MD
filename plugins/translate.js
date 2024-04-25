@@ -8,7 +8,7 @@ const {
   
   command({
        pattern: "tr",
-       fromMe: true,  
+       fromMe: isPrivate,  
        desc: "Google Translate",
        dontAddCommandList: true,
        type: "tool",

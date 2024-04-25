@@ -37,7 +37,7 @@ const getInstagramId = (query) => {
 command(
   {
     pattern: "song",
-    fromMe: true,  
+    fromMe: isPrivate,  
     type: "downloader",
   },
   async (message, match) => {
@@ -71,7 +71,7 @@ command(
 command(
   {
     pattern: "video",
-    fromMe: true,  
+    fromMe: isPrivate,  
     type: "downloader",
   },
   async (message, match) => {
@@ -121,7 +121,7 @@ if (videoId !== null){
 
 command({
   pattern: "ig ?(.*)",
-  fromMe: true,  
+  fromMe: isPrivate,  
   desc: "downloads video from instagram",
   type: "downloader",
 }, async (message, match, m) => {

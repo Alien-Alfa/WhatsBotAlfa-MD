@@ -6,7 +6,7 @@ const fs = require("fs-extra")
 command(
   {
     pattern: "sticker ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "_Converts Photo or video to sticker_",
     type: "converter",
   },
@@ -31,7 +31,7 @@ command(
 command(
   {
     pattern: "tgs ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Download Sticker From Telegram",
     type: "Tool",
   },
@@ -74,7 +74,7 @@ command(
 command(
   {
     pattern: "take ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Changes Exif data of stickers",
     type: "tool",
   },
@@ -83,7 +83,7 @@ command(
     if (!message.reply_message && !message.reply_message.sticker)
       return await message.reply("_Reply to sticker_");
     let buff = await m.quoted.download();
-    let [packname, author] = match.split(",");
+    let [packname, author] = match.split(":");
     await message.sendMessage(
       buff,
       {
@@ -101,7 +101,7 @@ command(
 command(
   {
     pattern: "getexif ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "description",
     type: "type",
   },

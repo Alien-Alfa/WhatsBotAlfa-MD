@@ -2,7 +2,7 @@ const { command, styletext, listall, tiny, isPrivate } = require("../lib/");
 command(
   {
     pattern: "fancy ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "converts text to fancy text",
     type: "converter",
   },

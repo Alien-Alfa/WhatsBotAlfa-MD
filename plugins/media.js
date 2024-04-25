@@ -29,7 +29,7 @@ const { spotifydl } = require('../lib/spotify')
 command(
   {
     pattern: "qr ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Read/Write Qr.",
     type: "Tool",
   },
@@ -62,7 +62,7 @@ command(
 Function(
   {
     pattern: "img ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Google Image search",
     type: "downloader",
   },
@@ -106,7 +106,7 @@ async function gimage(query, amount = 5) {
 command(
   {
     pattern: "removebg ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "removes background of an image",
   },
   async (message, match) => {
@@ -148,7 +148,7 @@ command(
 command(
   {
     pattern: "photo ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Changes sticker to Photo",
     type: "converter",
   },
@@ -171,7 +171,7 @@ command(
 command(
   {
     pattern: "mp4 ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Changes sticker to Video",
     type: "converter",
   },
@@ -196,7 +196,7 @@ command(
 
 command ({
 pattern: "2tts",
-fromMe: true,  
+fromMe: isPrivate,  
 desc: "google-tts",
 type: "tool"
 },
@@ -221,7 +221,7 @@ return await message.reply(participants);
 command(
   {
     pattern: "fetch ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Downloads from a direct link",
     type: "downloader",
   },
@@ -256,7 +256,7 @@ command(
 command(
   {
     pattern: "yts ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Search Youtube",
     type: "Search",
   },
@@ -298,7 +298,7 @@ command(
 command(
   {
     pattern: "ytv ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     dontAddCommandList: true,
   },
   async (message, match) => {
@@ -325,7 +325,7 @@ command(
 command(
   {
     pattern: "yta ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     dontAddCommandList: true,
   },
   async (message, match) => {
@@ -355,7 +355,7 @@ command(
 command(
   {
     pattern: "spotify ?(.*)",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Spotify song Downloader",
     type: "downloader",
   },

@@ -5,7 +5,7 @@ const acrcloud = require("acrcloud")
 command(
 {
 pattern : "find",
-fromMe: true,  
+fromMe: isPrivate,  
 desc : "yts player",
 type : "music",
  },

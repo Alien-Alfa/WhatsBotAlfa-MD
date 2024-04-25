@@ -77,7 +77,7 @@ command(
   }
 );
 
-command({ on: "text", fromMe: true,   }, async (message, match) => {
+command({ on: "text", fromMe: false,   }, async (message, match) => {
   try{
   var filtreler = await getFilter(message.jid);
   if (!filtreler) return;

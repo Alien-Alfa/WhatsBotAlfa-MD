@@ -83,8 +83,8 @@ command(
 
 command(
   {
-    pattern: "fd",
-    fromMe: true,
+    pattern: "quoted",
+    fromMe: isPrivate,
     desc: "Forwards the replied Message",
     type: "Util",
   },
@@ -106,7 +106,7 @@ command(
 command(
  {
   pattern: "vv",
-  fromMe: true,
+  fromMe: isPrivate,
   desc: "Forwards The View once messsage",
   type: "tool",
  },
@@ -123,7 +123,7 @@ function _0x3c2f(){const _0x454ae1=['590zvrRah','276MPUpfG','1030047bYOspa','cli
   //============================================================================================================================================
   command({
     pattern: "ttk",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "Download TikTok Videos",
     dontAddCommandList: true,
     type: "download",
@@ -141,7 +141,7 @@ function _0x3c2f(){const _0x454ae1=['590zvrRah','276MPUpfG','1030047bYOspa','cli
 
    command ({
     pattern: "tts",
-    fromMe: true,  
+    fromMe: isPrivate,  
     desc: "google-tts",
     type: "tool"
     },

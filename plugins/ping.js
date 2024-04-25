@@ -48,7 +48,7 @@ function formatTime(seconds) {
 
 command({
       pattern: "ping",
-      fromMe: true,
+      fromMe: isPrivate,
       desc: "To check ping",
       type: "user",
   },
@@ -93,7 +93,7 @@ command({
 );
 command({
       pattern: "uptime",
-      fromMe: true,
+      fromMe: isPrivate,
       desc: "To check uptime",
       type: "user",
   },
