@@ -202,7 +202,7 @@ async (message, match) => {
 
 command({
   pattern: "1list"
-  , fromMe: isPublic,  
+  , fromMe: isPrivate,  
    desc: "Show All commands"
   , dontAddCommandList: true
 , }, async (message, match, m) => {
