@@ -157,12 +157,13 @@ async function Tsp() {
             });
 
             console.log("⬇️  Installing Plugins...");
-
+try{
             fs.readdirSync("./plugins").forEach((plugin) => {
                 if (path.extname(plugin).toLowerCase() == ".js") {
                     require("./plugins/" + plugin);
                 }
             });
+}catch(err){console.log("[PLUGIN ERROR]: "+err)}
             console.log("✅ Plugins Installed!");
 
             try {

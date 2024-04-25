@@ -1,5 +1,5 @@
 
-
+/*
 const { command, isAdmin, parseJid, isPrivate } = require("../lib");
 command(
   {
@@ -212,3 +212,4 @@ ${
   }
 );
 
+*/

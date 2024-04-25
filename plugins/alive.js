@@ -18,5 +18,3 @@ await message.reply(`Hey ${user}\nAlive for ${await process.send("uptime")}`)
 }
 )
 
-
-//Tshephang+Cyber 🐤you change plugin disappeares

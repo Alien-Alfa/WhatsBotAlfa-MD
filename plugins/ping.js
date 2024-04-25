@@ -1,7 +1,8 @@
 const {
   command,
   fromMe,
-  sleep
+  sleep,
+  isPrivate
 } = require("../lib")
 
 
