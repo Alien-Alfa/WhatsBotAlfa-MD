@@ -18,6 +18,8 @@ const {
     Sticker,
 } = require("./lib/Base");
 const pino = require("pino");
+const { UpdateLocal } = require("./lib")
+
 logger = pino({
     level: "silent"
 });
@@ -331,57 +333,15 @@ setTimeout(() => {
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 8000;
-let html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reset Button</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #000000;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #00ff1e;
-    color: rgb(0, 0, 0);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  button:hover {
-    background-color: #00f7ff;
-  }
-</style>
-</head>
-<body>
-
-    <button id="resetButton">Reset</button>
-    <button id="updateButton">Update</button>
-
-<script>
-  // Add event listener to the button
-  document.getElementById('resetButton').addEventListener('click', function() {
-      process.send('reset');
+app.post('/restart', (req, res) => {
+  console.log("[Restarting]");
+  process.send('reset');
+    res.sendStatus(200); 
+});
+app.post('/update', (req, res) => {
+    console.log("[Updating]");
+    UpdateLocal()
+      res.sendStatus(200); 
   });
-  document.getElementById('updateButton').addEventListener('click', function() {
-      process.send('reset');
-  });
-</script>
-
-</body>
-</html>
-`
-app.get("/", (req, res) => {res.send(html);});
+app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'lib/BASE/index.html')); });
 app.listen(port, () => console.log(`cortana Server listening on port http://localhost:${port}`));
