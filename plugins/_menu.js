@@ -319,7 +319,7 @@ command({
 │╭──[ ${config.BOT_NAME} ]──㋰
 ││USER :  ${message.pushName}
 ││NUMBER :  ${m.sender.split("@")[0]}
-││WORKTYPE : ${config.WORK_TYPE}
+││WORKTYPE : ${config.WORKTYPE}
 │╰──㋰
 │
 │╭──[ "INFO BOT"]──㋰
