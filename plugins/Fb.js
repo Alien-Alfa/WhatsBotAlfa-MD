@@ -15,13 +15,13 @@ await message.reply("downloading please wait ⏳");
 let {sd , hd ,thumbnail}= await dl(match);
 let img = await getBuffer(thumbnail);
 if(match.split(";")[1] == "hd"){
- await message.client.sendMessage(message.jid , {video: {url: hd} , caption:"Supported by Tshephang 🖤" , thumbnail: img }, {quoted: message});
+ await message.client.sendMessage(message.jid , {video: {url: hd} , thumbnail: img }, {quoted: message});
 }
  
 
 let rs = await (await fetch(sd)).buffer();
 
-await message.client.sendMessage(message.jid , {video:  rs, caption:"Supported by Tshephang 🖤" , thumbnail: img }, {quoted: message});
+await message.client.sendMessage(message.jid , {video:  rs, thumbnail: img }, {quoted: message});
 }catch(e){
 await message.reply(`
 *Download failed 
