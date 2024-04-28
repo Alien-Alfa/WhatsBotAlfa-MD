@@ -60,12 +60,12 @@ start("index.js")
 
 
 app.post('/restart', (req, res) => {
-  console.log("[Restarting]");
+  console.log("[Server Requested Restart]");
   ClusterRestart()
     res.sendStatus(200); 
 });
 app.post('/update', (req, res) => {
-    console.log("[Updating]");
+    console.log("[Server Requested Update]");
     UpdateLocal()
       res.sendStatus(200); 
   });
