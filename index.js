@@ -319,3 +319,8 @@ setTimeout(() => {
     Aurora();
 }, 500);
 
+async function ClusterRestart() {
+    return process.send('reset');
+  }
+  
+  module.exports = ClusterRestart

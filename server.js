@@ -5,7 +5,8 @@ let fs = require('fs')
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 8000;
-const { UpdateLocal, ClusterRestart } = require("./lib")
+const { UpdateLocal } = require("./lib")
+const ClusterRestart = require("./index")
 
 
 
