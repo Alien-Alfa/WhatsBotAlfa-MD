@@ -5,7 +5,7 @@ let fs = require('fs')
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 8000;
-const { UpdateLocal } = require("./lib")
+const { UpdateLocal, ClusterRestart } = require("./lib")
 
 
 
@@ -61,7 +61,7 @@ start("index.js")
 
 app.post('/restart', (req, res) => {
   console.log("[Restarting]");
-  process.send('reset');
+  ClusterRestart()
     res.sendStatus(200); 
 });
 app.post('/update', (req, res) => {
