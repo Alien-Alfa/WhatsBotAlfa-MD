@@ -2,13 +2,6 @@
 let cluster = require('cluster')
 let path = require('path')
 let fs = require('fs')
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 8000;
-const { UpdateLocal } = require("./lib")
-const ClusterRestart = require("./index")
-
-
 
 
 const workers = {};
@@ -58,19 +51,5 @@ function start(file) {
 
 start("index.js")
 
-
-
-app.post('/restart', (req, res) => {
-  console.log("[Server Requested Restart]");
-  ClusterRestart()
-    res.sendStatus(200); 
-});
-app.post('/update', (req, res) => {
-    console.log("[Server Requested Update]");
-    UpdateLocal()
-      res.sendStatus(200); 
-  });
-app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'lib/BASE/index.html')); });
-app.listen(port, () => console.log(`cortana Server listening on port http://localhost:${port}`));
 
 console.log(`==================================================\n                Server Starting...!\n==================================================`)

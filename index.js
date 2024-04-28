@@ -25,6 +25,7 @@ const PDMFUNCTION = require("./lib")
 const path = require("path");
 const events = require("./lib/event");
 const got = require("got");
+const { UpdateLocal } = require("./lib")
 
 const config = require("./config");
 const package = require("./package.json");
@@ -319,8 +320,18 @@ setTimeout(() => {
     Aurora();
 }, 500);
 
-async function ClusterRestart() {
-    return process.send('reset');
-  }
-  
-  module.exports = ClusterRestart
+const express = require("express");
+const app = express();
+const port = process.env.PORT || 8000;
+app.post('/restart', (req, res) => {
+  console.log("[Restarting]");
+  process.send('reset');
+    res.sendStatus(200); 
+});
+app.post('/update', (req, res) => {
+    console.log("[Updating]");
+    UpdateLocal()
+      res.sendStatus(200); 
+  });
+app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'lib/BASE/index.html')); });
+app.listen(port, () => console.log(`cortana Server listening on port http://localhost:${port}`));
