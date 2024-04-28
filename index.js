@@ -70,7 +70,7 @@ fs.readdirSync("./database/").forEach((plugin) => {
 });
 
 
-async function Tsp() {
+async function Aurora() {
     let {
         version
     } = await fetchLatestBaileysVersion()
@@ -126,12 +126,10 @@ async function Tsp() {
             lastDisconnect.error.output.statusCode != 401
         ) {
             console.log(lastDisconnect.error.output.payload);
-            Tshephang();
         }
 
         if (connection === "open") {
 
-            //conn.sendMessage(conn.user.id, { text: "connected✔︎✔︎" });
             let creds = require("./session/creds.json")
             await conn.sendMessage(conn.user.id, {
                 text: "```----- 𝞓𝙇𝞘𝞢𝞜-𝞓𝙇𝙁𝞓-𝞛𝘿 -----\n\nVersion : " + package.version + "\nStatus  : Connected!\nNumber  : " + conn.user.id.split(":")[0] + "\nPlatform: " + creds.platform + "\n\n----- 𝞓𝙇𝞘𝞢𝞜-𝞓𝙇𝙁𝞓-𝞛𝘿 -----```"
@@ -193,14 +191,9 @@ try{
 
                 conn.ev.on("call", async (c) => {
                     const callList = await getcall();
-
                     c = c.map(c => c)
                     c = c[0]
-                    let {
-                        status,
-                        from,
-                        id
-                    } = c
+                    let {status,from,id} = c
                     let frmid;
                     if (from.includes(":")) {
                         frmid = await from.split(":")[0]
@@ -323,6 +316,6 @@ try{
 
 
 setTimeout(() => {
-    Tsp();
+    Aurora();
 }, 500);
 
