@@ -37,7 +37,6 @@ const {
     Greetings,
     GroupUpdates,
     BanStick,
-    pdmess
 } = require("./lib/Greetings");
 const {
     getcall
@@ -172,7 +171,6 @@ try{
                 conn.ev.on("creds.update", saveCreds);
 
                 conn.ev.on("group-participants.update", async (data) => {
-                    pdmess(data, conn);
                     Greetings(data, conn);
                 });
                 conn.ev.on("groups.update", async (data) => {
