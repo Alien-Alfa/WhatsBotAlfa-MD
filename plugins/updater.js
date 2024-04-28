@@ -12,7 +12,7 @@ command({
 }, async (message, match) => {
     if(!match){
 await message.CheckUpdate(message)
-} else if(match === now){
+} else if(match === "now"){
     try{
         let isHeroku = false; // Adjust based on your conditions
         if (isHeroku) {
