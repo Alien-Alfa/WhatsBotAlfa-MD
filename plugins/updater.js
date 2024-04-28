@@ -10,25 +10,19 @@ command({
     desc: "Updates bot",
     type: 'owner'
 }, async (message, match) => {
+    if(!match){
 await message.CheckUpdate(message)
-});
-
-command({
-    pattern: 'updatenow',
-    fromMe: true,
-    desc: "Updates bot",
-    dontAddCommandList: true,
-    type: 'owner'
-}, async (message, match) => {
+} else if(match === now){
     try{
-    let isHeroku = false; // Adjust based on your conditions
-    if (isHeroku) {
-        await message.UpdateHeroku(message);
-    } else {
-        await message.UpdateLocal(message);
+        let isHeroku = false; // Adjust based on your conditions
+        if (isHeroku) {
+            await message.UpdateHeroku(message);
+        } else {
+            await message.UpdateLocal(message);
+        }
+    } catch (error) {
+      console.error("[Error]:", error);
     }
-} catch (error) {
-  console.error("[Error]:", error);
 }
 });
 
