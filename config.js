@@ -32,5 +32,5 @@ module.exports = {
   HEROKU_API_KEY: process.env.HEROKU_API_KEY || " ",
   OWNER_NAME: process.env.OWNER_NAME || "𝞓𝙇𝞘𝞢𝞜-𝞓𝙇𝙁𝞓",
   BOT_NAME: process.env.BOT_NAME || "𝗔𝗨𝗥𝗢𝗥𝗔",
-  WORKTYPE: process.env.WORKTYPE === undefined ? "public" : process.env.WORKTYPE,
+  WORKTYPE: process.env.WORKTYPE === undefined ? "private" : process.env.WORKTYPE,
 };
