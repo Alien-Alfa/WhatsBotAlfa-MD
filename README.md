@@ -97,6 +97,7 @@
 # `Scan QR Code For Session`
 
 # `❗SCAN QR❗`
+## ⚠️ USE A GERMAN VPN`
  <a href="https://apex-alien-alfa.vercel.app"><img title="ＡＬＩＥＮ ＡＬＦＡ" src="https://repl.it/badge/github/quiec/whatsasena" width="300"></a>
   <br><br><br>
 # `Change Session In Github`
