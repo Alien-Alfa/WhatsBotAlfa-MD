@@ -1,11 +1,12 @@
-FROM node:latest
-WORKDIR /root/ALFA/
-RUN yarn global add pm2
-RUN yarn
-COPY package*.json ./
-RUN yarn install --ignore-engines --network-concurrency 1
-RUN apt -y update && apt -y upgrade && apt -y install ffmpeg git imagemagick python3 graphicsmagick sudo npm yarn curl && curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && sudo apt install -y nodejs && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - && echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list && apt -y update && apt -y install yarn && apt autoremove -y && rm -rf /var/lib/apt/lists/*
-ENV DEBIAN_FRONTEND=noninteractive
+FROM node:18.16.0-bullseye-slim
+RUN apt-get update && \
+    apt-get install -y \
+    ffmpeg \
+    webp && \
+    apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/*
+RUN git clone https://github.com/Alien-Alfa/WhatsBotAlfa-MD.git /APEX
+WORKDIR /APEX
 EXPOSE 8000
-COPY . .
+RUN npm install
 CMD ["npm", "start"]

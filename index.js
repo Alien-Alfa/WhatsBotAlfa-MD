@@ -24,6 +24,8 @@ async function auth() {
 }
 }
 
+auth()
+
 const readAndRequireFiles = async (directory) => {
   try {
     const files = await fs.readdir(directory);
@@ -58,7 +60,6 @@ async function initialize() {
   }
 }
 
-return initialize()
 
 
 
