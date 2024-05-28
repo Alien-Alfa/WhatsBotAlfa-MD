@@ -101,7 +101,7 @@
  <a href="https://apex-alien-alfa.vercel.app"><img title="ＡＬＩＥＮ ＡＬＦＡ" src="https://img.shields.io/badge/Vercel-000000.svg?style=for-the-badge&logo=Vercel&logoColor=white" width="300"></a>
   <br><br> 
 ### If not Showing QR, Delete Session from this link
-<a href="https://apex-alien-alfa.vercel.app"><img title="ＡＬＩＥＮ ＡＬＦＡ" src="https://img.shields.io/badge/Koyeb-121212.svg?style=for-the-badge&logo=Koyeb&logoColor=white" width="300"></a>
+<a href="https://apex-alien-alfa.koyeb.app/settings"><img title="ＡＬＩＥＮ ＡＬＦＡ" src="https://img.shields.io/badge/Koyeb-121212.svg?style=for-the-badge&logo=Koyeb&logoColor=white" width="300"></a>
   <br><br><br>
 # `Change Session In Github`
 
