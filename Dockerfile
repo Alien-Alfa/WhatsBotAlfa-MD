@@ -1,20 +1,14 @@
-FROM node:18-slim
-
-WORKDIR /APEX
+FROM node:18.16.0-bullseye-slim
 
 RUN apt-get update && \
-    apt-get install -y git python3 build-essential && \
-    apt-get clean && \
+    apt-get install -y \
+    ffmpeg \
+    webp && \
+    apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/Alien-Alfa/WhatsBotAlfa-MD.git /APEX
-
-WORKDIR /APEX/WhatsBotAlfa-MD
-
+WORKDIR /APEX
 RUN npm install
-
-RUN npm rebuild
-
-EXPOSE 8000
-
 CMD ["npm", "start"]
+
