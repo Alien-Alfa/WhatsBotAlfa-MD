@@ -11,9 +11,7 @@ global.__basedir = __dirname;
 async function auth() {
   try{
     if (!fsx.existsSync("./session/creds.json")) {
-      const id = config.SESSION_ID;
-      if (id === "") return;
-      return await WriteSession(id).then(() => {
+      return await WriteSession().then(() => {
           return initialize();
       });
   } else if (fsx.existsSync("./session/creds.json")) {
