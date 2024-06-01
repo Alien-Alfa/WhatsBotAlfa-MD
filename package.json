@@ -59,7 +59,7 @@
     },
   "scripts": {
     "start": "node server.js",
-    "log": "node server.js"
+    "main": "node index.js"
   },
   "repository": {
     "type": "git",
