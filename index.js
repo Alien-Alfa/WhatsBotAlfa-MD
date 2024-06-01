@@ -51,4 +51,4 @@ async function initialize() {
   }
 }
 
-auth();
+return initialize();
