@@ -1,4 +1,4 @@
-FROM node:18.16.0-bullseye-slim
+FROM node:18-slim
 
 RUN apt-get update && \
     apt-get install -y git python3 build-essential && \
@@ -8,5 +8,6 @@ RUN apt-get update && \
 RUN git clone https://github.com/Alien-Alfa/WhatsBotAlfa-MD.git /APEX
 WORKDIR /APEX
 RUN npm install
+EXPOSE 8000
 CMD ["npm", "start"]
 
