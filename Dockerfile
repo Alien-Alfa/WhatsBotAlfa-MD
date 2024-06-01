@@ -8,6 +8,7 @@ RUN apt-get update && \
 RUN git clone https://github.com/Alien-Alfa/WhatsBotAlfa-MD.git /APEX
 WORKDIR /APEX
 RUN npm install
+RUN npm rebuild
 EXPOSE 8000
 CMD ["npm", "start"]
 
