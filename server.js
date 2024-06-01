@@ -97,7 +97,6 @@ fs.readdir('session/', (err, files) => {
     });
   });
 }
-start("index.js");
 
 console.log(`==================================================\n                Server Starting...!\n==================================================`);
 const express = require("express");
@@ -134,3 +133,4 @@ app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'lib/Messages/ind
 app.listen(port, () => console.log(`cortana Server listening on port http://localhost:${port}`));
 
 
+ start("index.js");
