@@ -23,9 +23,7 @@ async function auth() {
   return console.error("AuthFile Generation Error:", error);
 }
 }
-
 auth()
-
 const readAndRequireFiles = async (directory) => {
   try {
     const files = await fs.readdir(directory);
