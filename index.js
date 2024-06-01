@@ -9,20 +9,18 @@ const { UpdateLocal, WriteSession} = require("./lib");
 global.__basedir = __dirname;
 
 async function auth() {
-  try{
+  try {
     if (!fsx.existsSync("./session/creds.json")) {
-      return await WriteSession().then(() => {
-          return initialize();
-      });
-  } else if (fsx.existsSync("./session/creds.json")) {
+      await WriteSession();
+    }
     return initialize();
+  } catch (error) {
+    console.error("AuthFile Generation Error:", error);
+    return process.exit(1);
   }
-} catch (error) {
-  return console.error("AuthFile Generation Error:", error);
 }
-}
-auth()
-const readAndRequireFiles = async (directory) => {
+
+async function readAndRequireFiles(directory) {
   try {
     const files = await fs.readdir(directory);
     return Promise.all(
@@ -31,31 +29,26 @@ const readAndRequireFiles = async (directory) => {
         .map((file) => require(path.join(directory, file)))
     );
   } catch (error) {
-    return console.error("Error reading and requiring files:", error);
+    console.error("Error reading and requiring files:", error);
+    throw error; // Rethrow the error to propagate it
   }
-};
+}
 
 async function initialize() {
- 
   console.log("============> Aurora-MD [Alien-Alfa] <============");
   try {
     await readAndRequireFiles(path.join(__dirname, "/assets/database/"));
     console.log("Syncing Database");
-
     await config.DATABASE.sync();
-
     console.log("⬇  Installing Plugins...");
     await readAndRequireFiles(path.join(__dirname, "/assets/plugins/"));
     await getandRequirePlugins();
     console.log("✅ Plugins Installed!");
-
-    return  await connect();
+    await connect();
   } catch (error) {
     console.error("Initialization error:", error);
-    return process.exit(1); // Exit with error status
+    process.exit(1); // Exit with error status
   }
 }
 
-
-
-
+auth();
