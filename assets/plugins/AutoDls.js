@@ -76,7 +76,6 @@ const downloadFacebookMedia = async (message, match) => {
     if (!match) return;
 
     try {
-        if (!match.includes("facebook.com")) return;
         await message.reply("_Downloading..._");
         const regex = /(https?:\/\/[^\s]+)/;
         const link = match.match(regex);
