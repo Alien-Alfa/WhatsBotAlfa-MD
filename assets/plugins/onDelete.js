@@ -9,7 +9,7 @@ command(
   },
   async (message, match) => {
     if (!DELETED_LOG) return;
-    if (!DELETED_LOG_CHAT)
+    if (!DELETED_LOG_CHAT || "")
       return await message.sendMessage(
         message.user,
         "Please set DELETED_LOG_CHAT in ENV to use log delete message"
