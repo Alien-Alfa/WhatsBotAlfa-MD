@@ -6,6 +6,7 @@ const {
     igdl,
     isUrl,
     toAudio,
+    getJson,
 } = require("../../lib");
 const dl = require("@xaviabot/fb-downloader");
 const fetch = require("node-fetch");
@@ -29,15 +30,15 @@ command({
     desc: "Auto download media from any Url",
     type: "auto",
 },
-async (message) => {
-    const text = message.text || message.reply_message.text;
-    if (text && isIgUrl(text)) {
+async (message, match) => {
+    const text = match
+    if (isIgUrl(text)) {
         await downloadInstaMedia(message, text);
 
-    } else if (text && isFbUrl(text)) {
-        await downloadFacebookMedia(message, message.reply_message.text);
+    } else if (isFbUrl(text)) {
+        await downloadFacebookMedia(message, text);
 
-    } else if (text && isYtUrl(text)) {
+    } else if (isYtUrl(text)) {
         //await downloadInstaMedia(message, message.reply_message.text);
 
     }
@@ -45,36 +46,34 @@ async (message) => {
 );
 
 const downloadInstaMedia = async (message, match) => {
-    match = match || message.reply_message.text;
-    if (!match) return;
-
+    await message.reply("_Downloading..._");
     const url = getUrl(match.trim())[0];
-    if (!url) {
-        return await message.client.sendMessage(message.jid, "Invalid Instagram link");
-    }
-
-    if (!isIgUrl(url)) {
-        return await message.client.sendMessage(message.jid, "Invalid Instagram link");
-    }
-
     try {
-        const data = await igdl(url);
-        if (data.length === 0) {
-            return await message.client.sendMessage(message.jid, "No media found on the link");
-        }
-
-        for (const mediaUrl of data) {
-            await message.sendFile(mediaUrl);
-        }
-    } catch (error) {
-        await message.client.sendMessage(message.jid, "Error: " + error.message || error);
-    }
+        const data = await getJson(
+          `https://api.thexapi.xyz/api/v1/download/instagram?url=${url}`
+        );
+  console.log(data)
+        if (data.data?.length == 0)
+          return await message.sendMessage(
+            message.jid,
+            "No media found on the link"
+          );
+        data.data.forEach(async (url) => {
+          await message.sendFile(url);
+        });
+      } catch (e) {
+        await message.sendMessage(message.jid, "Error: " + e);
+      }
 };
 
-const downloadFacebookMedia = async (message, match) => {
-    match = match || message.reply_message.text;
-    if (!match) return;
 
+
+
+
+
+
+
+const downloadFacebookMedia = async (message, match) => {
     try {
         await message.reply("_Downloading..._");
         const regex = /(https?:\/\/[^\s]+)/;

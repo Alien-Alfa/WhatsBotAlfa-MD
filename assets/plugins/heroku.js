@@ -16,7 +16,7 @@ command(
     type: "heroku",
   },
   async (message) => {
-    await message.reply(`_Restarting_`);
+    await message.reply(`_Restarting..._`);
     if (Config.HEROKU) {
       if (Config.HEROKU_APP_NAME === "") {
         return await message.reply("Add `HEROKU_APP_NAME` env variable");
@@ -28,15 +28,7 @@ command(
         await message.reply(`HEROKU : ${error.body.message}`);
       });
     } else {
-      require("child_process").exec(
-        "pm2 restart Aurora",
-        (error, stdout, stderr) => {
-          if (error) {
-            return message.sendMessage(message.jid, `Error: ${error}`);
-          }
-          return;
-        }
-      );
+      return await process.send("reset")
     }
   }
 );
@@ -70,8 +62,9 @@ command(
           await message.reply(`HEROKU : ${error.body.message}`);
         });
     } else {
-      await message.reply(`_Shutting down._`);
-      await delay(1000).then(() => process.exit(0));
+      await message.reply(`_Shutting down!_`);
+      await delay(1000).then(() =>  process.send("Kill")
+    );
     }
   }
 );

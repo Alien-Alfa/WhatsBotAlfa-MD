@@ -15,17 +15,21 @@ function start(file) {
 
     const p = cluster.fork();
     p.on('message', async (data) => {
-        console.log(`[RECEIVED from ${file}]`, "Restart");
+        console.log(`[RECEIVED from ${file}]`, data);
         switch (data) {
             case 'reset':
                 resetProcess(file);
-            break;
+                break;
             case 'uptime':
                 p.send(process.uptime());
-            break;
+                break;
             case 'shutdown':
-                shutdown()
-            break;
+                shutdown();
+                break;
+            case 'Kill':
+                console.log("Received Kill command, shutting down everything immediately");
+                shutdown(true);
+                break;
         }
     });
 
@@ -38,8 +42,10 @@ function start(file) {
 
         delete workers[file];
 
-        console.log("Restarting the process immediately");
-        start(file);
+        if (signal !== 'SIGTERM') { // Prevent restarting if killed intentionally
+            console.log("Restarting the process immediately");
+            start(file);
+        }
     });
 
     workers[file] = p;
@@ -59,17 +65,25 @@ function BootUp() {
     start("index.js");
 }
 
-function shutdown() {
+function shutdown(killAll = false) {
     console.log("Shutting down the server...");
     for (const file in workers) {
-        stopProcess(file);
+        stopProcess(file, killAll);
+    }
+    if (killAll) {
+        console.log("Exiting the main process...");
+        process.exit();
     }
 }
 
-function stopProcess(file) {
+function stopProcess(file, killAll = false) {
     const worker = workers[file];
     if (worker) {
-        worker.send('shutdown'); // Send shutdown message to the worker
+        if (killAll) {
+            worker.kill();
+        } else {
+            worker.send('shutdown'); // Send shutdown message to the worker
+        }
         delete workers[file];
         console.log(`Stopping process for ${file}`);
     } else {
@@ -77,60 +91,67 @@ function stopProcess(file) {
     }
 }
 
-async function deleteSession(){
-fs.readdir('session/', (err, files) => {
-    if (err) {
-      console.error('Error reading directory:', err);
-      return;
-    }
-  
-    files.forEach(file => {
-      if (file !== 'Aurora.txt') {
-        fs.unlink(path.join('session/', file), err => {
-          if (err) {
-            console.error('Error deleting file:', err);
+async function deleteSession() {
+    fs.readdir('session/', (err, files) => {
+        if (err) {
+            console.error('Error reading directory:', err);
             return;
-          }
-          console.log(`${file} has been deleted.`);
+        }
+
+        files.forEach(file => {
+            if (file !== 'Aurora.txt') {
+                fs.unlink(path.join('session/', file), err => {
+                    if (err) {
+                        console.error('Error deleting file:', err);
+                        return;
+                    }
+                    console.log(`${file} has been deleted.`);
+                });
+            }
         });
-      }
     });
-  });
 }
 
 console.log(`==================================================\n                Server Starting...!\n==================================================`);
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 8000;
+
 app.post('/restart', (req, res) => {
-  console.log("[Restarting]");
-  for (const file in workers) {
-    resetProcess(file);
-}
-    res.sendStatus(200); 
+    console.log("[Restarting]");
+    for (const file in workers) {
+        resetProcess(file);
+    }
+    res.sendStatus(200);
 });
+
 app.post('/update', (req, res) => {
     console.log("[Discarding Session]");
-     deleteSession()
-     return res.sendStatus(200); 
-  });
-  app.post('/shutdown', (req, res) => {
+    deleteSession();
+    res.sendStatus(200);
+});
+
+app.post('/shutdown', (req, res) => {
     console.log("[ShutDown]");
-    shutdown()
-    return res.sendStatus(200); 
-  });
-  app.post('/bootup', (req, res) => {
+    shutdown();
+    res.sendStatus(200);
+});
+
+app.post('/bootup', (req, res) => {
     console.log("[BootUp]");
-    BootUp()
-    return res.sendStatus(200); 
-  });
-  app.post('/feksession', (req, res) => {
+    BootUp();
+    res.sendStatus(200);
+});
+
+app.post('/feksession', (req, res) => {
     console.log("[Discarding Session]");
-    //BootUp()
-    return res.sendStatus(200); 
-  });
-app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'lib/Messages/index.html')); });
+    res.sendStatus(200);
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'lib/Messages/index.html'));
+});
+
 app.listen(port, () => console.log(`cortana Server listening on port http://localhost:${port}`));
 
-
- start("index.js");
+start("index.js");
