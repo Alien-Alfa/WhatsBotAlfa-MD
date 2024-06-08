@@ -730,7 +730,7 @@ command(
         else if (!message.reply_message.sticker) return await message.reply("_Reply to sticker_");
         let isadmin = await isAdmin(message.jid, message.key.participant, message.client);
         if (!isadmin) return
-        const StickId = await message.reply_message.message.stickerMessage.mediaKey
+        const StickId = await message.reply_message.sticker.mediaKey
         // console.log( await StickId)
         await stickban.saveStickBan(message.jid, StickId);
         return await message.reply(`_Sticker Banned successfully._`);
@@ -754,7 +754,7 @@ command({
            return await message.reply("_Reply to sticker_");
         let isadmin = await isAdmin(message.jid, message.key.participant, message.client);
         if (!isadmin) return
-        const StickId = message.reply_message.message.stickerMessage.mediaKey
+        const StickId = message.reply_message.sticker.mediaKey
 
         del = await stickban.deleteStickBan(message.jid, StickId);
 
