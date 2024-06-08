@@ -12,23 +12,23 @@ const {
   const fetch = require("node-fetch");
   
   
-  const isIgUrl = (match) => {
+  const isIgUrl = (text) => {
     const regex = /(https?:\/\/(?:www\.)?instagram\.com\/p\/[\w-]+\/?)/;
     const match = text.match(regex);
     return match ? match[0] : null;
-  };
-  
-  const isFbUrl = (match) => {
+};
+
+const isFbUrl = (text) => {
     const regex = /(https?:\/\/(?:www\.)?(?:facebook\.com|fb\.com|fb\.watch)\/[^\s]+)/;
     const match = text.match(regex);
     return match ? match[0] : null;
-  };
-  
-  const isYtUrl = (match) => {
+};
+
+const isYtUrl = (text) => {
     const regex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+)/;
     const match = text.match(regex);
     return match ? match[0] : null;
-  };
+};
   
   
   command({
