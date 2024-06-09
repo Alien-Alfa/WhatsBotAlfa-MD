@@ -30,7 +30,7 @@ module.exports = {
   WORK_TYPE: process.env.WORK_TYPE || "public",
   SESSION_URL: process.env.SESSION_URL || "",
   DELETED_LOG_CHAT: "120363084228202932@g.us",
-  DELETED_LOG: true,
+  DELETED_LOG: toBool(process.env.DELETED_LOG) || false,
   DATABASE_URL: DATABASE_URL,
   DATABASE:
     DATABASE_URL === "./assets/database.db"
