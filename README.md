@@ -259,8 +259,8 @@ If you are concerned about security, you can install it on your own computer. If
 ```
 Due to Bot; Your WhatsApp account may be banned.
 This is an open source project, you are responsible for everything you do. 
-Absolutely, Asena executives do not accept responsibility.
-By establishing the Asena, you are deemed to have accepted these responsibilities.
+Absolutely, Alien-Alfa or X-Asena executives do not accept responsibility.
+By establishing this Software, you are deemed to have accepted these responsibilities.
 ```
   
 ## ⚠️ Developers
@@ -269,7 +269,7 @@ By establishing the Asena, you are deemed to have accepted these responsibilitie
 | [![Alien-Alfa](https://github.com/Alien-alfa.png?size=200)](https://github.com/Alien-Alfa) |[![Neeraj-x0](https://github.com/Neeraj-x0.png?size=200)](https://github.com/Alien-Alfa)|
 |----|----|
 | [꧁𓊈𒆜ＡＬＩＥＮ ＡＬＦＡ𒆜𓊉꧂](https://github.com/AI-VIKI) | [꧁𓊈𒆜ＮＥＥＲＡＪ－ｘＯ𒆜𓊉꧂](https://github.com/Neeraj-x0) |
-|  𒆜Bug Fixes, Modules, updates𒆜 |  𒆜base, Modules, Fixes𒆜 |
+|  𒆜 ReBase, Modules, updates 𒆜 |  𒆜 Base, Modules, Fixes 𒆜 |
   
   </div>
 
