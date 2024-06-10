@@ -13,7 +13,7 @@ module.exports = {
   SESSION_ID: process.env.SESSION_ID === undefined ? "" : process.env.SESSION_ID,
   LANG: process.env.LANG || "EN",
   AUTH_TOKEN: "",
-  HANDLERS: process.env.HANDLERS === 'false' || process.env.HANDLER === "null" ? '^': '^',
+  HANDLERS: process.env.HANDLER === 'false' || process.env.HANDLER || process.env.HANDLER === undefined ? '.': process.env.HANDLERS,
   RMBG_KEY: process.env.RMBG_KEY || false,
   BRANCH:process.env.WARN_COUNT || "master",
   WARN_COUNT:process.env.WARN_COUNT || 3,

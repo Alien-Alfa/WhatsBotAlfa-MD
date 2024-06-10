@@ -1,5 +1,5 @@
 const { command, isPrivate } = require("../../lib/");
-const { isAdmin, parsedJid } = require("../../lib");
+const { isAdmin, parsedJid,fromMe } = require("../../lib");
 
 command(
   {
@@ -16,8 +16,9 @@ command(
     if (!match) return await message.reply("_Mention user to add");
     let isyouadmin = await isAdmin(message.jid, message.key.participant, message.client);
     if (!isyouadmin) return;
-    const ismeadmin = await isAdmin(message.jid, message.user, message.client);
-    if (!ismeadmin) return await message.reply("_I'm not admin_");
+    //let me = await fromMe(message.participant)
+    //const ismeadmin = await isAdmin(message.jid, message.user, message.client);
+    //if (!ismeadmin) return await message.reply("_I'm not admin_");
     const jid = parsedJid(match);
 
     await message.client.groupParticipantsUpdate(message.jid, jid, "add");
