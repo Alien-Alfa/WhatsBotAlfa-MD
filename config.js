@@ -31,6 +31,7 @@ module.exports = {
   SESSION_URL: process.env.SESSION_URL || "",
   DELETED_LOG_CHAT: "120363084228202932@g.us",
   DELETED_LOG: toBool(process.env.DELETED_LOG) || false,
+  GEMINI_API: process.env.GEMINI_API === undefined ? false :  process.env.GEMINI_API,
   DATABASE_URL: DATABASE_URL,
   DATABASE:
     DATABASE_URL === "./assets/database.db"
