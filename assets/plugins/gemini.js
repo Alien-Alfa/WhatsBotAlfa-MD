@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { command, isPrivate } = require("../../lib");
 const gemini = require("../../lib/Gemini");
+const config = require("../../config"); 
 
 command(
   {
