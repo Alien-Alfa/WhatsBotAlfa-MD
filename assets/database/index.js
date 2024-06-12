@@ -11,4 +11,5 @@ module.exports = {
   stickban:require("./stickban"),
   UserBan:require("./BannedAccount"),
   GroupDB:require("./GroupStateSave"),
+  AiChat:require("./aiChat"),
 };

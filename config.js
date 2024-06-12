@@ -27,11 +27,11 @@ module.exports = {
   OWNER_NAME: process.env.OWNER_NAME || "𝞓𝙇𝞘𝞢𝞜-𝞓𝙇𝙁𝞓",
   HEROKU: toBool(process.env.HEROKU) || false,
   BOT_NAME: process.env.BOT_NAME || "𝗔𝗨𝗥𝗢𝗥𝗔",
-  WORK_TYPE: process.env.WORK_TYPE || "public",
+  WORK_TYPE: process.env.WORK_TYPE || "private",
   SESSION_URL: process.env.SESSION_URL || "",
   DELETED_LOG_CHAT: "120363084228202932@g.us",
   DELETED_LOG: toBool(process.env.DELETED_LOG) || false,
-  GEMINI_API: process.env.GEMINI_API === undefined ? false :  process.env.GEMINI_API,
+  GEMINI_API: process.env.GEMINI_API === undefined ? "AIzaSyBsedR82cCBWLv09rrNT1CoA8KvsQxqt4o" :  process.env.GEMINI_API,
   DATABASE_URL: DATABASE_URL,
   DATABASE:
     DATABASE_URL === "./assets/database.db"

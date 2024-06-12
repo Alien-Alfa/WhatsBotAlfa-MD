@@ -20,7 +20,7 @@ async function auth() {
   }
 }
 
-async function readAndRequireFiles(directory) {
+const readAndRequireFiles = async (directory) => {
   try {
     const files = await fs.readdir(directory);
     return Promise.all(
@@ -30,9 +30,9 @@ async function readAndRequireFiles(directory) {
     );
   } catch (error) {
     console.error("Error reading and requiring files:", error);
-    throw error; // Rethrow the error to propagate it
+    throw error;
   }
-}
+};
 
 async function initialize() {
   console.log("============> Aurora-MD [Alien-Alfa] <============");
@@ -44,10 +44,10 @@ async function initialize() {
     await readAndRequireFiles(path.join(__dirname, "/assets/plugins/"));
     await getandRequirePlugins();
     console.log("✅ Plugins Installed!");
-    await connect();
+    return  await connect();
   } catch (error) {
     console.error("Initialization error:", error);
-    process.exit(1); // Exit with error status
+    return process.exit(1); // Exit with error status
   }
 }
 

@@ -23,7 +23,7 @@ command(
       const image = await m.quoted.download();
 
       fs.writeFileSync("image.jpg", image);
-      const text = await gemini(match, image, {
+      const text = await gemini(match, image, false, {
         id,
       });
       return await message.reply(text);
@@ -31,7 +31,7 @@ command(
     match = message.reply_message
       ? message.reply_message.text + `\n\n${match || ""}`
       : match;
-    const text = await gemini(match, null, { id });
+    const text = await gemini(match, null, false, { id });
     return await message.reply(text);
   }
 );

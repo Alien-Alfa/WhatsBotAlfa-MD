@@ -12,7 +12,8 @@ const {
   stickban,
   UserBan,
   banbot,
-  GroupDB
+  GroupDB,
+  AiChat
 } = require("../database");
 const config = require("../../config");
 const {
@@ -771,3 +772,41 @@ command({
 
   }
 );
+
+
+command({
+   pattern: "aichat",
+   fromMe: isPrivate,
+   desc: "Activates ai aurora on this chat",
+   dontAddCommandList: true,
+},
+async (message, match) => {
+   const chatId = message.key.remoteJid;
+   try {
+      if (message.isGroup){
+      let isadmin = await isAdmin(message.jid, message.key.participant, message.client);
+      if (!isadmin) return
+      }
+      const ChatList = await AiChat.Ai.findOne({
+         where: {
+            chatId
+         },
+      });
+      if (!ChatList) {
+         await AiChat.saveAi(chatId);
+         return message.reply("_AI Chat Activated!_");
+      }
+      else if (ChatList) {
+         await ChatList.destroy();
+         return message.reply("_Ai Chat Deactivated!_");
+      }
+      else {
+         return message.reply("_Error!_");
+      }
+   }
+   catch (error) {
+      console.error(error);
+      return message.reply("_Error activating Ai Chat!_");
+   }
+
+});
