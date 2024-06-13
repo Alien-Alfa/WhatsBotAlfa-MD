@@ -27,13 +27,13 @@ command(
       return await message.reply(replyMsg);
     }
 
-    if (match === "get") {
+    if (match === " get") {
       let msg = await getMessage(message.jid, "welcome");
       if (!msg) return await message.reply("_There is no welcome set_");
       return message.reply(msg.message);
     }
 
-    if (match === "on") {
+    if (match === " on") {
       let msg = await getMessage(message.jid, "welcome");
       if (!msg)
         return await message.reply("_There is no welcome message to enable_");
@@ -42,13 +42,13 @@ command(
       return await message.reply("_Welcome enabled_");
     }
 
-    if (match === "off") {
+    if (match === " off") {
       if (!status) return await message.reply("_Welcome already disabled_");
       await toggleStatus(message.jid, "welcome");
       return await message.reply("_Welcome disabled_");
     }
 
-    if (match == "delete") {
+    if (match == " delete") {
       await delMessage(message.jid, "welcome");
       return await message.reply("_Welcome deleted successfully_");
     }
@@ -79,23 +79,23 @@ command(
       return await message.reply(replyMsg);
     }
 
-    if (match === "get") {
+    if (match === " get") {
       let msg = await getMessage(message.jid, "goodbye");
       if (!msg) return await message.reply("_There is no goodbye set_");
       return message.reply(msg.message);
     }
 
-    if (match === "on") {
+    if (match === " on") {
       await toggleStatus(message.jid, "goodbye");
       return await message.reply("_Goodbye enabled_");
     }
 
-    if (match === "off") {
+    if (match === " off") {
       await toggleStatus(message.jid);
       return await message.reply("_Goodbye disabled_");
     }
 
-    if (match === "delete") {
+    if (match === " delete") {
       await delMessage(message.jid, "goodbye");
       return await message.reply("_Goodbye deleted successfully_");
     }

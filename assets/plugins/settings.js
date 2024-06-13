@@ -68,13 +68,13 @@ command({
      const SnapShots = await GroupDB.getSnapshot(message.jid);
 
      try {
-        if (match === "new") {
+        if (match === " new") {
            return await saveNewData()
         }
-        else if (match === "restore") {
+        else if (match === " restore") {
            return await RestoreData()
         }
-        else if (match === "-help") {
+        else if (match === " -help") {
            return await message.client.sendMessage(message.jid, {
               text: `*Info*\nThis command will Save the current Metadata To database.
 *Tags*
@@ -717,7 +717,7 @@ command(
   },
   async (message, match) => {
      try {
-        if (match === "list") {
+        if (match === " list") {
            const chatId = message.key.remoteJid;
            const BannIds = await stickban.getStickBan(chatId);
            if (!BannIds) return await message.reply("_No Stickers are Banned_");
