@@ -56,6 +56,7 @@ command({
      desc: "Save a snapshot of the Group setings",
   },
   async (message, match) => {
+   console.log("'"+match+"'")
      const {
         key
      } = await message.reply("_Procesing that request!_");
@@ -83,8 +84,7 @@ command({
 - -help : Shows the information of this command`,
               edit: key
            });
-        }
-        else {
+        } else {
            //============================================================================================================================================================
            //========================== Get values ==========================
 
