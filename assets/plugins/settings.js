@@ -250,11 +250,7 @@ Saved Values:
               }
               else {
                  let buff = await getBuffer(ProfilePic)
-                 await message.client.sendMessage(message.jid, {
-                    image: {
-                       url: ProfilePic
-                    }
-                 });
+
                  message.setPP(chat, buff);
                  await message.client.sendMessage(message.jid, {
                     text: `Profile picture Restored!`,
@@ -319,8 +315,14 @@ Saved Values:
            try {
               const MetaData = await message.client.groupMetadata(message.jid);
               const pp = await getUserProfilePicture(message, message.jid);
+
+              const ppfile = await getBuffer(pp)
+              const response = await axios.post("http://paste.c-net.org/", ppfile, {
+               headers: { "Content-Type": "image/jpeg" },
+            });
+
               let metaData = JSON.stringify(MetaData);
-              let res = await GroupDB.setSnapshot(message.jid, pp, metaData)
+              let res = await GroupDB.setSnapshot(message.jid, response, metaData)
               if (!res) return
               let pfpp;
               if (pp === "false") {
