@@ -19,6 +19,8 @@ const config = require("../../config");
 const {
   delay
 } = require("@whiskeysockets/baileys");
+const axios = require("axios");
+
 
 async function getUserProfilePicture(message, user) {
   try {
