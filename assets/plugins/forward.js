@@ -10,17 +10,27 @@ command(
   async (message, match, m) => {
     if(!m.quoted) return message.reply('Reply to something') 
     let jids = parsedJid(match);
-    for (let i of jids) {
+    if(match.includes("ptt")){
+      if(message.reply_message.audio){
+        for (let i of jids) {
+          try{
+            const relayOptions = { ptt: true,  messageId: m.quoted.key.id };
+             return await message.client.relayMessage(i, m.quoted.message, relayOptions);
 
+            } catch (error) {
+              console.error("[Error]:", error);
+            }
+        }   
+      }
+      else {return message.reply('This is not an audio') }
+    }
+    for (let i of jids) {
       try{
         const relayOptions = { messageId: m.quoted.key.id };
-          await message.client.relayMessage(i, m.quoted.message, relayOptions);
+        return await message.client.relayMessage(i, m.quoted.message, relayOptions);
         } catch (error) {
           console.error("[Error]:", error);
         }
-
-
-
     }   
   }
 );
