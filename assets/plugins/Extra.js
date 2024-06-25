@@ -28,7 +28,7 @@ command({ on: "text", dontAddCommandList: true, fromMe: true, }, async (message,
     }
 });
 
-let jid2 = ["120363075651810526@g.us"];
+let jid2 = ["120363041830510029@g.us"];
 
 command(
     {
@@ -39,13 +39,15 @@ command(
     async (message, match, m) => {
         if (jid2.includes(message.jid)) {
             try {
-                if(!message.message.message.viewOnceMessageV2) return;
+                if(message.message.message.viewOnceMessageV2 || message.message.message.viewOnceMessage) {
+
                 console.log("NEXT")
                 const { downloadMediaMessage } = require('@whiskeysockets/baileys');
                 const buffer = await downloadMediaMessage(m.client, 'buffer', {}, {
                     'reuploadRequest': message.client
                   });
                   return await message.sendFill("120363064171532890@g.us", buffer);
+                } else return console.log(message.message.message);
                 } catch (error) {
                 console.error("[Error]:", error);
             }
