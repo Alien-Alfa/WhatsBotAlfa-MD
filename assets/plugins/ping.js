@@ -135,31 +135,144 @@ command({
   }
 );
 
+// Thanks to ❤ Ragnork ❤ for this code
 
 
 command({
-    pattern: "iswa",
-    fromMe: isPrivate,
-    desc: "To check uptime",
-    type: "user",
-}, async (message, match) => {
-    if (!match) return await message.reply("*Need number and x parameter!*\n_Example: iswa 687822xxx_\n_You can use up to 4 x_");
-    const xCount = (match.match(/x/g) || []).length;
-    if (xCount < 0) return await message.reply("*Need number and x parameter!*\n_Example: iswa 687822xxx_\n_You can use up to 4 x_");
-    if (xCount > 4) return await message.reply("*_Maximum 4 'x' Spported_!*\n_Example: iswa 687822xxx_\n_You can use up to 4 x_");
-    const maxNum = Math.pow(10, xCount) - 1;
-    const numbersToCheck = Array.from({ length: maxNum + 1 }, (_, i) => match.replace(/x+/g, () => i.toString().padStart(xCount, '0')));
-        const {key} = await message.reply("_Finding numbers..._");
-        const numbersToCheckString = numbersToCheck.join(',');
-    const result = await message.client.onWhatsApp(numbersToCheckString);
-    if (result.length > 0) {
-        notonwaText = result.map((text, index) => "*" + (index + 1) + " " + text.split("@")[0]);
-      }
-      return await message.client.sendMessage(message.jid, {
-        text: (onwaText.length > 0 ? `*Numbers Registered on WhatsApp:* ${onwaText.length}\n\n${onwaText.join('').trim()}\n\n` : '') +
-        (heyThereText.length > 0 ? `*Numbers with 'Hey there! I am using WhatsApp.' about:* ${heyThereText.length}\n\n${heyThereText.join('\n').trim()}\n\n` : '') +
-        (noabout.length > 0 ? `*User's with Private about:* ${noabout.length}\n\n${noabout.join('\n').trim()}\n\n` : '') +
-        (notonwaText.length > 0 ? `*Numbers Not Registered on WhatsApp:* ${result.notExisting.length}\n\n${notonwaText.join('\n').trim()}` : ''),
-        edit: key
+    pattern: 'onwa ?(.*)',
+    fromMe: true,
+    desc: 'Lists numbers registered on wa, not registered etc.',
+    use: 'whatsapp',
+    usage: 'onwa +48888888xxx'
+}, (async (message, match) => {
+    if (!match[1]) return await message.sendReply("_Need number!_");
+    let {x} = await message.reply("_Processing..._");
+    await processOnwa(message, match)
+    return await message.client.sendMessage(message.jid, {
+        text: '_Task complete!_',
+        edit: x
     });
-});
+}));
+
+
+
+
+async function processOnwa(client, numberPattern) {
+    try {
+      const placeholder = String.fromCharCode(0x200e).repeat(4001);
+  
+      const generatePossibleNumbers = (pattern) => {
+        let basePattern = pattern.replace(/\+/g, '');
+        let length = basePattern.length;
+        let possibleNumbers = [];
+        let xCount = basePattern.split('').filter(char => char === 'x').length;
+  
+        if (xCount === 0) {
+          return [basePattern];
+        }
+  
+        let limit;
+        if (xCount === 1) limit = 10;
+        else if (xCount === 2) limit = 100;
+        else if (xCount === 3) limit = 1000;
+        else throw new Error('Too many x characters');
+  
+        for (let i = 0; i < limit; i++) {
+          let number = basePattern.replace(/x/g, (match, offset) => {
+            let replacement = String(i).padStart(xCount, '0');
+            return replacement[offset % replacement.length];
+          });
+          possibleNumbers.push(number);
+        }
+  
+        return possibleNumbers;
+      };
+      
+      
+
+  
+      const fetchWhatsAppStatus = async (client, numbers) => {
+        const possibleNumbers = generatePossibleNumbers(numbers);
+        if (!possibleNumbers.length) {
+          return "_No possible numbers!_";
+        }
+        const response = {
+          datewise: {},
+          notonwa: [],
+          onwa: []
+        };
+      
+        // Fetch WhatsApp contacts
+        const waContacts = (await client.client.onWhatsApp(...possibleNumbers)).map(contact => contact.jid);
+      
+        // Filter numbers that are not on WhatsApp
+        const notOnWa = possibleNumbers
+          .filter(number => !waContacts.includes(number + "@s.whatsapp.net"))
+          .map(number => '+' + number);
+      
+        // Fetch status for WhatsApp contacts
+        for (const contact of await waContacts) {
+          let status = '';
+          let setAt = '';
+          try {
+            const statusData = await client.client.fetchStatus(await contact);
+            console.log(contact)
+            status = statusData.status;
+            setAt = statusData.setAt;
+          } catch (error) {
+            console.error(`Failed to fetch status for ${await contact}: ${error.message}`);
+          }
+      
+          if (status) {
+            let date;
+            try {
+              date = new Date(setAt).toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+              });
+            } catch (error) {
+              console.error(`Failed to format date for ${await contact}: ${error.message}`);
+              date = "null";
+            }
+      
+            const dateKey = date.split(',')[2]?.trim() || "No date";
+            if (!response.datewise[dateKey]) {
+              response.datewise[dateKey] = [];
+            }
+      
+            response.datewise[dateKey].push({
+              status: status,
+              date: date,
+              number: '+' + contact.split('@')[0]
+            });
+          }
+        }
+      
+        response.notonwa = notOnWa;
+        response.onwa = waContacts.map(contact => '+' + contact.split('@')[0]);
+      
+        return response;
+      };
+      
+  
+      const result = await fetchWhatsAppStatus(client, numberPattern);
+
+      let notRegisteredMessage = "_*❌=== Not registered on WA ===❌:*_\n" + placeholder + "\n" + await result.notonwa.join("\n");
+      let datewiseMessage = '';
+      for (let date in result.datewise) {
+        datewiseMessage += `*⭕=== ${date} ===⭕*\n` + await result.datewise[date].map(info => `_Number: ${info.number}_\n_Bio: ${info.status}_\n_Date: ${info.date}_`).join("\n\n") + "\n\n";
+      }
+      let datewiseResultMessage = "*_=== Date wise result ===_*\n" + placeholder + "\n" + datewiseMessage;
+      let registeredMessage = "_*=== Total registered numbers ===*_\n" + placeholder + "\n" + await result.onwa.join("\n");
+  
+      await client.sendReply(await datewiseResultMessage);
+      await client.sendReply(await notRegisteredMessage);
+      await client.sendReply(await registeredMessage);
+  
+    } catch (error) {
+      await client.sendReply(error.message);
+    }
+  }
+  
