@@ -1,7 +1,8 @@
 
 const { command, isPrivate, parsedJid } = require("../../lib");
 const {
-    React
+    React,
+    Trans
   } = require("../database");
 // Made with ❤ by AlienAlfa
 const {
@@ -29,6 +30,33 @@ command({ on: "text", dontAddCommandList: true, fromMe: true, }, async (message,
             return null;
         }
     }
+});
+
+
+
+command({ on: "text", dontAddCommandList: true, fromMe: true, }, async (message, match) => {
+
+  const TransList = await Trans.getAutoTrans();
+  const res = TransList.some(item => item.dataValues && item.dataValues.chatId === message.jid);
+
+  if (res) {
+  if (jid.includes(message.jid)) {
+      let text = match;
+      let lang = res ? res.dataValues.language : "en";
+
+      try {
+          let result = await translate(text, {
+              'to': lang,
+              'autoCorrect': true
+          });
+
+          return await message.client.sendMessage(message.jid, { text: result.text, edit: message.key });
+      } catch (error) {
+          console.error(error);
+          return null;
+      }
+  }
+}
 });
 
 

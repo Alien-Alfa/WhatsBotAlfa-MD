@@ -8,6 +8,7 @@ module.exports = {
   callAction:require("./callAction"),
   PDM:require("./pdm"),
   React:require("./autoreact"),
+  Trans:require("./autotranslate"),
   banbot:require("./banbot"),
   stickban:require("./stickban"),
   UserBan:require("./BannedAccount"),

@@ -49,7 +49,7 @@ const isYtUrl = (text) => {
   
       }
       else if (isYtUrl(text)) {
-        //await downloadInstaMedia(message, message.reply_message.text);
+        await downloadYoutubeMedia(message, message.reply_message.text);
   
       }
     }
@@ -111,6 +111,33 @@ const isYtUrl = (text) => {
       }, {
         quoted: message
       });
+    }
+    catch (error) {
+      await message.client.sendMessage(message.jid, "Error: " + error.message || error);
+    }
+  };
+
+  const downloadYoutubeMedia = async (message, match) => {
+    try {
+      await message.reply("_Downloading..._");
+      const regex = /(https?:\/\/[^\s]+)/;
+      const link = match.match(regex);
+      let json = await getJson(`https://abhi-api-wphp.onrender.com/api/download/ytv?url=${link[0]}`);
+
+      let img = await getBuffer("https://avatars.githubusercontent.com/u/64305844?v=4");
+console.log(await json)
+
+      await message.client.sendMessage(message.jid, {
+          video: {
+            url: json.result.downloadUrl
+          },
+          caption: json.result.quality + json.result.title,
+          thumbnail: img
+        }, {
+          quoted: message
+        });
+      
+  
     }
     catch (error) {
       await message.client.sendMessage(message.jid, "Error: " + error.message || error);

@@ -11,6 +11,7 @@ const {
   PDM,
   React,
   stickban,
+  Trans,
   UserBan,
   banbot,
   GroupDB,
@@ -855,3 +856,38 @@ async (message, match) => {
    }
 
 });
+
+
+command(
+
+   {
+      pattern: "autotrans",
+      fromMe: isPrivate,
+      desc: "auto translate message to a specific language",
+   },
+   async (message, match) => {
+      try {
+         if (match === " list") {
+            const chatId = message.key.remoteJid;
+            const BannIds = await Trans.getAutoTrans(chatId);
+            if (!BannIds) return await message.reply("_Auto translation not enabled!_");
+            let mggs = `*Language:*\n`;
+            BannIds.forEach(async (BanneUsers) => {
+               mggs += "- " + BanneUsers + "\n"
+            });
+            return await message.reply(mggs);
+ 
+         }
+         else if (!match) return await message.reply("_Reply to sticker_");
+
+         const language = await message.reply_message.sticker.mediaKey
+         // console.log( await StickId)
+         await Trans.saveAutoTrans(message.jid, language);
+         return await message.reply(`_Sticker Banned successfully._`);
+      }
+      catch (error) {
+         console.error("[Error]:", error);
+      }
+ 
+   }
+ );
