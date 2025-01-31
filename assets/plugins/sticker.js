@@ -16,10 +16,11 @@ command(
         message.reply_message.image ||
         message.reply_message.text
       )
-    )
-      return await message.reply("_Reply to photo/video/text_");
+    ) return await message.reply("_Reply to photo/video/text_");
+
     if (message.reply_message.text) {
       let buff = await textToImg(message.reply_message.text);
+      console.log("Sticker text conversion:", buff);  // Debugging log
       return await message.sendMessage(
         message.jid,
         buff,
@@ -27,8 +28,10 @@ command(
         "stickerMessage"
       );
     }
-    let buff = await m.quoted.download();
-    message.sendMessage(
+
+    let buff = await m.download();
+    console.log("Downloaded file:", buff);  // Debugging log
+    return await message.sendMessage(
       message.jid,
       buff,
       { packname: config.PACKNAME, author: config.AUTHOR },
@@ -36,6 +39,7 @@ command(
     );
   }
 );
+
 
 command(
   {

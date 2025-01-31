@@ -10,7 +10,7 @@ command(
   },
   async (message, match) => {
     let text = match;
-    let replyMessageText = message.reply_message && message.reply_message.text;
+    let replyMessageText = await message.reply_message && message.reply_message.text;
 
     if (replyMessageText) {
       if (!isNaN(match))

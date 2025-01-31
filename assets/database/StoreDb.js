@@ -1,6 +1,7 @@
 const { isJidGroup } = require("@whiskeysockets/baileys");
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
+const { Op } = require("sequelize");
 
 const chatDb = config.DATABASE.define("Chat", {
   id: {
@@ -81,12 +82,34 @@ const saveMessage = async (message, user) => {
   }
 };
 
+
+const loadDeletedMessages = async (jid, sinceTimestamp) => {
+  try {
+    const messages = await messageDb.findAll({
+      where: {
+        jid,
+        createdAt: {
+          [Op.gte]: sinceTimestamp, // Use createdAt instead of messageTimestamp
+        },
+      },
+    });
+
+    return messages;
+  } catch (error) {
+    console.error("Error loading deleted messages:", error);
+    throw new Error("Error loading deleted messages");
+  }
+};
+
+
+
+
 const loadMessage = async (id) => {
   if (!id) return;
   const message = await messageDb.findOne({
     where: { id },
   });
-  if (message) return message.dataValues;
+  if (message) return await message;
   return false;
 };
 
@@ -118,6 +141,7 @@ const getName = async (jid) => {
 module.exports = {
   saveMessage,
   loadMessage,
+  loadDeletedMessages,
   saveChat,
   getName,
 };

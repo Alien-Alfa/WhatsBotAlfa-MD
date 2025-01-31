@@ -17,7 +17,7 @@ const {
     async (message, match, m) => {
       try{
 
-        
+        console.log(match)
         let args = match.split(" ");
 let lang = args[0];
 let text = args.slice(1).join(" ");

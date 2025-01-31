@@ -53,11 +53,12 @@ command(
 
 command(
   {
-    pattern: "pp ",
+    pattern: "pp",
     fromMe: true,
     desc: "Set profile picture",
     type: "user",
   },
+
   async (message, match, m) => {
     if (!message.reply_message.image)
       return await message.reply("_Reply to a photo_");
@@ -70,7 +71,7 @@ command(
 command(
   {
     pattern: "fullpp",
-    fromMe: true,  
+    fromMe: true,
     desc: "Set Full profilr picture",
     type: "user",
   },

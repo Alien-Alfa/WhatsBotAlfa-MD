@@ -10,7 +10,7 @@ const {
   } = require('@vitalets/google-translate-api');
   const defaultLang = 'en'
 
-
+/*
 command({ on: "text", dontAddCommandList: true, fromMe: true, }, async (message, match) => {
     let jid = ["120363039040066520@g.us"];
 
@@ -58,7 +58,7 @@ command({ on: "text", dontAddCommandList: true, fromMe: true, }, async (message,
   }
 }
 });
-
+*/
 
 command(
     {
@@ -214,8 +214,8 @@ async function getRandomEmoji() {
   return emojis[randomIndex];
 }
 
-/* 
-*/
+
+
 
 command(
   {
