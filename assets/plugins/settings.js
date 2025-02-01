@@ -385,7 +385,7 @@ command({
 
 ││ *snapshot* : Saves the current metadata of the group and can be used to restore the group with the saved data later *bot must be admin*
 
-│╰──㋰\n`.toUpperCase()
+│╰──㋰\n`
 
         return message.reply(mess);
 
