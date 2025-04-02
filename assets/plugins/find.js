@@ -1,4 +1,4 @@
-const {command , isPrivate , getBuffer} = require("../../lib/");
+const { command , isPrivate , getBuffer , reply } = require("../../lib/");
 const ytsr = require('ytsr');
 const acrcloud = require("acrcloud")
 
@@ -12,10 +12,11 @@ command(
     async (message, match, m) => {
 
   try{
- if (!m.quoted.message.videoMessage && !m.quoted.message.audioMessage)
-      return await message.sendMessage("*Need Video! Or Audio*");
-    
- let buff = await m.quoted.download()
+
+ let { msg , status } = await reply(m,"audio&video", true);
+ if(status == 0) return message.reply(msg);
+      
+ let buff = await m.download();
 try{
      const acr = new acrcloud({
         host: "identify-eu-west-1.acrcloud.com",
