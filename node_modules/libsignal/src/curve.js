@@ -45,6 +45,25 @@ function scrubPubKeyFormat(pubKey) {
     }
 }
 
+function unclampEd25519PrivateKey(clampedSk) {
+    const unclampedSk = new Uint8Array(clampedSk);
+
+    // Fix the first byte
+    unclampedSk[0] |= 6; // Ensure last 3 bits match expected `110` pattern
+
+    // Fix the last byte
+    unclampedSk[31] |= 128; // Restore the highest bit
+    unclampedSk[31] &= ~64; // Clear the second-highest bit
+
+    return unclampedSk;
+}
+
+exports.getPublicFromPrivateKey = function(privKey) {
+    const unclampedPK = unclampEd25519PrivateKey(privKey)
+    const keyPair = curveJs.generateKeyPair(unclampedPK);
+    return prefixKeyInPublicKey(Buffer.from(keyPair.public))
+}
+
 exports.generateKeyPair = function() {
     try {
         const {publicKey: publicDerBytes, privateKey: privateDerBytes} = nodeCrypto.generateKeyPairSync(

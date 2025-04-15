@@ -1,3 +1,5 @@
+/*
+
 const {
     isPrivate,
     command,
@@ -10,14 +12,15 @@ const {
     validateQuality,
   } = require("../../lib");
   const dl = require("@xaviabot/fb-downloader");
+
   const fetch = require("node-fetch");
   const { yta, ytv, ytsdl } = require("../../lib/ytdl");
   
   const isIgUrl = (text) => {
-    const regex = /(https?:\/\/(?:www\.)?instagram\.com\/p\/[\w-]+\/?)/;
+    const regex = /(https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv|stories)\/[\w-]+\/?)/;
     const match = text.match(regex);
     return match ? match[0] : null;
-};
+  };  
 
 const isFbUrl = (text) => {
     const regex = /(https?:\/\/(?:www\.)?(?:facebook\.com|fb\.com|fb\.watch)\/[^\s]+)/;
@@ -49,7 +52,7 @@ const isYtUrl = (text) => {
   
       }
       else if (isYtUrl(text)) {
-        await downloadYoutubeMedia(message, message.reply_message.text);
+        await downloadYoutubeMedia(message, text);
   
       }
     }
@@ -57,6 +60,17 @@ const isYtUrl = (text) => {
   
   const downloadInstaMedia = async (message, match) => {
     await message.reply("_Downloading..._");
+console.log(match)
+
+
+const { igdl } = require('btch-downloader')
+
+const data = await igdl(match)
+console.log(data) // JSON
+
+/*
+
+
     const url = getUrl(match.trim())[0];
     try {
       const data = await getJson(
@@ -75,6 +89,7 @@ const isYtUrl = (text) => {
     catch (e) {
       await message.sendMessage(message.jid, "Error: " + e);
     }
+    *//*
   };
   
   
@@ -120,6 +135,7 @@ const isYtUrl = (text) => {
   const downloadYoutubeMedia = async (message, match) => {
     try {
       await message.reply("_Downloading..._");
+
       const regex = /(https?:\/\/[^\s]+)/;
       const link = match.match(regex);
       let json = await getJson(`https://abhi-api-wphp.onrender.com/api/download/ytv?url=${link[0]}`);
@@ -137,7 +153,6 @@ console.log(await json)
           quoted: message
         });
       
-  
     }
     catch (error) {
       await message.client.sendMessage(message.jid, "Error: " + error.message || error);
@@ -283,3 +298,6 @@ console.log(await json)
       );
     }
   );
+  
+  
+  */

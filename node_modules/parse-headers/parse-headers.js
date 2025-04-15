@@ -9,7 +9,7 @@ module.exports = function (headers) {
   if (!headers)
     return {}
 
-  var result = {}
+  var result = Object.create(null);
 
   var headersArr = trim(headers).split('\n')
 

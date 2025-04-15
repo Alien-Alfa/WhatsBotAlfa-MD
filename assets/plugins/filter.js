@@ -31,7 +31,7 @@ command(
         "```use : .filter keyword:message\nto set a filter```"
       );
     } else {
-      await setFilter(message.jid, text, msg, true);
+      await setFilter(message.jid, text, await msg.replace(/\s/, ''), true);
       return await message.reply(`_Sucessfully set filter for ${text}_`);
     }
   }
@@ -57,23 +57,30 @@ command(
   }
 );
 
-command(
-  { on: "text", fromMe: false, dontAddCommandList: true },
-  async (message, match) => {
-    var filtreler = await getFilter(message.jid);
-    if (!filtreler) return;
-    filtreler.map(async (filter) => {
-      pattern = new RegExp(
-        filter.dataValues.regex
-          ? filter.dataValues.pattern
-          : "\\b(" + filter.dataValues.pattern + ")\\b",
-        "gm"
-      );
-      if (pattern.test(match)) {
-        await message.reply(filter.dataValues.text, {
-          quoted: message,
-        });
-      }
-    });
-  }
-);
+command({ on: "text", fromMe: false,   }, async (message, match) => {
+  try{
+  var filtreler = await getFilter(message.jid);
+  if (!filtreler) return;
+  filtreler.map(async (filter) => {
+
+    const rawPattern = filter.dataValues.pattern.trim(); // This removes leading/trailing spaces
+    const isRegex = filter.dataValues.regex;
+    
+    const pattern = new RegExp(
+      isRegex
+        ? rawPattern
+        : "\\b(" + rawPattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")\\b",
+      "gm"
+    );
+
+    if (pattern.test(match)) {
+      await message.reply(filter.dataValues.text, {
+        quoted: message,
+      });
+    }
+  });
+} catch (error) {
+  console.error("[Error]:", error);
+}
+
+});

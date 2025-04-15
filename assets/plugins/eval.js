@@ -30,7 +30,6 @@ const {
     AItts,
     toAudio,
     pm2Uptime,
-    XKCDComic,
     start,
   } = require("../../lib/");
   const {

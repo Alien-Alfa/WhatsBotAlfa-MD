@@ -158,7 +158,7 @@ command(
 
 command(
   {
-    pattern: "get ?(.*)",
+    pattern: "get",
     fromMe: true,  
     desc: "Get any file form the bot with the correct path",
     type: "misc",

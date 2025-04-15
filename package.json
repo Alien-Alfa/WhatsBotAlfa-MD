@@ -12,6 +12,7 @@
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "@google/generative-ai": "^0.5.0",
     "@hapi/boom": "^10.0.1",
+    "btch-downloader": "^1.0.2",
     "@neeraj-x0/nodetoolkit": "^1.0.3",
     "@vitalets/google-translate-api": "^9.2.0",
     "@whiskeysockets/baileys": "^6.7.12",

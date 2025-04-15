@@ -7,7 +7,7 @@ const ffmpeg = require("../../lib/myffmpeg");
 const googleTTS = require('google-tts-api');
 
 const getRandom = (text) => { return `${Math.floor(Math.random() * 10000)}${text}` }
-
+/*
 
 command(
     {
@@ -41,7 +41,7 @@ command(
     }
   })
 
-  
+  */
   
   //============================================================================================================================================
 // STATUS SAVER ( MAKE fromMe: false TO USE AS PUBLIC )

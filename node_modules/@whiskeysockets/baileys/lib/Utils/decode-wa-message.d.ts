@@ -1,7 +1,7 @@
-import { Logger } from 'pino';
 import { proto } from '../../WAProto';
 import { SignalRepository } from '../Types';
 import { BinaryNode } from '../WABinary';
+import { ILogger } from './logger';
 export declare const NO_MESSAGE_FOUND_ERROR_TEXT = "Message absent from node";
 export declare const MISSING_KEYS_ERROR_TEXT = "Key used already or never filled";
 export declare const NACK_REASONS: {
@@ -28,7 +28,7 @@ export declare function decodeMessageNode(stanza: BinaryNode, meId: string, meLi
     author: string;
     sender: string;
 };
-export declare const decryptMessageNode: (stanza: BinaryNode, meId: string, meLid: string, repository: SignalRepository, logger: Logger) => {
+export declare const decryptMessageNode: (stanza: BinaryNode, meId: string, meLid: string, repository: SignalRepository, logger: ILogger) => {
     fullMessage: proto.IWebMessageInfo;
     category: string;
     author: string;

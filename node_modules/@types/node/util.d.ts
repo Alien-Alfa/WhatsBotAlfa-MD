@@ -119,13 +119,19 @@ declare module "util" {
          */
         scriptName: string;
         /**
+         * Returns the unique id of the script, as in Chrome DevTools protocol
+         * [`Runtime.ScriptId`](https://chromedevtools.github.io/devtools-protocol/1-3/Runtime/#type-ScriptId).
+         * @since v22.14.0
+         */
+        scriptId: string;
+        /**
          * Returns the number, 1-based, of the line for the associate function call.
          */
         lineNumber: number;
         /**
          * Returns the 1-based column offset on the line for the associated function call.
          */
-        column: number;
+        columnNumber: number;
     }
     /**
      * The `util.format()` method returns a formatted string using the first argument
@@ -1555,11 +1561,17 @@ declare module "util" {
      * @return The parsed command line arguments:
      */
     export function parseArgs<T extends ParseArgsConfig>(config?: T): ParsedResults<T>;
-    interface ParseArgsOptionConfig {
+
+    /**
+     * Type of argument used in {@link parseArgs}.
+     */
+    export type ParseArgsOptionsType = "boolean" | "string";
+
+    export interface ParseArgsOptionDescriptor {
         /**
          * Type of argument.
          */
-        type: "string" | "boolean";
+        type: ParseArgsOptionsType;
         /**
          * Whether this option can be provided multiple times.
          * If `true`, all values will be collected in an array.
@@ -1572,15 +1584,16 @@ declare module "util" {
          */
         short?: string | undefined;
         /**
-         * The default option value when it is not set by args.
-         * It must be of the same type as the the `type` property.
-         * When `multiple` is `true`, it must be an array.
+         * The default value to
+         * be used if (and only if) the option does not appear in the arguments to be
+         * parsed. It must be of the same type as the `type` property. When `multiple`
+         * is `true`, it must be an array.
          * @since v18.11.0
          */
         default?: string | boolean | string[] | boolean[] | undefined;
     }
-    interface ParseArgsOptionsConfig {
-        [longOption: string]: ParseArgsOptionConfig;
+    export interface ParseArgsOptionsConfig {
+        [longOption: string]: ParseArgsOptionDescriptor;
     }
     export interface ParseArgsConfig {
         /**
@@ -1632,7 +1645,7 @@ declare module "util" {
         : T extends true ? IfTrue
         : IfFalse;
 
-    type ExtractOptionValue<T extends ParseArgsConfig, O extends ParseArgsOptionConfig> = IfDefaultsTrue<
+    type ExtractOptionValue<T extends ParseArgsConfig, O extends ParseArgsOptionDescriptor> = IfDefaultsTrue<
         T["strict"],
         O["type"] extends "string" ? string : O["type"] extends "boolean" ? boolean : string | boolean,
         string | boolean
@@ -1665,7 +1678,7 @@ declare module "util" {
 
     type PreciseTokenForOptions<
         K extends string,
-        O extends ParseArgsOptionConfig,
+        O extends ParseArgsOptionDescriptor,
     > = O["type"] extends "string" ? {
             kind: "option";
             index: number;

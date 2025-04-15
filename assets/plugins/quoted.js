@@ -8,47 +8,64 @@ command(
     desc: "Recall deleted messages within a given time frame",
   },
   async (message, m, match) => {
-    try{
-    const timeString =  String(await match.body || "").trim(); // Ensure match is a string and trim it
+    try {
+      const timeString = String(match.body || "").trim();
 
-    if (!timeString) {
-      return await message.reply(
-        "Usage: Recall <time>\nExample: Recall 30m (for 30 minutes) or Recall 1h (for 1 hour)"
-      );
-    }
+      if (!timeString) {
+        return await message.reply(
+          "Usage: Recall <time>\nExample: Recall 30m (30 minutes) or Recall 1h (1 hour)"
+        );
+      }
+
       const timeInMilliseconds = parseTimeToMilliseconds(timeString);
-      const sinceTimestamp = new Date(Date.now() - timeInMilliseconds); // Calculate start time
-
+      const sinceTimestamp = new Date(Date.now() - timeInMilliseconds);
       const jid = message.jid;
 
-      // Load deleted messages
-      const deletedMessages = await loadDeletedMessages(jid, sinceTimestamp);
-      let msg = await serialize(
-        await JSON.parse(JSON.stringify(await deletedMessages)),
-        message.client
-      );
+      // Step 1: Load all messages in the given timeframe
+      const messages = await loadDeletedMessages(jid, sinceTimestamp);
 
-      return await message.forward(message.jid, await msg);
+      if (!messages || messages.length === 0) {
+        return await message.reply("*No messages found in the given time frame.*");
+      }
 
-      return console.log(await msg)
+      let count = 0;
 
-      if (!deletedMessages || deletedMessages.length === 0) {
+      // Step 2: Filter REVOKE messages and forward originals
+      for (const msg of messages) {
+        let parsed;
+        try {
+          parsed = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
+        } catch (e) {
+          continue; // skip if parsing fails
+        }
+
+        const isRevoke = parsed?.message?.protocolMessage?.type === 'REVOKE';
+        const deletedKeyId = parsed?.message?.protocolMessage?.key?.id;
+
+        if (isRevoke && deletedKeyId) {
+          const original = await loadMessage(deletedKeyId);
+
+          if (original && original.message) {
+            const deserialized = await serialize(original.message, message.client);
+            await message.forward(message.jid, deserialized);
+            count++;
+          }
+        }
+      }
+
+      if (count === 0) {
         return await message.reply("*No deleted messages found in the given time frame.*");
       }
 
-      for (const msg of deletedMessages) {
-        // Deserialize and forward the recalled messages
-        const deserializedMsg = await serialize(msg.message, message.client);
-        await message.forward(message.jid, deserializedMsg);
-      }
+      return await message.reply(`*Recalled ${count} deleted message(s).*`);
 
-      return await message.reply(`*Recalled ${deletedMessages.length} messages.*`);
     } catch (error) {
       console.error("Error recalling messages:", error);
       return await message.reply("_Failed to recall messages. Please check logs for details._");
     }
   }
 );
+
 
 const parseTimeToMilliseconds = (timeString) => {
   const timeValue = parseInt(timeString.slice(timeString.lastIndexOf(" ") + 1, -1), 10);

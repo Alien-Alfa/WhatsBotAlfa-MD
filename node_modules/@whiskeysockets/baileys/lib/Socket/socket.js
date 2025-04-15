@@ -155,7 +155,7 @@ const makeSocket = (config) => {
         const result = await awaitNextMessage(init);
         const handshake = WAProto_1.proto.HandshakeMessage.decode(result);
         logger.trace({ handshake }, 'handshake recv from WA');
-        const keyEnc = noise.processHandshake(handshake, creds.noiseKey);
+        const keyEnc = await noise.processHandshake(handshake, creds.noiseKey);
         let node;
         if (!creds.me) {
             node = (0, Utils_1.generateRegistrationNode)(creds, config);
@@ -527,7 +527,7 @@ const makeSocket = (config) => {
         end(new boom_1.Boom('Multi-device beta not joined', { statusCode: Types_1.DisconnectReason.multideviceMismatch }));
     });
     ws.on('CB:ib,,offline_preview', (node) => {
-        logger.info('offline preview received', node);
+        logger.info('offline preview received', JSON.stringify(node));
         sendNode({
             tag: 'ib',
             attrs: {},

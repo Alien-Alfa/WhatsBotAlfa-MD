@@ -172,13 +172,13 @@ command(
 command(
   {
     pattern: "dlt",
-    fromMe: true,
-    desc: "deletes a message",
+    fromMe:"Delete a message",
     type: "user",
   },
   async (message, match, m, client) => {
     if (message.isGroup) {
-      client.sendMessage(message.jid, { delete: message.reply_message.key });
+      console.log(message.reply_message.key);
+      return await message.client.sendMessage(message.jid, { delete: await message.reply_message.key })
     }
   }
 );

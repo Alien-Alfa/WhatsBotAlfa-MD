@@ -142,7 +142,6 @@ async function endTriviaGame(message, userId) {
  */
 command(
   {
-    pattern: "xkcd",
     fromMe: isPrivate,
     desc: "Send a random XKCD comic.",
     type: "misc",

@@ -22,7 +22,7 @@ command(
     if (!match) {
       let replyMsg = `Welcome manager\n\nGroup: ${
         (await message.client.groupMetadata(message.jid)).subject
-      }\nStatus: ${stat}\n\nAvailable Actions:\n\n- ${prefix}welcome get: Get the welcome message\n- ${prefix}welcome on: Enable welcome message\n- ${prefix}welcome off: Disable welcome message\n- ${prefix}welcome delete: Delete the welcome message`;
+      }\nStatus: ${stat}\n\nAvailable Actions:\n\n- ${prefix}welcome get: Get the welcome message\n- ${prefix}welcome on: Enable welcome message\n- ${prefix}welcome off: Disable welcome message\n- ${prefix}welcome delete: Delete the welcome message\n\n Use These For Customisation \n@user for User Name\n@gname for Group Name \n@count for participant count`;
 
       return await message.reply(replyMsg);
     }
@@ -73,7 +73,7 @@ command(
     let stat = status ? "on" : "off";
     let replyMsg = `Goodbye manager\n\nGroup: ${
       (await message.client.groupMetadata(message.jid)).subject
-    }\nStatus: ${stat}\n\nAvailable Actions:\n\n- goodbye get: Get the goodbye message\n- goodbye on: Enable goodbye message\n- goodbye off: Disable goodbye message\n- goodbye delete: Delete the goodbye message`;
+    }\nStatus: ${stat}\n\nAvailable Actions:\n\n- goodbye get: Get the goodbye message\n- goodbye on: Enable goodbye message\n- goodbye off: Disable goodbye message\n- goodbye delete: Delete the goodbye message\n\n Use These For Customisation \n@user for User Name\n@gname for Group Name \n@count for participant count`;
 
     if (!match) {
       return await message.reply(replyMsg);
