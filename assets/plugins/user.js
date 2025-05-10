@@ -84,7 +84,7 @@ command(
       const buff = await m.quoted.download();
       await message.SetFullPP(message.user, buff);
       
-      return await message.reply("_✅ Profile Picture Updated_");
+      return await message.reply("_Profile Picture Updated_");
     } catch (error) {
       console.error("[❌ Error]:", error);
       return await message.reply("_Failed to update profile picture_");
