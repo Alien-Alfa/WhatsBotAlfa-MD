@@ -71,22 +71,27 @@ command(
 command(
   {
     pattern: "fullpp",
-    fromMe: true,
-    desc: "Set Full profilr picture",
+    fromMe: true,  
+    desc: "Set Full profile picture",
     type: "user",
   },
   async (message, match, m) => {
-    try{
-    if (!message.reply_message.image)
-      return await message.reply("_Reply to a photo_");
-    let buff = await m.quoted.download();
-    await message.SetFullPP(message.user , buff, message);
-    return await message.reply("_Profile Picture Updated_");
-  } catch (error) {
-    console.error("[Error]:", error);
-  }
+    try {
+      if (!message.reply_message?.image) {
+        return await message.reply("_Reply to a photo_");
+      }
+      
+      const buff = await m.quoted.download();
+      await message.SetFullPP(message.user, buff);
+      
+      return await message.reply("_✅ Profile Picture Updated_");
+    } catch (error) {
+      console.error("[❌ Error]:", error);
+      return await message.reply("_Failed to update profile picture_");
+    }
   }
 );
+
 
 command(
   {
