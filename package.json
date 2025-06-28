@@ -15,7 +15,7 @@
     "btch-downloader": "^1.0.2",
     "@neeraj-x0/nodetoolkit": "^1.0.3",
     "@vitalets/google-translate-api": "^9.2.0",
-    "@whiskeysockets/baileys": "^6.7.12",
+    "@whiskeysockets/baileys": "^6.6.0",
     "@xaviabot/fb-downloader": "^1.0.14",
     "acrcloud": "^1.4.0",
     "archiver": "^7.0.1",
