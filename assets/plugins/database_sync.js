@@ -5,7 +5,7 @@
  */
 
 const config = require("../../config");
-const { cmd } = require("../database/plugins");
+const { cmd } = require("../../lib/plugins");
 
 // Only register commands if MongoDB is enabled
 if (config.USE_MONGODB && config.MONGODB_URI) {

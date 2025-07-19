@@ -19,15 +19,19 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
   // MongoDB operations - fully compatible with SQLite interface
   dbOperations = {
+    models: null, // Initialize models property
+    
     async initialize() {
       try {
         const models = await mongoManager.connect();
         this.models = models;
+        dbOperations.models = models; // Also set on the main object
         
         // Initialize database sync manager
         const dbSyncManager = require("./DatabaseSyncManager");
         await dbSyncManager.initialize();
         
+        console.log("✅ MongoDB models initialized successfully");
         return models;
       } catch (error) {
         console.error("MongoDB initialization failed:", error);
@@ -58,13 +62,19 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         if (!jid || !name || isJidGroup(jid)) return;
         
+        const models = this.models || dbOperations.models;
+        if (!models || !models.Contact) {
+          console.warn("MongoDB models not initialized for saveContact");
+          return null;
+        }
+        
         const cacheKey = `contact_${jid}`;
         const cached = contactCache.get(cacheKey);
         if (cached && cached.name === name && Date.now() - cached.timestamp < CACHE_TTL) {
           return cached.data;
         }
         
-        const result = await this.models.Contact.findOneAndUpdate(
+        const result = await models.Contact.findOneAndUpdate(
           { jid },
           { jid, name, isGroup: isJidGroup(jid) },
           { upsert: true, new: true }
@@ -80,7 +90,8 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     async saveMessage(message, user) {
       try {
-        if (!this.models || !this.models.Message) {
+        const models = this.models || dbOperations.models;
+        if (!models || !models.Message) {
           console.warn("MongoDB models not initialized for saveMessage");
           return null;
         }
@@ -95,7 +106,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           messageType: this.getMessageType(message),
         };
         
-        const result = await this.models.Message.findOneAndUpdate(
+        const result = await models.Message.findOneAndUpdate(
           { id: message.key.id },
           messageData,
           { upsert: true, new: true }
@@ -116,13 +127,19 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         if (!id) return null;
         
+        const models = this.models || dbOperations.models;
+        if (!models || !models.Message) {
+          console.warn("MongoDB models not initialized for loadMessage");
+          return null;
+        }
+        
         const cacheKey = `load_${id}`;
         const cached = messageCache.get(cacheKey);
         if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
           return cached.data;
         }
         
-        const message = await this.models.Message.findOne({ id });
+        const message = await models.Message.findOne({ id });
         const result = message || null;
         
         messageCache.set(cacheKey, { data: result, timestamp: Date.now() });
@@ -135,7 +152,8 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     async saveChat(chat) {
       try {
-        if (!this.models || !this.models.Chat) {
+        const models = this.models || dbOperations.models;
+        if (!models || !models.Chat) {
           console.warn("MongoDB models not initialized for saveChat");
           return null;
         }
@@ -148,7 +166,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         if (cached && cached.timestamp === chat.conversationTimestamp) return cached.data;
         
         const isGroup = isJidGroup(chat.id);
-        const result = await this.models.Chat.findOneAndUpdate(
+        const result = await models.Chat.findOneAndUpdate(
           { id: chat.id },
           {
             id: chat.id,
