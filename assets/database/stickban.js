@@ -1,6 +1,18 @@
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
 
+// Safety check for MongoDB mode
+if (!config.DATABASE) {
+  console.log('⚠️ StickBan feature disabled in MongoDB mode');
+  module.exports = {
+    StickBan: null,
+    addBan: async () => null,
+    removeBan: async () => null,
+    getBan: async () => false
+  };
+  return;
+}
+
 const StickBan = config.DATABASE.define("StickBan", {
   chat: {
     type: DataTypes.STRING,

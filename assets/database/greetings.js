@@ -1,6 +1,21 @@
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
 
+// Safety check for MongoDB mode
+if (!config.DATABASE) {
+  console.log('⚠️ Greetings feature disabled in MongoDB mode');
+  module.exports = {
+    GreetingsDB: null,
+    getGreeting: async () => false,
+    setGreeting: async () => null,
+    deleteGreeting: async () => false,
+    enableGreeting: async () => null,
+    disableGreeting: async () => null,
+    getGreetingStatus: async () => false
+  };
+  return;
+}
+
 const GreetingsDB = config.DATABASE.define("Greetings", {
   chat: {
     type: DataTypes.STRING,

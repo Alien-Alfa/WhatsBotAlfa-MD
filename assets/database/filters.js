@@ -1,6 +1,19 @@
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
 
+// Safety check for MongoDB mode
+if (!config.DATABASE) {
+  console.log('⚠️ Filters feature disabled in MongoDB mode');
+  module.exports = {
+    FiltersDB: null,
+    getFilter: async () => false,
+    setFilter: async () => null,
+    deleteFilter: async () => false,
+    getFilters: async () => []
+  };
+  return;
+}
+
 const FiltersDB = config.DATABASE.define("filters", {
   chat: {
     type: DataTypes.STRING,

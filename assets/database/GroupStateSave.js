@@ -1,6 +1,17 @@
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
 
+// Safety check for MongoDB mode
+if (!config.DATABASE) {
+  console.log('⚠️ GroupDB feature disabled in MongoDB mode');
+  module.exports = {
+    GroupDB: null,
+    saveGroup: async () => null,
+    getGroup: async () => null
+  };
+  return;
+}
+
 const GroupDB = config.DATABASE.define("GroupSnapshot", {
   chat: {
     type: DataTypes.STRING,
