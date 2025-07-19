@@ -6,14 +6,15 @@ command(
     pattern: "recall",
     fromMe: isPrivate,
     desc: "Recall deleted messages within a given time frame",
+    type: "utility"
   },
-  async (message, m, match) => {
+  async (message, match, m) => {
     try {
-      const timeString = String(match.body || "").trim();
+      const timeString = String(match || "").trim();
 
       if (!timeString) {
         return await message.reply(
-          "Usage: Recall <time>\nExample: Recall 30m (30 minutes) or Recall 1h (1 hour)"
+          "_Usage: Recall <time>_\n\nExample: Recall 30m (30 minutes) or Recall 1h (1 hour)"
         );
       }
 
@@ -21,16 +22,16 @@ command(
       const sinceTimestamp = new Date(Date.now() - timeInMilliseconds);
       const jid = message.jid;
 
-      // Step 1: Load all messages in the given timeframe
+      // Load deleted messages in the given timeframe
       const messages = await loadDeletedMessages(jid, sinceTimestamp);
 
       if (!messages || messages.length === 0) {
-        return await message.reply("*No messages found in the given time frame.*");
+        return await message.reply("_No messages found in the given time frame_");
       }
 
       let count = 0;
 
-      // Step 2: Filter REVOKE messages and forward originals
+      // Filter REVOKE messages and forward originals
       for (const msg of messages) {
         let parsed;
         try {
@@ -54,10 +55,10 @@ command(
       }
 
       if (count === 0) {
-        return await message.reply("*No deleted messages found in the given time frame.*");
+        return await message.reply("_No deleted messages found in the given time frame_");
       }
 
-      return await message.reply(`*Recalled ${count} deleted message(s).*`);
+      return await message.reply(`_Recalled ${count} deleted message(s)_`);
 
     } catch (error) {
       console.error("Error recalling messages:", error);
@@ -66,67 +67,71 @@ command(
   }
 );
 
-
 const parseTimeToMilliseconds = (timeString) => {
-  const timeValue = parseInt(timeString.slice(timeString.lastIndexOf(" ") + 1, -1), 10);
-  const unit = timeString.slice(-1); // Extract the unit (m/h)
+  const timeValue = parseInt(timeString.slice(0, -1), 10);
+  const unit = timeString.slice(-1).toLowerCase();
   
   if (isNaN(timeValue)) {
     throw new Error("Invalid time format");
   }
   
-  if (unit === 'm') return timeValue * 60 * 1000; // Minutes to milliseconds
-  if (unit === 'h') return timeValue * 60 * 60 * 1000; // Hours to milliseconds
-  
-  throw new Error("Unsupported time unit. Use 'm' for minutes or 'h' for hours.");
+  switch (unit) {
+    case 'm': return timeValue * 60 * 1000; // Minutes to milliseconds
+    case 'h': return timeValue * 60 * 60 * 1000; // Hours to milliseconds
+    case 's': return timeValue * 1000; // Seconds to milliseconds
+    case 'd': return timeValue * 24 * 60 * 60 * 1000; // Days to milliseconds
+    default:
+      throw new Error("Unsupported time unit. Use 's', 'm', 'h', or 'd'.");
+  }
 };
 
 command(
   {
     pattern: "quoted",
     fromMe: isPrivate,
-    desc: "quoted message",
+    desc: "Get quoted message",
+    type: "utility"
   },
-  async (message, m, match) => {
-    if (!message.reply_message && !match) {
-      return await message.reply("*Reply to a message or provide ID*");
-    }
+  async (message, match, m) => {
+    try {
+      if (!message.reply_message && !match) {
+        return await message.reply("_Reply to a message or provide message ID_");
+      }
 
-    let key = (typeof match === 'string' && match.trim()) 
-    || (message.reply_message?.key?.id?.trim?.() || '');
+      let key = (typeof match === 'string' && match.trim()) 
+        || (message.reply_message?.key?.id?.trim?.() || '');
 
-if (!key) {
-    console.log('Debugging Info:', { match, replyMessageKeyId: message.reply_message?.key?.id });
-    return await message.reply("*No valid key found*");
-}
+      if (!key) {
+        return await message.reply("_No valid message key found_");
+      }
 
+      const msg = await loadMessage(key.trim());
 
-    let msg = await loadMessage( await key.trim() );
-    console.log("Key: '"+key+"'\n\n"+ await msg);
+      if (!msg) {
+        return await message.reply(
+          "_Message not found, maybe bot might not be running at that time_"
+        );
+      }
 
-    if (msg) {
-
-      msg = await serialize(
-        await JSON.parse(JSON.stringify(await msg.message)),
+      const serializedMsg = await serialize(
+        JSON.parse(JSON.stringify(msg.message)),
         message.client
       );
 
-      if (!msg.quoted || !msg.quoted.message) {
-        return await message.reply("No quoted message found");
+      if (!serializedMsg.quoted || !serializedMsg.quoted.message) {
+        return await message.reply("_No quoted message found_");
       }
-  
-      return await message.forward(message.jid, await msg.quoted);
+
+      return await message.forward(message.jid, serializedMsg.quoted);
       
+    } catch (error) {
+      console.error("Error getting quoted message:", error);
+      await message.reply("_Error retrieving quoted message_");
     }
-
-    if (!msg) {
-      return await message.reply(
-        "_Message not found, maybe bot might not be running at that time_"
-      );
-    }
-
   }
 );
+
+// Made with ❤ by AlienAlfa
 
 /*
 > const { command, isPrivate, serialize } = require("../../lib/");

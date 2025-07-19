@@ -5,135 +5,86 @@ const {
   isPrivate
 } = require("../../lib")
 
-
 function formatTime(seconds) {
   if (isNaN(seconds) || seconds < 0) {
       return "Invalid input";
   }
 
-  const months = Math.floor(seconds / (30 * 24 * 60 * 60));
-  seconds -= months * 30 * 24 * 60 * 60;
-
-  const days = Math.floor(seconds / (24 * 60 * 60));
-  seconds -= days * 24 * 60 * 60;
-
-  const hours = Math.floor(seconds / (60 * 60));
-  seconds -= hours * 60 * 60;
-
-  const minutes = Math.floor(seconds / 60);
-  seconds -= minutes * 60;
+  const units = [
+    { name: "month", value: 30 * 24 * 60 * 60 },
+    { name: "day", value: 24 * 60 * 60 },
+    { name: "hour", value: 60 * 60 },
+    { name: "minute", value: 60 },
+    { name: "second", value: 1 }
+  ];
 
   const timeArray = [];
-
-  if (months > 0) {
-      timeArray.push(months + (months === 1 ? " month" : " months"));
-  }
-  if (days > 0) {
-      timeArray.push(days + (days === 1 ? " day" : " days"));
-  }
-  if (hours > 0) {
-      timeArray.push(hours + (hours === 1 ? " hour" : " hours"));
-  }
-  if (minutes > 0) {
-      timeArray.push(minutes + (minutes === 1 ? " minute" : " minutes"));
-  }
-  if (seconds > 0) {
-      timeArray.push(seconds + (seconds === 1 ? " second" : " seconds"));
+  
+  for (const unit of units) {
+    const count = Math.floor(seconds / unit.value);
+    if (count > 0) {
+      timeArray.push(`${count} ${unit.name}${count !== 1 ? "s" : ""}`);
+      seconds -= count * unit.value;
+    }
   }
 
-  return timeArray.join(", ");
+  return timeArray.length > 0 ? timeArray.join(", ") : "0 seconds";
 }
 
 
 
 
 command({
-      pattern: "ping",
-      fromMe: isPrivate,
-      desc: "To check ping",
-      type: "user",
-  },
-  async (message, match) => {
-      let me = await fromMe(message.participant)
-      if (me) {
-          try {
-              const start = new Date().getTime();
-              await message.client.sendMessage(message.jid, {
-                  text: "```Checking Server!```",
-                  edit: message.key
-              });
-              const end = new Date().getTime();
-              setTimeout(async () => {
-                  return await message.client.sendMessage(message.jid, {
-                      text: "Ping: " + (end - start) + " ms",
-                      edit: message.key
-                  });
-              }, 1000)
-          } catch (error) {
-              console.error("[Error]:", error);
-          }
-      } else if (!me) {
-          try {
-
-              const start = new Date().getTime();
-              let {
-                  key
-              } = await message.reply("```Checking...```");
-              const end = new Date().getTime();
-              setTimeout(async () => {
-                  return await message.client.sendMessage(message.jid, {
-                      text: "```Latancy: " + (end - start) + " ms```",
-                      edit: key
-                  });
-              }, 1000)
-          } catch (error) {
-              console.error("[Error]:", error);
-          }
-      }
-  }
-);
+    pattern: "ping",
+    fromMe: isPrivate,
+    desc: "Check bot response time",
+    type: "utility",
+},
+async (message, match) => {
+    try {
+        const start = new Date().getTime();
+        const { key } = await message.reply("```Pinging...```");
+        const end = new Date().getTime();
+        
+        const latency = end - start;
+        const responseText = `🏓 *Pong!*\n\n⚡ *Latency:* ${latency}ms\n⏱️ *Response Time:* ${latency < 100 ? 'Excellent' : latency < 300 ? 'Good' : 'Fair'}`;
+        
+        setTimeout(async () => {
+            await message.client.sendMessage(message.jid, {
+                text: responseText,
+                edit: key
+            });
+        }, 500);
+    } catch (error) {
+        console.error("[Ping Error]:", error);
+        await message.reply("_Error checking ping._");
+    }
+});
 command({
-      pattern: "uptime",
-      fromMe: isPrivate,
-      desc: "To check uptime",
-      type: "user",
-  },
-  async (message, match) => {
-    let me = await fromMe(message.participant)
-
-            if (me) {
-          try {
-              await message.client.sendMessage(message.jid, {
-                  text: "```Fetching Uptime...```",
-                  edit: message.key
-              });
-              setTimeout(async () => {
-                  return await message.client.sendMessage(message.jid, {
-                      text: "Uptime: " + await formatTime(process.uptime().toFixed(0)),
-                      edit: message.key
-                  });
-              }, 1000)
-          } catch (error) {
-              console.error("[Error]:", error);
-          }
-
-      } else if (!me) {
-          try {
-              let { key } = await message.reply("```Fetching Uptime...```");
-              setTimeout(async () => {
-                  return await message.client.sendMessage(message.jid, {
-                      text: "Uptime: " + await formatTime(process.uptime().toFixed(0)),
-                      edit: key
-                  });
-              }, 1000)
-          } catch (error) {
-              console.error("[Error]:", error);
-          }
-      }
-
-
-  }
-);
+    pattern: "uptime",
+    fromMe: isPrivate,
+    desc: "Check bot uptime",
+    type: "utility",
+},
+async (message, match) => {
+    try {
+        const { key } = await message.reply("```Fetching uptime...```");
+        const uptime = process.uptime();
+        const formattedUptime = formatTime(Math.floor(uptime));
+        
+        const uptimeText = `⏰ *Bot Uptime*\n\n🚀 *Running for:* ${formattedUptime}\n📊 *Process ID:* ${process.pid}\n💾 *Memory Usage:* ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`;
+        
+        setTimeout(async () => {
+            await message.client.sendMessage(message.jid, {
+                text: uptimeText,
+                edit: key
+            });
+        }, 500);
+    } catch (error) {
+        console.error("[Uptime Error]:", error);
+        await message.reply("_Error fetching uptime._");
+    }
+});
 
 // Thanks to ❤ Ragnork ❤ for this code
 
@@ -276,3 +227,4 @@ async function processOnwa(client, numberPattern) {
     }
   }
   
+// Made with ❤ by AlienAlfa

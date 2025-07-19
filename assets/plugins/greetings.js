@@ -104,3 +104,5 @@ command(
     return await message.reply("_Goodbye set successfully_");
   }
 );
+
+// Made with ❤ by AlienAlfa

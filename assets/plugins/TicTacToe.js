@@ -1,4 +1,4 @@
-const { command, isAdmin, parseJid, isPrivate } = require("../../lib/");
+const { command, isAdmin, parsedJid, isPrivate } = require("../../lib/");
 command(
   {
     pattern: "delttt",
@@ -76,10 +76,10 @@ ${arr.slice(6).join("")}
 
 Current turn: @${room.game.currentTurn.split("@")[0]}
 `;
-        let mentions = parseJid(str);
-        for (let i of mentions) {
-          return await message.client.sendMessage(i, { text: str, mentions });
-        }
+        return await message.client.sendMessage(room.x, { 
+          text: str, 
+          mentions: [room.game.playerX, room.game.playerO] 
+        });
       } else {
         room = {
           id: "tictactoe-" + +new Date(),
@@ -89,7 +89,7 @@ Current turn: @${room.game.currentTurn.split("@")[0]}
           state: "WAITING",
         };
         if (match) room.name = match;
-        message.reply("_Waiting for partner_ ");
+        await message.reply("_Waiting for partner..._");
         this.game[room.id] = room;
       }
     }
@@ -196,3 +196,6 @@ ${
     }
   }
 );
+
+
+// Made with ❤ by AlienAlfa

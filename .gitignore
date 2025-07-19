@@ -1,2 +1,35 @@
 session
 assets/database.db
+node_modules
+
+# MongoDB related files
+.env
+*.env
+.env.local
+.env.production
+.env.development
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# MongoDB connection strings (if stored in files)
+mongodb-config.json
+database-config.json
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*~

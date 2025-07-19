@@ -113,3 +113,5 @@ Remaning    : ${secondsToDHMS(remaining)}`;
     }
   }
 );
+
+// Made with ❤ by AlienAlfa

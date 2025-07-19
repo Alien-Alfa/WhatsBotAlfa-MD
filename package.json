@@ -12,7 +12,6 @@
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "@google/generative-ai": "^0.5.0",
     "@hapi/boom": "^10.0.1",
-    "btch-downloader": "^1.0.2",
     "@neeraj-x0/nodetoolkit": "^1.0.3",
     "@vitalets/google-translate-api": "^9.2.0",
     "@whiskeysockets/baileys": "^6.6.0",
@@ -23,6 +22,7 @@
     "axios-retry": "^3.1.9",
     "bitly": "^4.1.1",
     "browser-id3-writer": "^4.4.0",
+    "btch-downloader": "^1.0.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "file-type": "^16.5.3",
@@ -37,6 +37,7 @@
     "jsdom": "^22.1.0",
     "jsqr": "^1.4.0",
     "jszip": "^3.10.1",
+    "mongoose": "^8.16.4",
     "node-cron": "^3.0.3",
     "node-webpmux": "^3.1.7",
     "open-sans-fontface": "^1.4.0",
@@ -61,7 +62,11 @@
     "ytsr": "^3.8.4"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "node setup-mongodb.js && node server.js",
+    "start:direct": "node server.js",
+    "start:mongodb": "USE_MONGODB=true node setup-mongodb.js && node server.js",
+    "start:sqlite": "USE_MONGODB=false node server.js",
+    "setup": "node setup-mongodb.js",
     "main": "node index.js"
   },
   "repository": {

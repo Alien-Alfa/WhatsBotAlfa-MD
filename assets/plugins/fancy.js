@@ -49,3 +49,5 @@ function styleText(text, index) {
   index = index - 1;
   return listall(text)[index];
 }
+
+// Made with ❤ by AlienAlfa

@@ -35,3 +35,4 @@ command(
     message.sendFile(trimmedBuffer);
   }
 );
+// Made with ❤ by AlienAlfa

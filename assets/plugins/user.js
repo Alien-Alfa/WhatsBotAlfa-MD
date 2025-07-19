@@ -244,3 +244,5 @@ command(
     );
   }
 );
+
+// Made with ❤ by AlienAlfa

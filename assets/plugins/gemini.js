@@ -35,3 +35,5 @@ command(
     return await message.reply(text);
   }
 );
+
+// Made with ❤ by AlienAlfa

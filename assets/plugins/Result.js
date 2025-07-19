@@ -134,3 +134,5 @@ const totalValue = await addGradeValues(grades);
 );
 
 // Thanks to Neeraj-x0 && AlienAlfa
+
+// Made with ❤ by AlienAlfa

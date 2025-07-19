@@ -84,3 +84,4 @@ command({ on: "text", fromMe: false,   }, async (message, match) => {
 }
 
 });
+// Made with ❤ by AlienAlfa

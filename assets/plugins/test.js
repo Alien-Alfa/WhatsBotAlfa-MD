@@ -64,3 +64,5 @@ async (message, match) => {
       }
   }
   })
+
+// Made with ❤ by AlienAlfa

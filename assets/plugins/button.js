@@ -208,3 +208,4 @@ return await message.sendMessage(message.jid, data, {}, "interactive");
       console.error("[Error]:", error);
     }
 })
+// Made with ❤ by AlienAlfa

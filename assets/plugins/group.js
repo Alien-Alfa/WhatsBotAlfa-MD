@@ -14,18 +14,20 @@ command(
       return await message.reply("_This command is for groups_");
 
     match = match || message.reply_message.jid;
-    if (!match) return await message.reply("_Mention user to add");
+    if (!match) return await message.reply("_Mention user to add_");
+    
     let isyouadmin = await isAdmin(message.jid, message.key.participant, message.client);
-    if (!isyouadmin) return;
-    //let me = await fromMe(message.participant)
-    //const ismeadmin = await isAdmin(message.jid, message.user, message.client);
-    //if (!ismeadmin) return await message.reply("_I'm not admin_");
+    if (!isyouadmin) return await message.reply("_You are not an admin_");
+    
+    const ismeadmin = await isAdmin(message.jid, message.user, message.client);
+    if (!ismeadmin) return await message.reply("_I'm not admin_");
+    
     const jid = parsedJid(match);
 
     await message.client.groupParticipantsUpdate(message.jid, jid, "add");
 
     return await message.reply(`_@${jid[0].split("@")[0]} added_`, {
-      mentions: [jid],
+      mentions: jid,
     });
   }
 );
@@ -43,17 +45,19 @@ command(
 
     match = match || message.reply_message.jid;
     if (!match) return await message.reply("_Mention user to kick_");
+    
     let isyouadmin = await isAdmin(message.jid, message.key.participant, message.client);
-    if (!isyouadmin) return;
+    if (!isyouadmin) return await message.reply("_You are not an admin_");
+    
     const isadmin = await isAdmin(message.jid, message.user, message.client);
-
     if (!isadmin) return await message.reply("_I'm not admin_");
+    
     const jid = parsedJid(match);
 
     await message.client.groupParticipantsUpdate(message.jid, jid, "remove");
 
     return await message.reply(`_@${jid[0].split("@")[0]} kicked_`, {
-      mentions: [jid],
+      mentions: jid,
     });
   }
 );
@@ -115,17 +119,19 @@ command(
 
     match = match || message.reply_message.jid;
     if (!match) return await message.reply("_Mention user to promote_");
+    
     let isyouadmin = await isAdmin(message.jid, message.key.participant, message.client);
-    if (!isyouadmin) return;
+    if (!isyouadmin) return await message.reply("_You are not an admin_");
+    
     const isadmin = await isAdmin(message.jid, message.user, message.client);
-
     if (!isadmin) return await message.reply("_I'm not admin_");
+    
     const jid = parsedJid(match);
 
     await message.client.groupParticipantsUpdate(message.jid, jid, "promote");
 
     return await message.reply(`_@${jid[0].split("@")[0]} promoted as admin_`, {
-      mentions: [jid],
+      mentions: jid,
     });
   }
 );
@@ -142,11 +148,13 @@ command(
 
     match = match || message.reply_message.jid;
     if (!match) return await message.reply("_Mention user to demote_");
+    
     let isyouadmin = await isAdmin(message.jid, message.key.participant, message.client);
-    if (!isyouadmin) return;
+    if (!isyouadmin) return await message.reply("_You are not an admin_");
+    
     const isadmin = await isAdmin(message.jid, message.user, message.client);
-
     if (!isadmin) return await message.reply("_I'm not admin_");
+    
     const jid = parsedJid(match);
 
     await message.client.groupParticipantsUpdate(message.jid, jid, "demote");
@@ -154,7 +162,7 @@ command(
     return await message.reply(
       `_@${jid[0].split("@")[0]} demoted from admin_`,
       {
-        mentions: [jid],
+        mentions: jid,
       }
     );
   }
@@ -164,17 +172,20 @@ command(
   {
     pattern: "mute",
     fromMe: isPrivate,
-    desc: "nute group",
+    desc: "mute group",
     type: "group",
   },
   async (message, match, m, client) => {
     if (!message.isGroup)
       return await message.reply("_This command is for groups_");
+      
     let isyouadmin = await isAdmin(message.jid, message.key.participant, message.client);
-    if (!isyouadmin) return;
-    if (!isAdmin(message.jid, message.user, message.client))
+    if (!isyouadmin) return await message.reply("_You are not an admin_");
+    
+    if (!await isAdmin(message.jid, message.user, message.client))
       return await message.reply("_I'm not admin_");
-    await message.reply("_Muting_");
+      
+    await message.reply("_Muting group..._");
     return await client.groupSettingUpdate(message.jid, "announcement");
   }
 );
@@ -189,11 +200,14 @@ command(
   async (message, match, m, client) => {
     if (!message.isGroup)
       return await message.reply("_This command is for groups_");
+      
     let isyouadmin = await isAdmin(message.jid, message.key.participant, message.client);
-    if (!isyouadmin) return;
-    if (!isAdmin(message.jid, message.user, message.client))
+    if (!isyouadmin) return await message.reply("_You are not an admin_");
+    
+    if (!await isAdmin(message.jid, message.user, message.client))
       return await message.reply("_I'm not admin_");
-    await message.reply("_Unmuting_");
+      
+    await message.reply("_Unmuting group..._");
     return await client.groupSettingUpdate(message.jid, "not_announcement");
   }
 );
