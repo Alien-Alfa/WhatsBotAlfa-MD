@@ -5,6 +5,9 @@ const config = require("./config");
 const connect = require("./lib/connection");
 const { UpdateLocal, WriteSession} = require("./lib");
 
+// Add got for HTTP requests
+const { default: got } = require("got");
+
 global.__basedir = __dirname;
 
 async function auth() {
@@ -22,7 +25,7 @@ async function auth() {
 // Performance: Optimized file loading with parallel processing
 async function readAndRequireFiles(directory) {
   try {
-    const files = await fs.promises.readdir(directory);
+    const files = await fs.readdir(directory);
     const jsFiles = files.filter(file => path.extname(file) === ".js");
     
     // Performance: Load files in parallel
@@ -60,24 +63,17 @@ async function loadExternalPlugins() {
     console.log("🔄 Checking for external plugins...");
     const startTime = Date.now();
     
-    // Performance: Timeout for external requests
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-    
     try {
-      const response = await fetch(`${gitUrl}assets/plugins/`, {
-        signal: controller.signal,
-        timeout: 10000
+      const response = await got(`${gitUrl}assets/plugins/`, {
+        timeout: 10000,
+        retry: 0
       });
       
-      clearTimeout(timeoutId);
-      
-      if (response.ok) {
+      if (response.statusCode === 200) {
         const loadTime = Date.now() - startTime;
         console.log(`✅ External plugins checked in ${loadTime}ms`);
       }
     } catch (error) {
-      clearTimeout(timeoutId);
       console.log("📦 Using local plugins (external check failed)");
     }
   } catch (error) {
