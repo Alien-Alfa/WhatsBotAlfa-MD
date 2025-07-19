@@ -108,13 +108,13 @@ async function initialize() {
     } else {
       // SQLite/PostgreSQL initialization
       console.log("🗃️ Using SQL database...");
-      await Promise.all([
-        readAndRequireFiles(path.join(__dirname, "/assets/database/")),
-        config.DATABASE.sync({ 
-          logging: false, // Disable SQL logging for performance
-          alter: false    // Disable table alterations for performance
-        })
-      ]);
+      // Load database models first
+      await readAndRequireFiles(path.join(__dirname, "/assets/database/"));
+      // Then sync the database to create tables
+      await config.DATABASE.sync({ 
+        logging: false, // Disable SQL logging for performance
+        alter: true     // Enable table alterations to create missing tables
+      });
     }
     
     console.log("✅ Database synced");
