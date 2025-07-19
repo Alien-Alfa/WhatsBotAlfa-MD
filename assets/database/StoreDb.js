@@ -5,6 +5,19 @@ const { isJidGroup } = require("@whiskeysockets/baileys");
 const config = require("../../config");
 const { DataTypes, Op } = require("sequelize");
 
+// MongoDB Safety Check: Prevent database operations in MongoDB mode
+if (!config.DATABASE) {
+  // MongoDB mode - provide safe fallback functions
+  module.exports = {
+    saveMessage: async () => null,
+    loadMessage: async () => null,
+    loadDeletedMessages: async () => [],
+    saveChat: async () => null,
+    getName: async (jid) => jid.split("@")[0].replace(/_/g, " "),
+  };
+  return;
+}
+
 // Performance: Optimize database models with indexes
 const chatDb = config.DATABASE.define("Chat", {
   id: {

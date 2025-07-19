@@ -2,6 +2,16 @@ const config = require("../../config");
 const util = require("util");
 const { DataTypes } = require("sequelize");
 
+// MongoDB Safety Check: Prevent database operations in MongoDB mode
+if (!config.DATABASE) {
+  // MongoDB mode - provide safe fallback functions
+  module.exports = {
+    SaveGemini: async () => null,
+    GetGemini: async () => [],
+  };
+  return;
+}
+
 const GeminiDB = config.DATABASE.define("Geminis", {
   chatid: {
     type: DataTypes.STRING,

@@ -1,6 +1,13 @@
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
 
+// MongoDB Safety Check: Prevent database operations in MongoDB mode
+if (!config.DATABASE) {
+  // MongoDB mode - provide safe fallback function
+  module.exports = async () => null;
+  return;
+}
+
 const options = config.DATABASE.define("Options", {
   chat: {
     type: DataTypes.STRING,
