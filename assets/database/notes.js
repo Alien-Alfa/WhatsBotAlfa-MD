@@ -69,10 +69,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
   return;
 }
 
-// Safety check for SQLite mode when DATABASE is not configuredt config = require('../../config');
-const { DataTypes } = require('sequelize');
-
-// Safety check for MongoDB mode
+// Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
   console.log('⚠️ Notes feature disabled in MongoDB mode');
   module.exports = {
