@@ -1,7 +1,75 @@
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
 
-// Safety check for MongoDB mode
+// MongoDB Support
+if (config.USE_MONGODB && config.MONGODB_URI) {
+  // Use MongoDB for PausedChat
+  const mongoManager = require("./mongodb");
+  let models = null;
+
+  const initModels = async () => {
+    if (!models) {
+      models = await mongoManager.connect();
+    }
+    return models;
+  };
+
+  module.exports = {
+    PausedChatDB: null, // MongoDB doesn't use Sequelize models
+    
+    async addPausedChat(jid) {
+      try {
+        const models = await initModels();
+        const result = await models.PausedChat.findOneAndUpdate(
+          { jid: jid },
+          { jid, isPaused: true },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB addPausedChat error:", error);
+        return null;
+      }
+    },
+    
+    async removePausedChat(jid) {
+      try {
+        const models = await initModels();
+        const result = await models.PausedChat.deleteOne({ jid: jid });
+        return result.deletedCount > 0;
+      } catch (error) {
+        console.warn("MongoDB removePausedChat error:", error);
+        return false;
+      }
+    },
+    
+    async isPausedChat(jid) {
+      try {
+        const models = await initModels();
+        const pausedChat = await models.PausedChat.findOne({ jid: jid });
+        return pausedChat ? pausedChat.isPaused : false;
+      } catch (error) {
+        console.warn("MongoDB isPausedChat error:", error);
+        return false;
+      }
+    },
+    
+    async getPausedChats() {
+      try {
+        const models = await initModels();
+        const pausedChats = await models.PausedChat.find({ isPaused: true });
+        return pausedChats;
+      } catch (error) {
+        console.warn("MongoDB getPausedChats error:", error);
+        return [];
+      }
+    }
+  };
+  
+  return;
+}
+
+// Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
   console.log('⚠️ PausedChat feature disabled in MongoDB mode');
   module.exports = {

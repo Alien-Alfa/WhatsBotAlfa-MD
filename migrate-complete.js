@@ -177,15 +177,26 @@ async function migrateAllData() {
 
     // Close connections
     await sqliteDb.close();
-    await mongoManager.disconnect();
     
     console.log('\n✅ Migration completed successfully!');
     console.log('🚀 Your MongoDB database now contains all the migrated data');
     console.log('🔄 Restart your bot to use the MongoDB data');
 
+    // Return summary for plugin use
+    return {
+      success: true,
+      migrated: totalMigrated,
+      total: totalRecords,
+      collections: {
+        messages: messageCount,
+        contacts: contactCount,
+        chats: chatCount
+      }
+    };
+
   } catch (error) {
     console.error('❌ Migration failed:', error);
-    process.exit(1);
+    throw error;
   }
 }
 
@@ -211,7 +222,18 @@ function getMessageType(messageData) {
   }
 }
 
-// Run migration
+// Export for use in other modules (like plugins)
+module.exports = { migrateAllData };
+
+// If running directly
 if (require.main === module) {
-  migrateAllData().catch(console.error);
+  migrateAllData()
+    .then((result) => {
+      console.log(`\n📊 Migration Summary:`, result);
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.error('Migration failed:', err);
+      process.exit(1);
+    });
 }

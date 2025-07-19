@@ -1,7 +1,174 @@
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
 
-// Safety check for MongoDB mode
+// MongoDB Support
+if (config.USE_MONGODB && config.MONGODB_URI) {
+  // Use MongoDB for greetings
+  const mongoManager = require("./mongodb");
+  let models = null;
+
+  const initModels = async () => {
+    if (!models) {
+      models = await mongoManager.connect();
+    }
+    return models;
+  };
+
+  module.exports = {
+    GreetingsDB: null, // MongoDB doesn't use Sequelize models
+    
+    async getGreeting(id) {
+      try {
+        const models = await initModels();
+        const greeting = await models.Greeting.findOne({ jid: id });
+        return greeting || false;
+      } catch (error) {
+        console.warn("MongoDB getGreeting error:", error);
+        return false;
+      }
+    },
+    
+    async setGreeting(id, isEnable, message) {
+      try {
+        const models = await initModels();
+        const result = await models.Greeting.findOneAndUpdate(
+          { jid: id },
+          { jid: id, isEnable, message },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB setGreeting error:", error);
+        return null;
+      }
+    },
+    
+    async deleteGreeting(id) {
+      try {
+        const models = await initModels();
+        const result = await models.Greeting.deleteOne({ jid: id });
+        return result.deletedCount > 0;
+      } catch (error) {
+        console.warn("MongoDB deleteGreeting error:", error);
+        return false;
+      }
+    },
+    
+    async enableGreeting(id) {
+      try {
+        const models = await initModels();
+        const result = await models.Greeting.findOneAndUpdate(
+          { jid: id },
+          { isEnable: true },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB enableGreeting error:", error);
+        return null;
+      }
+    },
+    
+    async disableGreeting(id) {
+      try {
+        const models = await initModels();
+        const result = await models.Greeting.findOneAndUpdate(
+          { jid: id },
+          { isEnable: false },
+          { new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB disableGreeting error:", error);
+        return null;
+      }
+    },
+    
+    async getGreetingStatus(id) {
+      try {
+        const models = await initModels();
+        const greeting = await models.Greeting.findOne({ jid: id });
+        return greeting ? greeting.isEnable : false;
+      } catch (error) {
+        console.warn("MongoDB getGreetingStatus error:", error);
+        return false;
+      }
+    },
+    
+    async setMessage(id, message) {
+      try {
+        const models = await initModels();
+        const result = await models.Greeting.findOneAndUpdate(
+          { jid: id },
+          { message },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB setMessage error:", error);
+        return null;
+      }
+    },
+    
+    async getMessage(id) {
+      try {
+        const models = await initModels();
+        const greeting = await models.Greeting.findOne({ jid: id });
+        return greeting ? greeting.message : null;
+      } catch (error) {
+        console.warn("MongoDB getMessage error:", error);
+        return null;
+      }
+    },
+    
+    async delMessage(id) {
+      try {
+        const models = await initModels();
+        const result = await models.Greeting.findOneAndUpdate(
+          { jid: id },
+          { $unset: { message: "" } },
+          { new: true }
+        );
+        return result !== null;
+      } catch (error) {
+        console.warn("MongoDB delMessage error:", error);
+        return false;
+      }
+    },
+    
+    async toggleStatus(id) {
+      try {
+        const models = await initModels();
+        const greeting = await models.Greeting.findOne({ jid: id });
+        const newStatus = greeting ? !greeting.isEnable : true;
+        const result = await models.Greeting.findOneAndUpdate(
+          { jid: id },
+          { isEnable: newStatus },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB toggleStatus error:", error);
+        return null;
+      }
+    },
+    
+    async getStatus(id) {
+      try {
+        const models = await initModels();
+        const greeting = await models.Greeting.findOne({ jid: id });
+        return greeting ? greeting.isEnable : false;
+      } catch (error) {
+        console.warn("MongoDB getStatus error:", error);
+        return false;
+      }
+    }
+  };
+  
+  return;
+}
+
+// Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
   console.log('⚠️ Greetings feature disabled in MongoDB mode');
   module.exports = {

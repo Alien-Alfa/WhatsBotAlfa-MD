@@ -1,4 +1,75 @@
-const config = require('../../config');
+const config = require("../../config");
+const { DataTypes } = require("sequelize");
+
+// MongoDB Support
+if (config.USE_MONGODB && config.MONGODB_URI) {
+  // Use MongoDB for AutoReact
+  const mongoManager = require("./mongodb");
+  let models = null;
+
+  const initModels = async () => {
+    if (!models) {
+      models = await mongoManager.connect();
+    }
+    return models;
+  };
+
+  module.exports = {
+    AutoReactDB: null, // MongoDB doesn't use Sequelize models
+    
+    async addAutoReact(jid) {
+      try {
+        const models = await initModels();
+        const result = await models.AutoReact.findOneAndUpdate(
+          { jid: jid },
+          { jid, isEnabled: true },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB addAutoReact error:", error);
+        return null;
+      }
+    },
+    
+    async removeAutoReact(jid) {
+      try {
+        const models = await initModels();
+        const result = await models.AutoReact.deleteOne({ jid: jid });
+        return result.deletedCount > 0;
+      } catch (error) {
+        console.warn("MongoDB removeAutoReact error:", error);
+        return false;
+      }
+    },
+    
+    async isAutoReact(jid) {
+      try {
+        const models = await initModels();
+        const autoReact = await models.AutoReact.findOne({ jid: jid });
+        return autoReact ? autoReact.isEnabled : false;
+      } catch (error) {
+        console.warn("MongoDB isAutoReact error:", error);
+        return false;
+      }
+    },
+    
+    async getAutoReacts() {
+      try {
+        const models = await initModels();
+        const autoReacts = await models.AutoReact.find({ isEnabled: true });
+        return autoReacts;
+      } catch (error) {
+        console.warn("MongoDB getAutoReacts error:", error);
+        return [];
+      }
+    }
+  };
+  
+  return;
+}
+
+// Safety check for SQLite mode when DATABASE is not configuredt config = require('../../config');
 const { DataTypes } = require('sequelize');
 
 // Safety check for MongoDB mode

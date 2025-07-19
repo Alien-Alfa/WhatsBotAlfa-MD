@@ -1,7 +1,75 @@
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
 
-// Safety check for MongoDB mode
+// MongoDB Support
+if (config.USE_MONGODB && config.MONGODB_URI) {
+  // Use MongoDB for filters
+  const mongoManager = require("./mongodb");
+  let models = null;
+
+  const initModels = async () => {
+    if (!models) {
+      models = await mongoManager.connect();
+    }
+    return models;
+  };
+
+  module.exports = {
+    FiltersDB: null, // MongoDB doesn't use Sequelize models
+    
+    async setFilter(id, text, data, read = false) {
+      try {
+        const models = await initModels();
+        const result = await models.Filter.findOneAndUpdate(
+          { jid: id, text: text },
+          { jid: id, text, data, read },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB setFilter error:", error);
+        return null;
+      }
+    },
+    
+    async deleteFilter(id, text) {
+      try {
+        const models = await initModels();
+        const result = await models.Filter.deleteOne({ jid: id, text: text });
+        return result.deletedCount > 0;
+      } catch (error) {
+        console.warn("MongoDB deleteFilter error:", error);
+        return false;
+      }
+    },
+    
+    async getFilter(id, text) {
+      try {
+        const models = await initModels();
+        const filter = await models.Filter.findOne({ jid: id, text: text });
+        return filter;
+      } catch (error) {
+        console.warn("MongoDB getFilter error:", error);
+        return null;
+      }
+    },
+    
+    async getFilters(id) {
+      try {
+        const models = await initModels();
+        const filters = await models.Filter.find({ jid: id });
+        return filters;
+      } catch (error) {
+        console.warn("MongoDB getFilters error:", error);
+        return [];
+      }
+    }
+  };
+  
+  return;
+}
+
+// Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
   console.log('⚠️ Filters feature disabled in MongoDB mode');
   module.exports = {

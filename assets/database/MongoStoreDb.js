@@ -103,7 +103,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           jid: message.key.remoteJid,
           message: message,
           sender: user,
-          messageType: this.getMessageType(message),
+          messageType: dbOperations.getMessageType(message),
         };
         
         const result = await models.Message.findOneAndUpdate(
@@ -219,13 +219,6 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       }
     },
 
-    // Additional utility methods to match SQLite interface
-    getMessageType(message) {
-      if (!message?.message) return 'text';
-      const messageKeys = Object.keys(message.message);
-      return messageKeys[0] || 'text';
-    },
-
     // Database model access for direct operations
     getModels() {
       return this.models;
@@ -255,7 +248,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
               jid: message.key.remoteJid,
               message: message,
               sender: user,
-              messageType: this.getMessageType(message),
+              messageType: dbOperations.getMessageType(message),
             },
             upsert: true
           }
