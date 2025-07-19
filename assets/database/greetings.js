@@ -11,7 +11,12 @@ if (!config.DATABASE) {
     deleteGreeting: async () => false,
     enableGreeting: async () => null,
     disableGreeting: async () => null,
-    getGreetingStatus: async () => false
+    getGreetingStatus: async () => false,
+    setMessage: async () => null,
+    getMessage: async () => null,
+    delMessage: async () => false,
+    toggleStatus: async () => null,
+    getStatus: async () => false
   };
   return;
 }

@@ -8,7 +8,8 @@ if (!config.DATABASE) {
     PDM: null,
     savePDM: async () => null,
     checkPDM: async () => false,
-    deletePDM: async () => null
+    deletePDM: async () => null,
+    getPDM: async () => []
   };
   return;
 }

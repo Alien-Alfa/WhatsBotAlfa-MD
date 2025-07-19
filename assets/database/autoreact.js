@@ -8,7 +8,8 @@ if (!config.DATABASE) {
     React: null,
     saveReact: async () => null,
     checkReact: async () => false,
-    deleteReact: async () => null
+    deleteReact: async () => null,
+    getReact: async () => []
   };
   return;
 }

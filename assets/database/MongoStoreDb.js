@@ -35,6 +35,24 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       }
     },
 
+    // Helper method to determine message type
+    getMessageType(message) {
+      if (!message?.message) return 'unknown';
+      
+      const msgContent = message.message;
+      if (msgContent.conversation) return 'text';
+      if (msgContent.imageMessage) return 'image';
+      if (msgContent.videoMessage) return 'video';
+      if (msgContent.audioMessage) return 'audio';
+      if (msgContent.documentMessage) return 'document';
+      if (msgContent.stickerMessage) return 'sticker';
+      if (msgContent.locationMessage) return 'location';
+      if (msgContent.contactMessage) return 'contact';
+      if (msgContent.extendedTextMessage) return 'extendedText';
+      
+      return 'other';
+    },
+
     // Core database operations - identical to SQLite interface
     async saveContact(jid, name) {
       try {
@@ -62,6 +80,11 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     async saveMessage(message, user) {
       try {
+        if (!this.models || !this.models.Message) {
+          console.warn("MongoDB models not initialized for saveMessage");
+          return null;
+        }
+        
         if (!message?.key?.id) return;
         
         const messageData = {
@@ -112,6 +135,11 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     async saveChat(chat) {
       try {
+        if (!this.models || !this.models.Chat) {
+          console.warn("MongoDB models not initialized for saveChat");
+          return null;
+        }
+        
         if (!chat?.id || chat.id === "status@broadcast" || chat.id === "broadcast") return;
         if (!chat.conversationTimestamp) return;
         
