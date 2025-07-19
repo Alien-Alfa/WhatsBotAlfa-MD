@@ -47,7 +47,7 @@ async function readAndRequireFiles(directory) {
 }
 
 // Performance: Optimized plugin loading
-async function getandRequirePlugins() {
+async function loadExternalPlugins() {
   try {
     const gitUrl = config.HEROKU_APP_NAME ? 
       `https://${config.HEROKU_APP_NAME}.herokuapp.com/` : 
@@ -130,7 +130,8 @@ async function initialize() {
     // Performance: Parallel plugin loading
     await Promise.all([
       readAndRequireFiles(path.join(__dirname, "/assets/plugins/")),
-      getandRequirePlugins()
+      getandRequirePlugins(),
+      loadExternalPlugins()
     ]);
     
     const pluginTime = Date.now() - pluginStartTime;
