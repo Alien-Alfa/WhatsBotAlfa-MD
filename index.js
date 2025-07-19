@@ -3,7 +3,6 @@ const fsx = require("fs");
 const path = require("path");
 const config = require("./config");
 const connect = require("./lib/connection");
-const { getandRequirePlugins } = require("./assets/database/plugins");
 const { UpdateLocal, WriteSession} = require("./lib");
 
 global.__basedir = __dirname;
@@ -126,6 +125,9 @@ async function initialize() {
     
     console.log("⬇ Installing Plugins...");
     const pluginStartTime = Date.now();
+    
+    // Import plugins function after database is ready
+    const { getandRequirePlugins } = require("./assets/database/plugins");
     
     // Performance: Parallel plugin loading
     await Promise.all([
