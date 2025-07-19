@@ -40,13 +40,9 @@ class MongoDBManager {
       console.log("🔄 Connecting to MongoDB...");
       
       await mongoose.connect(config.MONGODB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
         maxPoolSize: 10,
         serverSelectionTimeoutMS: 30000,
         socketTimeoutMS: 45000,
-        bufferMaxEntries: 0,
-        bufferCommands: false,
       });
 
       this.isConnected = true;
