@@ -156,17 +156,22 @@ async function connect() {
 
     console.log("🔄 Connecting to MongoDB...");
     
-    // Disconnect any existing connection first
+    // Close any existing connections
     if (mongoose.connection.readyState !== 0) {
       await mongoose.disconnect();
     }
     
-    // Connect to MongoDB with simplified options
-    await mongoose.connect(config.MONGODB_URI, {
-      serverSelectionTimeoutMS: 30000,
-      socketTimeoutMS: 45000,
-      family: 4 // Use IPv4, skip trying IPv6
-    });
+    // Clean the MongoDB URI to remove any deprecated options
+    let cleanUri = config.MONGODB_URI;
+    if (cleanUri.includes('bufferMaxEntries') || cleanUri.includes('buffermaxentries')) {
+      cleanUri = cleanUri.replace(/[&?]bufferMaxEntries=\d+/gi, '');
+      cleanUri = cleanUri.replace(/[&?]buffermaxentries=\d+/gi, '');
+      cleanUri = cleanUri.replace(/[&?]bufferCommands=(true|false)/gi, '');
+      console.log("🧹 Cleaned deprecated options from MongoDB URI");
+    }
+    
+    // Connect to MongoDB with minimal options
+    await mongoose.connect(cleanUri);
 
     isConnected = true;
     console.log("✅ MongoDB connected successfully!");
