@@ -167,9 +167,9 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         
         const isGroup = isJidGroup(chat.id);
         const result = await models.Chat.findOneAndUpdate(
-          { id: chat.id },
+          { jid: chat.id },
           {
-            id: chat.id,
+            jid: chat.id,
             conversationTimestamp: chat.conversationTimestamp,
             isGroup,
           },
