@@ -130,7 +130,24 @@ command(
         
         const syncTime = Date.now() - startTime;
         
-        const response = `
+        // Customize message based on sync result
+        let response;
+        if (result.status === 'skipped') {
+          response = `
+✅ *Database Status Check Complete*
+
+📊 *MongoDB Status:*
+• Duration: ${syncTime}ms
+• Mode: MongoDB Only
+• Connection: ✅ Active
+• Sync: Not needed (single database)
+
+ℹ️ *Info:* Running in MongoDB-only mode. No sync required as all data is stored directly in MongoDB.
+
+⏰ *Last Check:* ${new Date().toLocaleString()}
+          `;
+        } else {
+          response = `
 ✅ *Database Sync Complete*
 
 📊 *Sync Results:*
@@ -141,7 +158,9 @@ command(
 
 ⏰ *Last Sync:* ${new Date().toLocaleString()}
 🔄 *Next Auto Sync:* In 30 minutes
-        `;
+          `;
+        }
+        
         
         await message.reply(response);
       } else {

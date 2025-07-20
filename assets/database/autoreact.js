@@ -16,6 +16,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
   module.exports = {
     AutoReactDB: null, // MongoDB doesn't use Sequelize models
+    React: {
+      findOne: async () => null, // Mock Sequelize findOne for settings.js compatibility
+      create: async () => null,
+      findAll: async () => [],
+      destroy: async () => true
+    },
     
     async addAutoReact(jid) {
       try {

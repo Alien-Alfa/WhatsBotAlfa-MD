@@ -52,6 +52,66 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         console.warn("MongoDB isBannedAccount error:", error);
         return false;
       }
+    },
+    
+    async getUserBan(jid = null) {
+      try {
+        const models = await initModels();
+        if (jid) {
+          const bannedAccount = await models.BannedAccount.findOne({ jid: jid });
+          return bannedAccount ? [bannedAccount] : [];
+        } else {
+          const bannedAccounts = await models.BannedAccount.find({ isBanned: true });
+          return bannedAccounts;
+        }
+      } catch (error) {
+        console.warn("MongoDB getUserBan error:", error);
+        return [];
+      }
+    }
+  };
+
+  // Export MongoDB functions with SQLite-compatible interface
+  module.exports = {
+    UserBan: null, // MongoDB doesn't use Sequelize models
+    getUserBan: async function(jid = null) {
+      try {
+        const models = await initModels();
+        if (jid) {
+          const bannedAccount = await models.BannedAccount.findOne({ jid: jid });
+          return bannedAccount ? [bannedAccount] : [];
+        } else {
+          const bannedAccounts = await models.BannedAccount.find({ isBanned: true });
+          return bannedAccounts;
+        }
+      } catch (error) {
+        console.warn("MongoDB getUserBan error:", error);
+        return [];
+      }
+    },
+    saveUserBan: async function(jid, bannedid) {
+      try {
+        const models = await initModels();
+        const result = await models.BannedAccount.findOneAndUpdate(
+          { jid: jid },
+          { jid, isBanned: true },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB saveUserBan error:", error);
+        return null;
+      }
+    },
+    deleteUserBan: async function(jid, bannedid) {
+      try {
+        const models = await initModels();
+        const result = await models.BannedAccount.deleteOne({ jid: jid });
+        return result.deletedCount > 0;
+      } catch (error) {
+        console.warn("MongoDB deleteUserBan error:", error);
+        return false;
+      }
     }
   };
   

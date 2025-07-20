@@ -14,9 +14,11 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     return models;
   };
 
-  module.exports = {
-    PdmDB: null, // MongoDB doesn't use Sequelize models
+  // Create MongoDB-compatible interface that matches SQLite exports
+  const mongoInterface = {
+    PdmDB: null, // MongoDB doesn't use this
     
+    // MongoDB functions (new interface)
     async addPDM(jid) {
       try {
         const models = await initModels();
@@ -54,17 +56,93 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       }
     },
     
-    async getPDMs() {
+    async getPDM() {
       try {
         const models = await initModels();
         const pdms = await models.PDM.find({ isEnabled: true });
         return pdms;
       } catch (error) {
-        console.warn("MongoDB getPDMs error:", error);
+        console.warn("MongoDB getPDM error:", error);
         return [];
+      }
+    },
+    
+    // SQLite-compatible interface for settings.js
+    PDM: {
+      findOne: async (options) => {
+        try {
+          const models = await initModels();
+          const query = {};
+          if (options.where && options.where.chatId) {
+            query.jid = options.where.chatId;
+          }
+          return await models.PDM.findOne(query);
+        } catch (error) {
+          console.warn("MongoDB PDM.findOne error:", error);
+          return null;
+        }
+      },
+      create: async (data) => {
+        try {
+          const models = await initModels();
+          return await models.PDM.create({ jid: data.chatId, isEnabled: true });
+        } catch (error) {
+          console.warn("MongoDB PDM.create error:", error);
+          return null;
+        }
+      },
+      findAll: async (options = {}) => {
+        try {
+          const models = await initModels();
+          return await models.PDM.find({});
+        } catch (error) {
+          console.warn("MongoDB PDM.findAll error:", error);
+          return [];
+        }
+      },
+      destroy: async (options) => {
+        try {
+          const models = await initModels();
+          if (options.where && options.where.chatId) {
+            const result = await models.PDM.deleteOne({ jid: options.where.chatId });
+            return result.deletedCount;
+          }
+          return 0;
+        } catch (error) {
+          console.warn("MongoDB PDM.destroy error:", error);
+          return 0;
+        }
+      }
+    },
+
+    // Export the same functions as SQLite version for compatibility
+    savePDM: async (chatId) => {
+      try {
+        const models = await initModels();
+        return await models.PDM.findOneAndUpdate(
+          { jid: chatId },
+          { jid: chatId, isEnabled: true },
+          { upsert: true, new: true }
+        );
+      } catch (error) {
+        console.warn("MongoDB savePDM error:", error);
+        return null;
+      }
+    },
+
+    deleteAllPDM: async () => {
+      try {
+        const models = await initModels();
+        const result = await models.PDM.deleteMany({});
+        return result.deletedCount;
+      } catch (error) {
+        console.warn("MongoDB deleteAllPDM error:", error);
+        return 0;
       }
     }
   };
+
+  module.exports = mongoInterface;
   
   return;
 }

@@ -314,11 +314,35 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     // Sync management
     async performSync() {
+      // Check if we're in dual database mode (MongoDB + SQLite)
+      const config = require("../../config");
+      if (!config.DATABASE || config.DATABASE === null) {
+        // MongoDB-only mode - no sync needed
+        return { 
+          status: "skipped", 
+          message: "Database sync not needed - using MongoDB only",
+          timestamp: new Date().toISOString()
+        };
+      }
+      
       const dbSyncManager = require("./DatabaseSyncManager");
       return await dbSyncManager.forcSync();
     },
 
     getSyncStats() {
+      // Check if we're in dual database mode (MongoDB + SQLite)
+      const config = require("../../config");
+      if (!config.DATABASE || config.DATABASE === null) {
+        // MongoDB-only mode - return basic stats
+        return {
+          totalSyncs: 0,
+          lastSyncDuration: 0,
+          errors: 0,
+          mode: "mongodb-only",
+          lastSyncTime: null
+        };
+      }
+      
       const dbSyncManager = require("./DatabaseSyncManager");
       return dbSyncManager.getSyncStats();
     }

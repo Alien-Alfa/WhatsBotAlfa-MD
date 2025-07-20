@@ -13,13 +13,24 @@ class DatabaseSyncManager {
       totalSyncs: 0,
       lastSyncDuration: 0,
       errors: 0,
-      lastError: null
     };
+  }
+
+  // Helper method to get MongoDB models safely
+  getMongoModels() {
+    const models = this.mongoDb?.getModels();
+    if (!models) {
+      console.warn("MongoDB models not available");
+      return null;
+    }
+    return models;
   }
 
   async initialize() {
     try {
-      if (!config.USE_MONGODB || !config.MONGODB_URI || !config.DATABASE) {
+      // Only initialize sync if we have both MongoDB AND SQLite configured
+      // If USE_MONGODB is true but DATABASE is null, we're in MongoDB-only mode
+      if (!config.USE_MONGODB || !config.MONGODB_URI || config.DATABASE === null) {
         console.log("⏭️ Database sync not needed - using single database");
         return;
       }
@@ -121,8 +132,15 @@ class DatabaseSyncManager {
   // Sync individual collections
   async syncChats() {
     try {
+      // Get MongoDB models from the correct path
+      const models = this.mongoDb.getModels();
+      if (!models) {
+        console.warn("MongoDB models not available for chat sync");
+        return;
+      }
+      
       // Get latest data from MongoDB
-      const mongoChats = await this.mongoDb.models.Chat.find({})
+      const mongoChats = await models.Chat.find({})
         .sort({ updatedAt: -1 })
         .limit(1000);
 

@@ -16,6 +16,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
   module.exports = {
     AiChatDB: null, // MongoDB doesn't use Sequelize models
+    Ai: {
+      findOne: async () => null, // Mock Sequelize findOne for settings.js compatibility
+      create: async () => null,
+      findAll: async () => [],
+      destroy: async () => true
+    },
     
     async addAiChat(jid) {
       try {
