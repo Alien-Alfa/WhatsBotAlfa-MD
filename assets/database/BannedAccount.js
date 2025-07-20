@@ -35,7 +35,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async removeBannedAccount(jid) {
       try {
-        const models = await initModels();
+        const models = await getModels();
         const result = await models.BannedAccount.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
@@ -46,7 +46,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async isBannedAccount(jid) {
       try {
-        const models = await initModels();
+        const models = await getModels();
         const bannedAccount = await models.BannedAccount.findOne({ jid: jid });
         return bannedAccount ? bannedAccount.isBanned : false;
       } catch (error) {
@@ -101,7 +101,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     },
     saveUserBan: async function(jid, bannedid) {
       try {
-        const models = await initModels();
+        const models = await getModels();
         const result = await models.BannedAccount.findOneAndUpdate(
           { jid: jid },
           { jid, isBanned: true },
@@ -115,7 +115,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     },
     deleteUserBan: async function(jid, bannedid) {
       try {
-        const models = await initModels();
+        const models = await getModels();
         const result = await models.BannedAccount.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {

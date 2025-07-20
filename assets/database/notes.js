@@ -67,7 +67,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async getNotes() {
       try {
-        const models = await initModels();
+        const models = await getModels();
         const notes = await models.Note.find({});
         return notes;
       } catch (error) {

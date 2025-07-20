@@ -17,7 +17,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     // MongoDB functions (new interface)
     async addPDM(jid) {
       try {
-        const models = await initModels();
+        const models = await getModels();
         const result = await models.PDM.findOneAndUpdate(
           { jid: jid },
           { jid, isEnabled: true },
@@ -32,7 +32,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async removePDM(jid) {
       try {
-        const models = await initModels();
+        const models = await getModels();
         const result = await models.PDM.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
@@ -43,7 +43,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async isPDM(jid) {
       try {
-        const models = await initModels();
+        const models = await getModels();
         const pdm = await models.PDM.findOne({ jid: jid });
         return pdm ? pdm.isEnabled : false;
       } catch (error) {
@@ -54,7 +54,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async getPDM() {
       try {
-        const models = await initModels();
+        const models = await getModels();
         const pdms = await models.PDM.find({ isEnabled: true });
         return pdms;
       } catch (error) {
@@ -67,7 +67,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     PDM: {
       findOne: async (options) => {
         try {
-          const models = await initModels();
+          const models = await getModels();
           const query = {};
           if (options.where && options.where.chatId) {
             query.jid = options.where.chatId;
@@ -80,7 +80,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       },
       create: async (data) => {
         try {
-          const models = await initModels();
+          const models = await getModels();
           return await models.PDM.create({ jid: data.chatId, isEnabled: true });
         } catch (error) {
           console.warn("MongoDB PDM.create error:", error);
@@ -89,7 +89,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       },
       findAll: async (options = {}) => {
         try {
-          const models = await initModels();
+          const models = await getModels();
           return await models.PDM.find({});
         } catch (error) {
           console.warn("MongoDB PDM.findAll error:", error);
@@ -98,7 +98,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       },
       destroy: async (options) => {
         try {
-          const models = await initModels();
+          const models = await getModels();
           if (options.where && options.where.chatId) {
             const result = await models.PDM.deleteOne({ jid: options.where.chatId });
             return result.deletedCount;
@@ -114,7 +114,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     // Export the same functions as SQLite version for compatibility
     savePDM: async (chatId) => {
       try {
-        const models = await initModels();
+        const models = await getModels();
         return await models.PDM.findOneAndUpdate(
           { jid: chatId },
           { jid: chatId, isEnabled: true },
@@ -128,7 +128,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     deleteAllPDM: async () => {
       try {
-        const models = await initModels();
+        const models = await getModels();
         const result = await models.PDM.deleteMany({});
         return result.deletedCount;
       } catch (error) {
