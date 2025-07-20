@@ -4,14 +4,10 @@ const { DataTypes } = require('sequelize');
 // MongoDB Support
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for BannedAccount
-  const mongoManager = require("./mongodb");
-  let models = null;
+  const mongoModels = require("./mongoModels");
 
-  const initModels = async () => {
-    if (!models) {
-      models = await mongoManager.connect();
-    }
-    return models;
+  const getModels = async () => {
+    return await mongoModels.getMongoModels();
   };
 
   module.exports = {
@@ -19,7 +15,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async addBannedAccount(jid) {
       try {
-        const models = await initModels();
+        const models = await getModels();
+        if (!models || !models.BannedAccount) {
+          console.warn("MongoDB BannedAccount model not available");
+          return null;
+        }
+        
         const result = await models.BannedAccount.findOneAndUpdate(
           { jid: jid },
           { jid, isBanned: true },
@@ -56,7 +57,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async getUserBan(jid = null) {
       try {
-        const models = await initModels();
+        const models = await getModels();
+        if (!models || !models.BannedAccount) {
+          console.warn("MongoDB BannedAccount model not available");
+          return [];
+        }
+        
         if (jid) {
           const bannedAccount = await models.BannedAccount.findOne({ jid: jid });
           return bannedAccount ? [bannedAccount] : [];
@@ -76,7 +82,11 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     UserBan: null, // MongoDB doesn't use Sequelize models
     getUserBan: async function(jid = null) {
       try {
-        const models = await initModels();
+        const models = await getModels();
+        if (!models || !models.BannedAccount) {
+          console.warn("MongoDB BannedAccount model not available");
+          return [];
+        }
         if (jid) {
           const bannedAccount = await models.BannedAccount.findOne({ jid: jid });
           return bannedAccount ? [bannedAccount] : [];

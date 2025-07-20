@@ -4,14 +4,10 @@ const { DataTypes } = require("sequelize");
 // MongoDB Support
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for PDM
-  const mongoManager = require("./mongodb");
-  let models = null;
+  const mongoModels = require("./mongoModels");
 
-  const initModels = async () => {
-    if (!models) {
-      models = await mongoManager.connect();
-    }
-    return models;
+  const getModels = async () => {
+    return await mongoModels.getMongoModels();
   };
 
   // Create MongoDB-compatible interface that matches SQLite exports

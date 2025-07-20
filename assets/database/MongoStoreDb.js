@@ -9,7 +9,7 @@ let dbOperations;
 
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // MongoDB Operations
-  const mongoManager = require("./mongodb");
+  const mongoModels = require("./mongoModels");
   
   // Performance: Cache for frequently accessed data
   const contactCache = new Map();
@@ -23,7 +23,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async initialize() {
       try {
-        const models = await mongoManager.connect();
+        const models = await mongoModels.initializeMongoModels();
         this.models = models;
         dbOperations.models = models; // Also set on the main object
         
@@ -233,7 +233,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     // Database model access for direct operations
     getModels() {
-      return dbOperations.models;
+      return dbOperations.models || mongoModels.getMongoModels();
     },
 
     // Compatibility methods for existing code

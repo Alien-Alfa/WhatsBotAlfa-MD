@@ -4,14 +4,10 @@ const { DataTypes } = require("sequelize");
 // MongoDB Support
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for notes
-  const mongoManager = require("./mongodb");
-  let models = null;
-
-  const initModels = async () => {
-    if (!models) {
-      models = await mongoManager.connect();
-    }
-    return models;
+  const mongoModels = require("./mongoModels");
+  
+  const getModels = async () => {
+    return await mongoModels.getMongoModels();
   };
 
   module.exports = {
@@ -19,7 +15,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async setNote(jid, note) {
       try {
-        const models = await initModels();
+        const models = await getModels();
+        if (!models || !models.Note) {
+          console.warn("MongoDB Note model not available");
+          return null;
+        }
+        
         const result = await models.Note.findOneAndUpdate(
           { jid: jid },
           { jid, note },
@@ -34,7 +35,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async getNote(jid) {
       try {
-        const models = await initModels();
+        const models = await getModels();
+        if (!models || !models.Note) {
+          console.warn("MongoDB Note model not available");
+          return null;
+        }
+        
         const noteDoc = await models.Note.findOne({ jid: jid });
         return noteDoc ? noteDoc.note : null;
       } catch (error) {
@@ -45,7 +51,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     
     async deleteNote(jid) {
       try {
-        const models = await initModels();
+        const models = await getModels();
+        if (!models || !models.Note) {
+          console.warn("MongoDB Note model not available");
+          return false;
+        }
+        
         const result = await models.Note.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
