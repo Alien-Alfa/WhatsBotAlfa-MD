@@ -58,8 +58,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
   return;
 }
 
-// Safety check for SQLite mode when DATABASE is not configuredt config = require("../../config");
-const { DataTypes } = require("sequelize");
+// Safety check for SQLite mode when DATABASE is not configured
 
 // Safety check for MongoDB mode
 if (!config.DATABASE) {

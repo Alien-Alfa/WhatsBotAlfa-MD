@@ -111,7 +111,9 @@ async function deleteAllReact() {
 }
 
 module.exports = {
-  React,
+  React: {
+    getReact: getReact
+  },
   getReact,
   saveReact,
   deleteAllReact

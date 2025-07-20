@@ -192,7 +192,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           return cached.name;
         }
         
-        const contact = await this.models.Contact.findOne({ jid });
+        const contact = await dbOperations.models.Contact.findOne({ jid });
         const name = contact?.name || jid.split("@")[0].replace(/_/g, " ");
         
         contactCache.set(cacheKey, { name, timestamp: Date.now() });
@@ -205,7 +205,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     async loadDeletedMessages(jid, sinceTimestamp) {
       try {
-        const messages = await this.models.Message.find({
+        const messages = await dbOperations.models.Message.find({
           jid,
           createdAt: { $gte: new Date(sinceTimestamp) },
         })
@@ -221,20 +221,20 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     // Database model access for direct operations
     getModels() {
-      return this.models;
+      return dbOperations.models;
     },
 
     // Compatibility methods for existing code
     async findContact(jid) {
-      return await this.models.Contact.findOne({ jid });
+      return await dbOperations.models.Contact.findOne({ jid });
     },
 
     async findMessage(id) {
-      return await this.loadMessage(id);
+      return await dbOperations.loadMessage(id);
     },
 
     async findChat(id) {
-      return await this.models.Chat.findOne({ id });
+      return await dbOperations.models.Chat.findOne({ id });
     },
 
     // Bulk operations for performance
@@ -254,7 +254,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           }
         }));
 
-        return await this.models.Message.bulkWrite(operations);
+        return await dbOperations.models.Message.bulkWrite(operations);
       } catch (e) {
         console.warn("Bulk save messages error:", e);
         return null;
@@ -271,7 +271,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           }
         }));
 
-        return await this.models.Contact.bulkWrite(operations);
+        return await dbOperations.models.Contact.bulkWrite(operations);
       } catch (e) {
         console.warn("Bulk save contacts error:", e);
         return null;
