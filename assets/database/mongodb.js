@@ -143,6 +143,53 @@ const schemas = {
   }, { timestamps: true })
 };
 
+// Schema migration function
+async function migrateSchemas() {
+  try {
+    // Check if old Chat collection with 'id' field exists
+    const chatCollection = mongoose.connection.db.collection('chats');
+    const indexes = await chatCollection.indexes();
+    
+    // Look for old 'id' index
+    const hasOldIdIndex = indexes.some(index => index.key && index.key.id);
+    
+    if (hasOldIdIndex) {
+      console.log("🔄 Migrating old Chat schema...");
+      
+      // Drop the old 'id' index
+      try {
+        await chatCollection.dropIndex({ id: 1 });
+        console.log("✅ Dropped old 'id' index");
+      } catch (error) {
+        if (error.code !== 27) { // Index not found error is OK
+          console.warn("Warning dropping old index:", error.message);
+        }
+      }
+      
+      // Migrate existing documents from 'id' to 'jid' field
+      const documentsWithId = await chatCollection.find({ id: { $exists: true } }).toArray();
+      if (documentsWithId.length > 0) {
+        console.log(`🔄 Migrating ${documentsWithId.length} chat documents...`);
+        
+        for (const doc of documentsWithId) {
+          if (doc.id && !doc.jid) {
+            await chatCollection.updateOne(
+              { _id: doc._id },
+              { 
+                $set: { jid: doc.id },
+                $unset: { id: 1 }
+              }
+            );
+          }
+        }
+        console.log("✅ Chat documents migrated successfully");
+      }
+    }
+  } catch (error) {
+    console.warn("Schema migration warning:", error.message);
+  }
+}
+
 // MongoDB Connection Function
 async function connect() {
   if (isConnected && Object.keys(models).length > 0) {
@@ -175,6 +222,9 @@ async function connect() {
 
     isConnected = true;
     console.log("✅ MongoDB connected successfully!");
+
+    // Run schema migrations
+    await migrateSchemas();
 
     // Initialize models
     for (const [modelName, schema] of Object.entries(schemas)) {

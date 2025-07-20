@@ -166,18 +166,36 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         if (cached && cached.timestamp === chat.conversationTimestamp) return cached.data;
         
         const isGroup = isJidGroup(chat.id);
-        const result = await models.Chat.findOneAndUpdate(
-          { jid: chat.id },
-          {
-            jid: chat.id,
-            conversationTimestamp: chat.conversationTimestamp,
-            isGroup,
-          },
-          { upsert: true, new: true }
-        );
         
-        chatCache.set(cacheKey, { timestamp: chat.conversationTimestamp, data: result });
-        return result;
+        try {
+          const result = await models.Chat.findOneAndUpdate(
+            { jid: chat.id },
+            {
+              jid: chat.id,
+              conversationTimestamp: chat.conversationTimestamp,
+              isGroup,
+            },
+            { upsert: true, new: true }
+          );
+          
+          chatCache.set(cacheKey, { timestamp: chat.conversationTimestamp, data: result });
+          return result;
+        } catch (error) {
+          // Handle duplicate key errors gracefully
+          if (error.code === 11000) {
+            console.warn(`Duplicate chat entry for ${chat.id}, attempting to find existing...`);
+            try {
+              const existing = await models.Chat.findOne({ jid: chat.id });
+              if (existing) {
+                chatCache.set(cacheKey, { timestamp: chat.conversationTimestamp, data: existing });
+                return existing;
+              }
+            } catch (findError) {
+              console.error("Error finding existing chat:", findError.message);
+            }
+          }
+          throw error;
+        }
       } catch (e) {
         console.warn("Save chat error:", e);
         return null;
