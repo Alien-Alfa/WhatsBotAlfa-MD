@@ -192,7 +192,13 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           return cached.name;
         }
         
-        const contact = await dbOperations.models.Contact.findOne({ jid });
+        const models = this.models || dbOperations.models;
+        if (!models || !models.Contact) {
+          console.warn("MongoDB models not initialized for getName");
+          return jid.split("@")[0].replace(/_/g, " ");
+        }
+        
+        const contact = await models.Contact.findOne({ jid });
         const name = contact?.name || jid.split("@")[0].replace(/_/g, " ");
         
         contactCache.set(cacheKey, { name, timestamp: Date.now() });
@@ -205,7 +211,13 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     async loadDeletedMessages(jid, sinceTimestamp) {
       try {
-        const messages = await dbOperations.models.Message.find({
+        const models = this.models || dbOperations.models;
+        if (!models || !models.Message) {
+          console.warn("MongoDB models not initialized for loadDeletedMessages");
+          return [];
+        }
+        
+        const messages = await models.Message.find({
           jid,
           createdAt: { $gte: new Date(sinceTimestamp) },
         })
@@ -215,7 +227,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         return messages;
       } catch (error) {
         console.error("Error loading deleted messages:", error);
-        throw new Error("Error loading deleted messages");
+        return [];
       }
     },
 
@@ -226,7 +238,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     // Compatibility methods for existing code
     async findContact(jid) {
-      return await dbOperations.models.Contact.findOne({ jid });
+      const models = this.models || dbOperations.models;
+      if (!models || !models.Contact) {
+        console.warn("MongoDB models not initialized for findContact");
+        return null;
+      }
+      return await models.Contact.findOne({ jid });
     },
 
     async findMessage(id) {
@@ -234,12 +251,23 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     },
 
     async findChat(id) {
-      return await dbOperations.models.Chat.findOne({ id });
+      const models = this.models || dbOperations.models;
+      if (!models || !models.Chat) {
+        console.warn("MongoDB models not initialized for findChat");
+        return null;
+      }
+      return await models.Chat.findOne({ id });
     },
 
     // Bulk operations for performance
     async saveMessages(messages) {
       try {
+        const models = this.models || dbOperations.models;
+        if (!models || !models.Message) {
+          console.warn("MongoDB models not initialized for saveMessages");
+          return null;
+        }
+        
         const operations = messages.map(({ message, user }) => ({
           updateOne: {
             filter: { id: message.key.id },
@@ -254,7 +282,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           }
         }));
 
-        return await dbOperations.models.Message.bulkWrite(operations);
+        return await models.Message.bulkWrite(operations);
       } catch (e) {
         console.warn("Bulk save messages error:", e);
         return null;
@@ -263,6 +291,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
     async saveContacts(contacts) {
       try {
+        const models = this.models || dbOperations.models;
+        if (!models || !models.Contact) {
+          console.warn("MongoDB models not initialized for saveContacts");
+          return null;
+        }
+        
         const operations = contacts.map(({ jid, name }) => ({
           updateOne: {
             filter: { jid },
@@ -271,7 +305,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           }
         }));
 
-        return await dbOperations.models.Contact.bulkWrite(operations);
+        return await models.Contact.bulkWrite(operations);
       } catch (e) {
         console.warn("Bulk save contacts error:", e);
         return null;
