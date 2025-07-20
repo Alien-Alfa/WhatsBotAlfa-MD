@@ -63,6 +63,11 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         console.warn("MongoDB getAutoReacts error:", error);
         return [];
       }
+    },
+
+    // Additional function aliases for compatibility
+    async getReact() {
+      return await this.getAutoReacts();
     }
   };
   

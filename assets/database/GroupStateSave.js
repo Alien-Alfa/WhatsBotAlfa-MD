@@ -1,4 +1,64 @@
-const config = require("../../config");
+const config = require('../../config');
+const { DataTypes } = require('sequelize');
+
+// MongoDB Support
+if (config.USE_MONGODB && config.MONGODB_URI) {
+  // Use MongoDB for GroupStateSave
+  const mongoManager = require("./mongodb");
+  let models = null;
+
+  const initModels = async () => {
+    if (!models) {
+      models = await mongoManager.connect();
+    }
+    return models;
+  };
+
+  module.exports = {
+    GroupStateSaveDB: null, // MongoDB doesn't use Sequelize models
+    
+    async saveGroupState(jid, state) {
+      try {
+        const models = await initModels();
+        const result = await models.GroupStateSave.findOneAndUpdate(
+          { jid: jid },
+          { jid, state },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB saveGroupState error:", error);
+        return null;
+      }
+    },
+    
+    async getGroupState(jid) {
+      try {
+        const models = await initModels();
+        const groupState = await models.GroupStateSave.findOne({ jid: jid });
+        return groupState ? groupState.state : null;
+      } catch (error) {
+        console.warn("MongoDB getGroupState error:", error);
+        return null;
+      }
+    },
+    
+    async deleteGroupState(jid) {
+      try {
+        const models = await initModels();
+        const result = await models.GroupStateSave.deleteOne({ jid: jid });
+        return result.deletedCount > 0;
+      } catch (error) {
+        console.warn("MongoDB deleteGroupState error:", error);
+        return false;
+      }
+    }
+  };
+  
+  return;
+}
+
+// Safety check for SQLite mode when DATABASE is not configuredt config = require("../../config");
 const { DataTypes } = require("sequelize");
 
 // Safety check for MongoDB mode

@@ -113,7 +113,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         
         if (user && message.pushName) {
-          await this.saveContact(user, message.pushName);
+          await dbOperations.saveContact(user, message.pushName);
         }
         
         return result;

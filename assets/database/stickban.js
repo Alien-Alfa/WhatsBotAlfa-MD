@@ -1,7 +1,64 @@
-const config = require("../../config");
-const { DataTypes } = require("sequelize");
+const config = require('../../config');
+const { DataTypes } = require('sequelize');
 
-// Safety check for MongoDB mode
+// MongoDB Support
+if (config.USE_MONGODB && config.MONGODB_URI) {
+  // Use MongoDB for StickBan
+  const mongoManager = require("./mongodb");
+  let models = null;
+
+  const initModels = async () => {
+    if (!models) {
+      models = await mongoManager.connect();
+    }
+    return models;
+  };
+
+  module.exports = {
+    StickBanDB: null, // MongoDB doesn't use Sequelize models
+    
+    async addStickBan(jid) {
+      try {
+        const models = await initModels();
+        const result = await models.StickBan.findOneAndUpdate(
+          { jid: jid },
+          { jid, isBanned: true },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB addStickBan error:", error);
+        return null;
+      }
+    },
+    
+    async removeStickBan(jid) {
+      try {
+        const models = await initModels();
+        const result = await models.StickBan.deleteOne({ jid: jid });
+        return result.deletedCount > 0;
+      } catch (error) {
+        console.warn("MongoDB removeStickBan error:", error);
+        return false;
+      }
+    },
+    
+    async isStickBan(jid) {
+      try {
+        const models = await initModels();
+        const stickBan = await models.StickBan.findOne({ jid: jid });
+        return stickBan ? stickBan.isBanned : false;
+      } catch (error) {
+        console.warn("MongoDB isStickBan error:", error);
+        return false;
+      }
+    }
+  };
+  
+  return;
+}
+
+// Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
   console.log('⚠️ StickBan feature disabled in MongoDB mode');
   module.exports = {

@@ -1,4 +1,64 @@
-const config = require("../../config");
+const config = require('../../config');
+const { DataTypes } = require('sequelize');
+
+// MongoDB Support
+if (config.USE_MONGODB && config.MONGODB_URI) {
+  // Use MongoDB for BannedAccount
+  const mongoManager = require("./mongodb");
+  let models = null;
+
+  const initModels = async () => {
+    if (!models) {
+      models = await mongoManager.connect();
+    }
+    return models;
+  };
+
+  module.exports = {
+    BannedAccountDB: null, // MongoDB doesn't use Sequelize models
+    
+    async addBannedAccount(jid) {
+      try {
+        const models = await initModels();
+        const result = await models.BannedAccount.findOneAndUpdate(
+          { jid: jid },
+          { jid, isBanned: true },
+          { upsert: true, new: true }
+        );
+        return result;
+      } catch (error) {
+        console.warn("MongoDB addBannedAccount error:", error);
+        return null;
+      }
+    },
+    
+    async removeBannedAccount(jid) {
+      try {
+        const models = await initModels();
+        const result = await models.BannedAccount.deleteOne({ jid: jid });
+        return result.deletedCount > 0;
+      } catch (error) {
+        console.warn("MongoDB removeBannedAccount error:", error);
+        return false;
+      }
+    },
+    
+    async isBannedAccount(jid) {
+      try {
+        const models = await initModels();
+        const bannedAccount = await models.BannedAccount.findOne({ jid: jid });
+        return bannedAccount ? bannedAccount.isBanned : false;
+      } catch (error) {
+        console.warn("MongoDB isBannedAccount error:", error);
+        return false;
+      }
+    }
+  };
+  
+  return;
+}
+
+// Safety check for SQLite mode when DATABASE is not configuredt config = require("../../config");
 const { DataTypes } = require("sequelize");
 
 // Safety check for MongoDB mode
