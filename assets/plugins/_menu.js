@@ -127,14 +127,14 @@ Description: ${i.desc}\`\`\``;
 ┃✧│ `;
         let comad = cmnd.filter(({ type }) => type == cmmd);
         comad.forEach(({ cmd }, num) => {
-          menu += `\n┃✧│ ${cmd.trim()}`;
+          menu += `\n┃✧│ ${prefix}${cmd.trim()}`;
         });
         menu += `\n┃✧╰─────────────────
 ╰══════════════════⊷❍`;
       });
 
       menu += `\n`;
-      //menu += `_🔖Send ${prefix}menu <command name> to get detailed information of specific command._\n*📍Eg:* _${prefix}menu plugin_`;
+     // menu += `\n🔖 *HOW TO USE COMMANDS:*\n• All commands must start with *${prefix}*\n• Example: Type *${prefix}ping* (not just 'ping')\n• For help: *${prefix}menu <command>*\n`;
       let fin = await menu.toUpperCase()
       return await message.client.sendMessage(message.jid, {text: typewriter(fin)});
 
@@ -153,7 +153,6 @@ command(
     fromMe: true,
     desc: "Show All Commands",
     type: "user",
-    dontAddCommandList: true,
   },
   async (message, match, { prefix }) => {
     try{

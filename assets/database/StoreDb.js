@@ -92,6 +92,45 @@ const contactCache = new Map();
 const messageCache = new Map();
 const CACHE_TTL = 300000; // 5 minutes
 
+// Database operation queue to prevent SQLite locking
+class DatabaseQueue {
+  constructor() {
+    this.queue = [];
+    this.isProcessing = false;
+  }
+
+  async add(operation) {
+    return new Promise((resolve, reject) => {
+      this.queue.push({ operation, resolve, reject });
+      this.process();
+    });
+  }
+
+  async process() {
+    if (this.isProcessing || this.queue.length === 0) return;
+    
+    this.isProcessing = true;
+    
+    while (this.queue.length > 0) {
+      const { operation, resolve, reject } = this.queue.shift();
+      
+      try {
+        const result = await operation();
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+      
+      // Small delay to prevent overwhelming SQLite
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+    
+    this.isProcessing = false;
+  }
+}
+
+const dbQueue = new DatabaseQueue();
+
 const saveContact = async (jid, name) => {
   try {
     if (!jid || !name || isJidGroup(jid)) return;
@@ -103,23 +142,45 @@ const saveContact = async (jid, name) => {
       return;
     }
     
-    const exists = await contactDb.findOne({ where: { jid } });
-    if (exists) {
-      if (exists.name === name) {
-        // Update cache
-        contactCache.set(cacheKey, { name, timestamp: Date.now() });
-        return;
+    // Queue the database operation to prevent SQLite locking
+    const result = await dbQueue.add(async () => {
+      let retries = 3;
+      
+      while (retries > 0) {
+        try {
+          // Use findOrCreate to handle race conditions
+          const [contact, created] = await contactDb.findOrCreate({
+            where: { jid },
+            defaults: { jid, name }
+          });
+          
+          // If record exists but name is different, update it
+          if (!created && contact.name !== name) {
+            await contact.update({ name });
+          }
+          
+          return contact;
+        } catch (error) {
+          retries--;
+          
+          if (error.name === 'SequelizeTimeoutError' || error.parent?.code === 'SQLITE_BUSY') {
+            if (retries > 0) {
+              // Wait longer before retry for database locks
+              await new Promise(resolve => setTimeout(resolve, 100 * (4 - retries)));
+              continue;
+            }
+          }
+          
+          throw error;
+        }
       }
-      const result = await contactDb.update({ name }, { where: { jid } });
-      contactCache.set(cacheKey, { name, timestamp: Date.now() });
-      return result;
-    } else {
-      const result = await contactDb.create({ jid, name });
-      contactCache.set(cacheKey, { name, timestamp: Date.now() });
-      return result;
-    }
+    });
+    
+    contactCache.set(cacheKey, { name, timestamp: Date.now() });
+    return result;
   } catch (e) {
-    console.warn("Save contact error:", e);
+    console.warn("Save contact error:", e.message || e);
+    return null;
   }
 };
 
@@ -140,30 +201,52 @@ const saveMessage = async (message, user) => {
       messageBatch.length = 0;
       
       try {
-        await Promise.allSettled(
-          batch.map(async ({ message, user }) => {
-            const cacheKey = `msg_${message.key.id}`;
-            if (messageCache.has(cacheKey)) return;
-            
-            await messageDb.upsert({
-              id: message.key.id,
-              jid: message.key.remoteJid,
-              message: message,
-            });
-            
-            messageCache.set(cacheKey, { timestamp: Date.now() });
-            
-            if (user && message.pushName) {
-              await saveContact(user, message.pushName);
-            }
-          })
-        );
+        // Queue the batch operation to prevent SQLite locking
+        await dbQueue.add(async () => {
+          await Promise.allSettled(
+            batch.map(async ({ message, user }) => {
+              const cacheKey = `msg_${message.key.id}`;
+              if (messageCache.has(cacheKey)) return;
+              
+              let retries = 3;
+              
+              while (retries > 0) {
+                try {
+                  await messageDb.upsert({
+                    id: message.key.id,
+                    jid: message.key.remoteJid,
+                    message: message,
+                  });
+                  
+                  messageCache.set(cacheKey, { timestamp: Date.now() });
+                  
+                  if (user && message.pushName) {
+                    await saveContact(user, message.pushName);
+                  }
+                  
+                  break; // Success, exit retry loop
+                } catch (error) {
+                  retries--;
+                  
+                  if (error.name === 'SequelizeTimeoutError' || error.parent?.code === 'SQLITE_BUSY') {
+                    if (retries > 0) {
+                      await new Promise(resolve => setTimeout(resolve, 50 * (4 - retries)));
+                      continue;
+                    }
+                  }
+                  
+                  throw error;
+                }
+              }
+            })
+          );
+        });
       } catch (error) {
-        console.warn("Batch message save error:", error);
+        console.warn("Batch message save error:", error.message || error);
       }
     }, 100); // Batch every 100ms
   } catch (e) {
-    console.warn("Save message error:", e);
+    console.warn("Save message error:", e.message || e);
   }
 };
 
@@ -222,26 +305,52 @@ const saveChat = async (chat) => {
     if (cached && cached.timestamp === chat.conversationTimestamp) return;
     
     const isGroup = isJidGroup(chat.id);
-    const chatExists = await chatDb.findOne({ where: { id: chat.id } });
     
-    if (chatExists) {
-      const result = await chatDb.update(
-        { conversationTimestamp: chat.conversationTimestamp },
-        { where: { id: chat.id } }
-      );
-      chatCache.set(cacheKey, { timestamp: chat.conversationTimestamp });
-      return result;
-    } else {
-      const result = await chatDb.create({
-        id: chat.id,
-        conversationTimestamp: chat.conversationTimestamp,
-        isGroup,
-      });
-      chatCache.set(cacheKey, { timestamp: chat.conversationTimestamp });
-      return result;
-    }
+    // Queue the database operation to prevent SQLite locking
+    const result = await dbQueue.add(async () => {
+      let retries = 3;
+      
+      while (retries > 0) {
+        try {
+          // Use findOrCreate to handle race conditions
+          const [chatRecord, created] = await chatDb.findOrCreate({
+            where: { id: chat.id },
+            defaults: {
+              id: chat.id,
+              conversationTimestamp: chat.conversationTimestamp,
+              isGroup,
+            }
+          });
+          
+          // If record exists but timestamp is different, update it
+          if (!created && chatRecord.conversationTimestamp !== chat.conversationTimestamp) {
+            await chatRecord.update({ 
+              conversationTimestamp: chat.conversationTimestamp 
+            });
+          }
+          
+          return chatRecord;
+        } catch (error) {
+          retries--;
+          
+          if (error.name === 'SequelizeTimeoutError' || error.parent?.code === 'SQLITE_BUSY') {
+            if (retries > 0) {
+              // Wait longer before retry for database locks
+              await new Promise(resolve => setTimeout(resolve, 100 * (4 - retries)));
+              continue;
+            }
+          }
+          
+          throw error;
+        }
+      }
+    });
+    
+    chatCache.set(cacheKey, { timestamp: chat.conversationTimestamp });
+    return result;
   } catch (e) {
-    console.warn("Save chat error:", e);
+    console.warn("Save chat error:", e.message || e);
+    return null;
   }
 };
 
