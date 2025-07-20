@@ -156,14 +156,16 @@ async function connect() {
 
     console.log("🔄 Connecting to MongoDB...");
     
-    // Connect to MongoDB
+    // Disconnect any existing connection first
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+    
+    // Connect to MongoDB with simplified options
     await mongoose.connect(config.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 30000,
       socketTimeoutMS: 45000,
-      bufferCommands: false,
-      bufferMaxEntries: 0
+      family: 4 // Use IPv4, skip trying IPv6
     });
 
     isConnected = true;
@@ -172,10 +174,20 @@ async function connect() {
     // Initialize models
     for (const [modelName, schema] of Object.entries(schemas)) {
       try {
-        models[modelName] = mongoose.model(modelName, schema);
+        // Check if model already exists
+        if (mongoose.models[modelName]) {
+          models[modelName] = mongoose.models[modelName];
+        } else {
+          models[modelName] = mongoose.model(modelName, schema);
+        }
       } catch (error) {
-        // Model might already exist
-        models[modelName] = mongoose.model(modelName);
+        console.warn(`Warning creating model ${modelName}:`, error.message);
+        // Try to get existing model
+        try {
+          models[modelName] = mongoose.model(modelName);
+        } catch (e) {
+          console.error(`Failed to initialize model ${modelName}:`, e.message);
+        }
       }
     }
 
@@ -185,6 +197,7 @@ async function connect() {
   } catch (error) {
     console.error("❌ MongoDB connection failed:", error);
     isConnected = false;
+    models = {};
     throw error;
   }
 }
