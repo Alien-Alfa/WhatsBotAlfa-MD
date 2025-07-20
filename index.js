@@ -93,17 +93,44 @@ async function initialize() {
     if (config.USE_MONGODB && config.MONGODB_URI) {
       // MongoDB initialization with sync system
       console.log("🍃 Using MongoDB database with auto-sync...");
-      const mongoStoreDb = require("./assets/database/MongoStoreDb");
-      await Promise.all([
-        readAndRequireFiles(path.join(__dirname, "/assets/database/")),
-        mongoStoreDb.initialize()
-      ]);
-      
-      // Display sync status
-      const syncStats = mongoStoreDb.getSyncStats();
-      console.log("🔄 Database sync system initialized");
-      console.log(`   - Sync frequency: Every 30 minutes`);
-      console.log(`   - Auto-sync with local SQLite: Enabled`);
+      try {
+        const mongoStoreDb = require("./assets/database/MongoStoreDb");
+        await Promise.all([
+          readAndRequireFiles(path.join(__dirname, "/assets/database/")),
+          mongoStoreDb.initialize()
+        ]);
+        
+        // Display sync status
+        const syncStats = mongoStoreDb.getSyncStats();
+        console.log("🔄 Database sync system initialized");
+        console.log(`   - Sync frequency: Every 30 minutes`);
+        console.log(`   - Auto-sync with local SQLite: Enabled`);
+        
+      } catch (error) {
+        console.error("❌ MongoDB initialization failed, falling back to SQLite:", error.message);
+        console.log("🗃️ Switching to SQLite database...");
+        // Load database models and initialize SQLite
+        await readAndRequireFiles(path.join(__dirname, "/assets/database/"));
+        
+        // Create SQLite database instance if not exists
+        const { Sequelize } = require("sequelize");
+        const sqliteDb = new Sequelize({
+          dialect: "sqlite",
+          storage: "./assets/database.db",
+          logging: false,
+          pool: {
+            max: 10,
+            min: 0,
+            acquire: 30000,
+            idle: 10000
+          }
+        });
+        
+        await sqliteDb.sync({ 
+          logging: false,
+          alter: true
+        });
+      }
       
     } else {
       // SQLite/PostgreSQL initialization
