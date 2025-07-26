@@ -25,15 +25,15 @@ command(
           // Edit the original command to hide it
           if (me) {
             await message.client.sendMessage(message.jid, {
-              text: "✅",
+              text: "❤️‍🩹",
               edit: message.key
             });
           } else {
-            let { key } = await message.reply("✅");
+            let { key } = await message.reply("❤️‍🩹");
             setTimeout(async () => {
               try {
                 await message.client.sendMessage(message.jid, {
-                  text: "✅",
+                  text: "❤️‍🩹",
                   edit: key
                 });
               } catch (e) {
