@@ -172,10 +172,19 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
       if (!urlMatch) return await message.reply("_Invalid Instagram URL._");
       
       const url = urlMatch[0];
-      const data = await igdl(url);
       
-      if (!data || data.length === 0) {
-        return await message.reply("_No media found on the link._");
+      let data;
+      try {
+        data = await igdl(url);
+      } catch (igdlError) {
+        console.warn("Instagram download API error:", igdlError.message);
+        return await message.reply("_Instagram download failed. Please try again later._");
+      }
+      
+      // Validate that data is an array and not an error string
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        console.warn("Instagram download failed or returned invalid data:", data);
+        return await message.reply("_No media found on the link or download failed._");
       }
       
       let mediaCount = 0;

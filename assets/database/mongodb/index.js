@@ -70,6 +70,12 @@ class MongoDBManager {
         AiChat,
         Gemini,
       };
+      
+      // Debug: Verify PausedChat model schema
+      console.log("🔍 Initializing MongoDB models...");
+      console.log("🔍 PausedChat model schema paths:", Object.keys(PausedChat.schema.paths));
+      console.log("🔍 PausedChat model name:", PausedChat.modelName);
+      console.log("🔍 PausedChat collection name:", PausedChat.collection.name);
 
       // Set up connection event handlers
       mongoose.connection.on("error", (error) => {

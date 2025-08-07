@@ -36,18 +36,42 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         // Ensure we have the correct model reference
         const PausedChatModel = mongoManager.getModels().PausedChat;
         
-        return await PausedChatModel.findOneAndUpdate(
-          { chatId },
-          { 
-            $set: {
-              chatId,
-              pausedBy,
-              reason,
-              pausedAt: new Date()
-            }
-          },
-          { upsert: true, new: true, runValidators: true }
-        );
+        // Debug: Check if model exists and log schema
+        console.log("🔍 PausedChat model exists:", !!PausedChatModel);
+        if (PausedChatModel) {
+          console.log("🔍 PausedChat schema paths:", Object.keys(PausedChatModel.schema.paths));
+        }
+        
+        // Use create instead of findOneAndUpdate to avoid strict mode issues
+        const newPausedChat = new PausedChatModel({
+          chatId,
+          jid: chatId, // Also set jid for compatibility
+          pausedBy,
+          reason,
+          pausedAt: new Date(),
+          isPaused: true
+        });
+        
+        // Use upsert logic manually
+        try {
+          return await newPausedChat.save();
+        } catch (duplicateError) {
+          if (duplicateError.code === 11000) {
+            // Document already exists, update it
+            return await PausedChatModel.findOneAndUpdate(
+              { chatId },
+              { 
+                pausedBy,
+                reason,
+                pausedAt: new Date(),
+                isPaused: true,
+                jid: chatId
+              },
+              { new: true, strict: false }
+            );
+          }
+          throw duplicateError;
+        }
       } catch (error) {
         console.warn("Save paused chat error:", error);
         console.error("Full error details:", error);
