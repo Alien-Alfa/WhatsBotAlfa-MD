@@ -14,11 +14,13 @@ command(
   },
   async (message) => {
     const chatId = message.key.remoteJid;
+    console.log("🔍 Attempting to pause chat:", chatId);
     try {
-      await PausedChats.savePausedChat(chatId);
+      const result = await PausedChats.savePausedChat(chatId);
+      console.log("✅ Pause chat result:", result);
       message.reply("Chat paused successfully.");
     } catch (error) {
-      console.error(error);
+      console.error("❌ Pause chat error:", error);
       message.reply("Error pausing the chat.");
     }
   }

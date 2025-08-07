@@ -42,35 +42,34 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           console.log("🔍 PausedChat schema paths:", Object.keys(PausedChatModel.schema.paths));
         }
         
-        // Use create instead of findOneAndUpdate to avoid strict mode issues
-        const newPausedChat = new PausedChatModel({
-          chatId,
-          jid: chatId, // Also set jid for compatibility
-          pausedBy,
+        // Since the current schema uses 'jid' field, use that instead of 'chatId'
+        const pauseData = {
+          jid: chatId,  // Use jid field that exists in schema
           reason,
+          pausedBy,
           pausedAt: new Date(),
           isPaused: true
-        });
+        };
         
-        // Use upsert logic manually
+        // Use upsert logic manually with existing schema
         try {
-          return await newPausedChat.save();
-        } catch (duplicateError) {
-          if (duplicateError.code === 11000) {
-            // Document already exists, update it
-            return await PausedChatModel.findOneAndUpdate(
-              { chatId },
-              { 
-                pausedBy,
-                reason,
-                pausedAt: new Date(),
-                isPaused: true,
-                jid: chatId
-              },
-              { new: true, strict: false }
-            );
+          return await PausedChatModel.findOneAndUpdate(
+            { jid: chatId },  // Search by jid field
+            pauseData,
+            { upsert: true, new: true, strict: false }
+          );
+        } catch (error) {
+          console.warn("findOneAndUpdate failed, trying create:", error.message);
+          // Fallback to create
+          try {
+            return await PausedChatModel.create(pauseData);
+          } catch (createError) {
+            if (createError.code === 11000) {
+              // Document exists, just return it
+              return await PausedChatModel.findOne({ jid: chatId });
+            }
+            throw createError;
           }
-          throw duplicateError;
         }
       } catch (error) {
         console.warn("Save paused chat error:", error);
@@ -87,7 +86,8 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         }
         
         const PausedChatModel = mongoManager.getModels().PausedChat;
-        return await PausedChatModel.deleteOne({ chatId });
+        // Use jid field to match the current schema
+        return await PausedChatModel.deleteOne({ jid: chatId });
       } catch (error) {
         console.warn("Delete paused chat error:", error);
         console.error("Full error details:", error);
