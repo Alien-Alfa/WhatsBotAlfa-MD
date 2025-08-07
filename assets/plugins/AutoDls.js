@@ -12,6 +12,9 @@ const {
   const dl = require("@xaviabot/fb-downloader");
   const fetch = require("node-fetch");
   const { yta, ytv, ytsdl } = require("../../lib/ytdl");
+  const fs = require('fs');
+  const path = require('path');
+  const { Readable } = require('stream');
   
   const isIgUrl = (text) => {
     const regex = /(https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv|stories)\/[\w-]+\/?)/;
@@ -29,6 +32,56 @@ const isYtUrl = (text) => {
     const regex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+)/;
     const match = text.match(regex);
     return match ? match[0] : null;
+};
+
+// Helper function to download file using stream
+const downloadFileStream = async (url, filename) => {
+  const tempDir = path.join(__dirname, '../../temp');
+  
+  // Create temp directory if it doesn't exist
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+  
+  const filePath = path.join(tempDir, filename);
+  
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    // Create write stream
+    const fileStream = fs.createWriteStream(filePath);
+    
+    // Pipe the response to file
+    await new Promise((resolve, reject) => {
+      response.body.pipe(fileStream);
+      response.body.on('error', reject);
+      fileStream.on('finish', resolve);
+      fileStream.on('error', reject);
+    });
+    
+    return filePath;
+  } catch (error) {
+    // Clean up file if it exists
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+    throw error;
+  }
+};
+
+// Helper function to clean up temp files
+const cleanupFile = (filePath) => {
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (error) {
+    console.warn(`Failed to cleanup file ${filePath}:`, error.message);
+  }
 };
   
   command({
@@ -67,8 +120,45 @@ const isYtUrl = (text) => {
         return await message.reply("_No media found on the link._");
       }
       
+      let mediaCount = 0;
       for (const item of data) {
-        await message.sendFile(item.download_link, { caption: item.caption });
+        let filePath = null;
+        try {
+          // Generate unique filename
+          const fileExtension = item.download_link.includes('.mp4') ? 'mp4' : 'jpg';
+          const filename = `instagram_${Date.now()}_${mediaCount}.${fileExtension}`;
+          
+          // Download using stream
+          filePath = await downloadFileStream(item.download_link, filename);
+          
+          // Send file based on type
+          if (fileExtension === 'mp4') {
+            await message.sendMessage(message.jid, {
+              video: fs.readFileSync(filePath),
+              caption: item.caption || `📸 Instagram Video ${mediaCount + 1}`,
+              mimetype: "video/mp4"
+            }, { quoted: message });
+          } else {
+            await message.sendMessage(message.jid, {
+              image: fs.readFileSync(filePath),
+              caption: item.caption || `📸 Instagram Photo ${mediaCount + 1}`
+            }, { quoted: message });
+          }
+          
+          mediaCount++;
+        } catch (error) {
+          console.error(`Error downloading Instagram media ${mediaCount}:`, error);
+          await message.reply(`_Error downloading media ${mediaCount + 1}: ${error.message}_`);
+        } finally {
+          // Clean up temp file
+          if (filePath) {
+            cleanupFile(filePath);
+          }
+        }
+      }
+      
+      if (mediaCount === 0) {
+        await message.reply("_Failed to download any media from the Instagram link._");
       }
     } catch (e) {
       await message.reply(`_Error downloading Instagram media: ${e.message}_`);
@@ -87,10 +177,35 @@ const isYtUrl = (text) => {
       
       if (!url) return await message.reply("_Could not download the video._");
 
-      await message.client.sendMessage(message.jid, {
-        video: { url },
-        caption: `*${title}*\n_[Quality: ${quality.toUpperCase()}]_`,
-      }, { quoted: message });
+      let filePath = null;
+      try {
+        // Generate unique filename
+        const filename = `facebook_${Date.now()}.mp4`;
+        
+        // Download using stream
+        filePath = await downloadFileStream(url, filename);
+        
+        // Send the video file
+        await message.sendMessage(message.jid, {
+          video: fs.readFileSync(filePath),
+          caption: `*${title}*\n_[Quality: ${quality.toUpperCase()}]_`,
+          mimetype: "video/mp4",
+          fileName: `${title}.mp4`
+        }, { quoted: message });
+        
+      } catch (error) {
+        console.error("Error in Facebook streaming download:", error);
+        // Fallback to direct URL method
+        await message.client.sendMessage(message.jid, {
+          video: { url },
+          caption: `*${title}*\n_[Quality: ${quality.toUpperCase()}]_`,
+        }, { quoted: message });
+      } finally {
+        // Clean up temp file
+        if (filePath) {
+          cleanupFile(filePath);
+        }
+      }
     } catch (error) {
       await message.reply(`_Error downloading Facebook media: ${error.message}_`);
     }
@@ -108,12 +223,46 @@ const isYtUrl = (text) => {
       }
       
       const { url, quality, title, thumbnail } = json.result.video;
+      let filePath = null;
+      let thumbnailBuffer = null;
 
-      await message.client.sendMessage(message.jid, {
-        video: { url },
-        caption: `*${title}*\n_[Quality: ${quality}]_`,
-        thumbnail: await getBuffer(thumbnail),
-      }, { quoted: message });
+      try {
+        // Download thumbnail
+        try {
+          thumbnailBuffer = await getBuffer(thumbnail);
+        } catch (thumbError) {
+          console.warn("Failed to download thumbnail:", thumbError.message);
+        }
+
+        // Generate unique filename
+        const filename = `youtube_${Date.now()}.mp4`;
+        
+        // Download using stream
+        filePath = await downloadFileStream(url, filename);
+        
+        // Send the video file
+        await message.sendMessage(message.jid, {
+          video: fs.readFileSync(filePath),
+          caption: `*${title}*\n_[Quality: ${quality}]_`,
+          thumbnail: thumbnailBuffer,
+          mimetype: "video/mp4",
+          fileName: `${title}.mp4`
+        }, { quoted: message });
+        
+      } catch (error) {
+        console.error("Error in YouTube streaming download:", error);
+        // Fallback to direct URL method
+        await message.client.sendMessage(message.jid, {
+          video: { url },
+          caption: `*${title}*\n_[Quality: ${quality}]_`,
+          thumbnail: thumbnailBuffer,
+        }, { quoted: message });
+      } finally {
+        // Clean up temp file
+        if (filePath) {
+          cleanupFile(filePath);
+        }
+      }
     } catch (error) {
       await message.reply(`_Error downloading YouTube media: ${error.message}_`);
     }
@@ -154,18 +303,51 @@ const isYtUrl = (text) => {
       match = match || (message.reply_message && message.reply_message.text);
       if (!match || !isYtUrl(match)) return await message.reply("_Provide a valid YouTube URL._");
       
+      let filePath = null;
       try {
         const { dlink, title } = await yta(match);
         await message.reply(`_Downloading ${title}..._`);
-        const buffer = await getBuffer(dlink);
-        const audio = await toAudio(buffer, "mp3");
+        
+        // Generate unique filename
+        const filename = `youtube_audio_${Date.now()}.mp3`;
+        
+        // Download using stream
+        filePath = await downloadFileStream(dlink, filename);
+        
+        // Convert to audio if needed
+        const audioBuffer = fs.readFileSync(filePath);
+        const convertedAudio = await toAudio(audioBuffer, "mp3");
+        
         await message.sendMessage(
           message.jid,
-          { audio, mimetype: "audio/mpeg", fileName: `${title}.mp3` },
+          { 
+            audio: convertedAudio, 
+            mimetype: "audio/mpeg", 
+            fileName: `${title}.mp3`,
+            ptt: false
+          },
           { quoted: message }
         );
       } catch (e) {
-        await message.reply(`_Error downloading audio: ${e.message}_`);
+        console.error("Error in YouTube audio streaming download:", e);
+        // Fallback to buffer method
+        try {
+          const { dlink, title } = await yta(match);
+          const buffer = await getBuffer(dlink);
+          const audio = await toAudio(buffer, "mp3");
+          await message.sendMessage(
+            message.jid,
+            { audio, mimetype: "audio/mpeg", fileName: `${title}.mp3` },
+            { quoted: message }
+          );
+        } catch (fallbackError) {
+          await message.reply(`_Error downloading audio: ${fallbackError.message}_`);
+        }
+      } finally {
+        // Clean up temp file
+        if (filePath) {
+          cleanupFile(filePath);
+        }
       }
     }
   );
@@ -185,16 +367,45 @@ const isYtUrl = (text) => {
         return await message.reply("_Invalid resolution. Supported: 144p, 240p, 360p, 480p, 720p, 1080p, 1440p, 2160p_");
       }
       
+      let filePath = null;
       try {
         const { dlink, title } = await ytv(match.split(";")[0], quality);
         await message.reply(`_Downloading ${title} (${quality})..._`);
+        
+        // Generate unique filename
+        const filename = `youtube_video_${Date.now()}.mp4`;
+        
+        // Download using stream
+        filePath = await downloadFileStream(dlink, filename);
+        
         await message.sendMessage(
           message.jid,
-          { video: { url: dlink }, caption: title, mimetype: "video/mp4", fileName: `${title}.mp4` },
+          { 
+            video: fs.readFileSync(filePath), 
+            caption: `*${title}*\n_[Quality: ${quality}]_`, 
+            mimetype: "video/mp4", 
+            fileName: `${title}.mp4` 
+          },
           { quoted: message }
         );
       } catch (e) {
-        await message.reply(`_Error downloading video: ${e.message}_`);
+        console.error("Error in YouTube video streaming download:", e);
+        // Fallback to direct URL method
+        try {
+          const { dlink, title } = await ytv(match.split(";")[0], quality);
+          await message.sendMessage(
+            message.jid,
+            { video: { url: dlink }, caption: title, mimetype: "video/mp4", fileName: `${title}.mp4` },
+            { quoted: message }
+          );
+        } catch (fallbackError) {
+          await message.reply(`_Error downloading video: ${fallbackError.message}_`);
+        }
+      } finally {
+        // Clean up temp file
+        if (filePath) {
+          cleanupFile(filePath);
+        }
       }
     }
   );
@@ -209,17 +420,47 @@ const isYtUrl = (text) => {
       match = match || (message.reply_message && message.reply_message.text);
       if (!match) return await message.reply("_Provide a song name to search._");
       
+      let filePath = null;
       try {
         const { dlink, title } = await ytsdl(match + " song");
         await message.reply(`_Downloading ${title}..._`);
-        const buffer = await getBuffer(dlink);
+        
+        // Generate unique filename
+        const filename = `song_${Date.now()}.mp3`;
+        
+        // Download using stream
+        filePath = await downloadFileStream(dlink, filename);
+        
+        const audioBuffer = fs.readFileSync(filePath);
         await message.sendMessage(
           message.jid,
-          { audio: buffer, mimetype: "audio/mpeg", fileName: `${title}.mp3` },
+          { 
+            audio: audioBuffer, 
+            mimetype: "audio/mpeg", 
+            fileName: `${title}.mp3`,
+            ptt: false
+          },
           { quoted: message }
         );
       } catch (e) {
-        await message.reply(`_Error downloading song: ${e.message}_`);
+        console.error("Error in song streaming download:", e);
+        // Fallback to buffer method
+        try {
+          const { dlink, title } = await ytsdl(match + " song");
+          const buffer = await getBuffer(dlink);
+          await message.sendMessage(
+            message.jid,
+            { audio: buffer, mimetype: "audio/mpeg", fileName: `${title}.mp3` },
+            { quoted: message }
+          );
+        } catch (fallbackError) {
+          await message.reply(`_Error downloading song: ${fallbackError.message}_`);
+        }
+      } finally {
+        // Clean up temp file
+        if (filePath) {
+          cleanupFile(filePath);
+        }
       }
     }
   );
@@ -234,16 +475,45 @@ const isYtUrl = (text) => {
       match = match || (message.reply_message && message.reply_message.text);
       if (!match) return await message.reply("_Provide a video name to search._");
       
+      let filePath = null;
       try {
         const { dlink, title } = await ytsdl(match, "video");
         await message.reply(`_Downloading ${title}..._`);
+        
+        // Generate unique filename
+        const filename = `video_${Date.now()}.mp4`;
+        
+        // Download using stream
+        filePath = await downloadFileStream(dlink, filename);
+        
         await message.sendMessage(
           message.jid,
-          { video: { url: dlink }, caption: title, mimetype: "video/mp4", fileName: `${title}.mp4` },
+          { 
+            video: fs.readFileSync(filePath), 
+            caption: `*${title}*`, 
+            mimetype: "video/mp4", 
+            fileName: `${title}.mp4` 
+          },
           { quoted: message }
         );
       } catch (e) {
-        await message.reply(`_Error downloading video: ${e.message}_`);
+        console.error("Error in video streaming download:", e);
+        // Fallback to direct URL method
+        try {
+          const { dlink, title } = await ytsdl(match, "video");
+          await message.sendMessage(
+            message.jid,
+            { video: { url: dlink }, caption: title, mimetype: "video/mp4", fileName: `${title}.mp4` },
+            { quoted: message }
+          );
+        } catch (fallbackError) {
+          await message.reply(`_Error downloading video: ${fallbackError.message}_`);
+        }
+      } finally {
+        // Clean up temp file
+        if (filePath) {
+          cleanupFile(filePath);
+        }
       }
     }
   );

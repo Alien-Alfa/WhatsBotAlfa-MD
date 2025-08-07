@@ -15,11 +15,13 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const models = mongoManager.getModels();
         if (!models.PausedChat) {
           await mongoManager.connect();
-          return await mongoManager.getModels().PausedChat.find({});
         }
-        return await models.PausedChat.find({});
+        
+        const PausedChatModel = mongoManager.getModels().PausedChat;
+        return await PausedChatModel.find({});
       } catch (error) {
         console.warn("Get paused chats error:", error);
+        console.error("Full error details:", error);
         return [];
       }
     },
@@ -30,13 +32,25 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         if (!models.PausedChat) {
           await mongoManager.connect();
         }
-        return await mongoManager.getModels().PausedChat.findOneAndUpdate(
+        
+        // Ensure we have the correct model reference
+        const PausedChatModel = mongoManager.getModels().PausedChat;
+        
+        return await PausedChatModel.findOneAndUpdate(
           { chatId },
-          { chatId, pausedBy, reason },
-          { upsert: true, new: true }
+          { 
+            $set: {
+              chatId,
+              pausedBy,
+              reason,
+              pausedAt: new Date()
+            }
+          },
+          { upsert: true, new: true, runValidators: true }
         );
       } catch (error) {
         console.warn("Save paused chat error:", error);
+        console.error("Full error details:", error);
         return null;
       }
     },
@@ -47,9 +61,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         if (!models.PausedChat) {
           await mongoManager.connect();
         }
-        return await mongoManager.getModels().PausedChat.deleteOne({ chatId });
+        
+        const PausedChatModel = mongoManager.getModels().PausedChat;
+        return await PausedChatModel.deleteOne({ chatId });
       } catch (error) {
         console.warn("Delete paused chat error:", error);
+        console.error("Full error details:", error);
         return null;
       }
     },
@@ -60,9 +77,12 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         if (!models.PausedChat) {
           await mongoManager.connect();
         }
-        return await mongoManager.getModels().PausedChat.deleteMany({});
+        
+        const PausedChatModel = mongoManager.getModels().PausedChat;
+        return await PausedChatModel.deleteMany({});
       } catch (error) {
         console.warn("Delete all paused chats error:", error);
+        console.error("Full error details:", error);
         return null;
       }
     }

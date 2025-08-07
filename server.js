@@ -50,7 +50,11 @@ function start(file) {
                     break;
                 case 'whatsapp_stopped':
                     whatsappConnectionStatus = 'stopped';
-                    logger.info('WhatsApp connection stopped');
+                    logger.info('WhatsApp connection and message processing stopped');
+                    break;
+                case 'whatsapp_started':
+                    whatsappConnectionStatus = 'connected';
+                    logger.info('WhatsApp connection and message processing started');
                     break;
                 default:
                     logger.warn(`Unknown message from ${file}: ${data}`);
