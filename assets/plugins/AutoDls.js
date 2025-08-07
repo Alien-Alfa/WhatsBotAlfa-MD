@@ -46,7 +46,18 @@ const downloadFileStream = async (url, filename) => {
   const filePath = path.join(tempDir, filename);
   
   try {
-    const response = await fetch(url);
+    // Add timeout and retry logic
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -55,21 +66,57 @@ const downloadFileStream = async (url, filename) => {
     // Create write stream
     const fileStream = fs.createWriteStream(filePath);
     
-    // Pipe the response to file
+    // Pipe the response to file with error handling
     await new Promise((resolve, reject) => {
-      response.body.pipe(fileStream);
-      response.body.on('error', reject);
-      fileStream.on('finish', resolve);
-      fileStream.on('error', reject);
+      const stream = response.body.pipe(fileStream);
+      
+      response.body.on('error', (error) => {
+        fileStream.destroy();
+        reject(new Error(`Download stream error: ${error.message}`));
+      });
+      
+      fileStream.on('error', (error) => {
+        reject(new Error(`File write error: ${error.message}`));
+      });
+      
+      fileStream.on('finish', () => {
+        // Verify file was written
+        if (fs.existsSync(filePath) && fs.statSync(filePath).size > 0) {
+          resolve();
+        } else {
+          reject(new Error('File download incomplete or empty'));
+        }
+      });
+      
+      // Handle stream end without finish (connection issues)
+      stream.on('end', () => {
+        setTimeout(() => {
+          if (!fileStream.destroyed) {
+            fileStream.end();
+          }
+        }, 1000);
+      });
     });
     
     return filePath;
   } catch (error) {
     // Clean up file if it exists
     if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+      try {
+        fs.unlinkSync(filePath);
+      } catch (cleanupError) {
+        console.warn(`Failed to cleanup incomplete file: ${cleanupError.message}`);
+      }
     }
-    throw error;
+    
+    // Handle specific error types
+    if (error.name === 'AbortError') {
+      throw new Error('Download timeout - file too large or connection slow');
+    } else if (error.message.includes('rate-overlimit')) {
+      throw new Error('Rate limit exceeded - please try again later');
+    } else {
+      throw error;
+    }
   }
 };
 
@@ -83,6 +130,9 @@ const cleanupFile = (filePath) => {
     console.warn(`Failed to cleanup file ${filePath}:`, error.message);
   }
 };
+
+// Helper function to add delay between requests
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
   
   command({
       on: "text",
@@ -95,12 +145,20 @@ const cleanupFile = (filePath) => {
       const text = match;
       if (!text) return;
       
-      if (isIgUrl(text)) {
-        await downloadInstaMedia(message, text);
-      } else if (isFbUrl(text)) {
-        await downloadFacebookMedia(message, text);
-      } else if (isYtUrl(text)) {
-        await downloadYoutubeMedia(message, text);
+      try {
+        if (isIgUrl(text)) {
+          await downloadInstaMedia(message, text);
+        } else if (isFbUrl(text)) {
+          await downloadFacebookMedia(message, text);
+        } else if (isYtUrl(text)) {
+          await downloadYoutubeMedia(message, text);
+        }
+      } catch (error) {
+        console.error("Auto download error:", error);
+        // Don't send error message for auto-downloads to avoid spam
+        if (error.message.includes('rate-overlimit')) {
+          console.warn("Rate limit hit for auto-download, skipping...");
+        }
       }
     }
   );
@@ -121,11 +179,33 @@ const cleanupFile = (filePath) => {
       }
       
       let mediaCount = 0;
-      for (const item of data) {
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
         let filePath = null;
+        
+        // Add delay between downloads to avoid rate limiting
+        if (i > 0) {
+          await delay(2000); // 2 second delay between media items
+        }
+        
         try {
+          // Check if download_link exists and is valid
+          if (!item.download_link || typeof item.download_link !== 'string') {
+            console.warn("Invalid download link for Instagram media:", item);
+            continue;
+          }
+
+          // Determine file extension from URL or content type
+          let fileExtension = 'jpg'; // default
+          if (item.download_link.includes('.mp4') || item.download_link.includes('video')) {
+            fileExtension = 'mp4';
+          } else if (item.download_link.includes('.jpg') || item.download_link.includes('.jpeg')) {
+            fileExtension = 'jpg';
+          } else if (item.download_link.includes('.png')) {
+            fileExtension = 'png';
+          }
+          
           // Generate unique filename
-          const fileExtension = item.download_link.includes('.mp4') ? 'mp4' : 'jpg';
           const filename = `instagram_${Date.now()}_${mediaCount}.${fileExtension}`;
           
           // Download using stream
@@ -148,7 +228,25 @@ const cleanupFile = (filePath) => {
           mediaCount++;
         } catch (error) {
           console.error(`Error downloading Instagram media ${mediaCount}:`, error);
-          await message.reply(`_Error downloading media ${mediaCount + 1}: ${error.message}_`);
+          // Try fallback method for this media item
+          try {
+            if (item.download_link) {
+              if (item.download_link.includes('.mp4') || item.download_link.includes('video')) {
+                await message.sendMessage(message.jid, {
+                  video: { url: item.download_link },
+                  caption: item.caption || `📸 Instagram Video ${mediaCount + 1}`
+                }, { quoted: message });
+              } else {
+                await message.sendMessage(message.jid, {
+                  image: { url: item.download_link },
+                  caption: item.caption || `📸 Instagram Photo ${mediaCount + 1}`
+                }, { quoted: message });
+              }
+              mediaCount++;
+            }
+          } catch (fallbackError) {
+            console.error(`Fallback failed for Instagram media ${mediaCount}:`, fallbackError);
+          }
         } finally {
           // Clean up temp file
           if (filePath) {
@@ -161,6 +259,7 @@ const cleanupFile = (filePath) => {
         await message.reply("_Failed to download any media from the Instagram link._");
       }
     } catch (e) {
+      console.error("Instagram download error:", e);
       await message.reply(`_Error downloading Instagram media: ${e.message}_`);
     }
   };
