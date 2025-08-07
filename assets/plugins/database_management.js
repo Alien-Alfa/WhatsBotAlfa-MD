@@ -4,6 +4,7 @@
  * Description: Database management commands for both SQLite and MongoDB
  */
 
+const fs = require("fs");
 const config = require("../../config");
 const { command } = require("../../lib");
 
@@ -57,7 +58,6 @@ command(
         await message.reply(response);
       } else {
         // SQLite mode
-        const fs = require('fs');
         const dbPath = './assets/database.db';
         const dbExists = fs.existsSync(dbPath);
         let dbSize = 0;
@@ -254,7 +254,6 @@ command(
         await message.reply(response);
       } else {
         // SQLite status
-        const fs = require('fs');
         const dbPath = './assets/database.db';
         const dbExists = fs.existsSync(dbPath);
         
