@@ -325,19 +325,68 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
       const link = match.match(/(https?:\/\/[^\s]+)/);
       if (!link) return await message.reply("_Invalid YouTube URL._");
       
-      const json = await getJson(`https://api.maher-zubair.tech/download/yt?url=${link[0]}`);
-      if (json.status !== 200 || !json.result || !json.result.video) {
-        return await message.reply("_Could not download the video._");
+      const url = link[0];
+      console.log("🔍 Attempting to download YouTube URL:", url);
+      
+      let json;
+      try {
+        json = await getJson(`https://api.maher-zubair.tech/download/yt?url=${url}`);
+        console.log("🔍 YouTube API response:", json);
+      } catch (apiError) {
+        console.warn("YouTube API error, trying fallback method:", apiError.message);
+        // Fallback to ytv function
+        try {
+          const { dlink, title } = await ytv(url, "360p");
+          let filePath = null;
+          
+          try {
+            const filename = `youtube_fallback_${Date.now()}.mp4`;
+            filePath = await downloadFileStream(dlink, filename);
+            
+            await message.sendMessage(message.jid, {
+              video: fs.readFileSync(filePath),
+              caption: `*${title}*\n_[Quality: 360p]_`,
+              mimetype: "video/mp4",
+              fileName: `${title}.mp4`
+            }, { quoted: message });
+            
+            return;
+          } catch (streamError) {
+            console.warn("Stream download failed, using direct URL:", streamError.message);
+            await message.sendMessage(message.jid, {
+              video: { url: dlink },
+              caption: `*${title}*\n_[Quality: 360p]_`,
+            }, { quoted: message });
+            return;
+          } finally {
+            if (filePath) cleanupFile(filePath);
+          }
+        } catch (fallbackError) {
+          console.error("Fallback ytv also failed:", fallbackError);
+          return await message.reply("_YouTube download is currently unavailable. Please try again later._");
+        }
       }
       
-      const { url, quality, title, thumbnail } = json.result.video;
+      if (!json || json.status !== 200 || !json.result || !json.result.video) {
+        console.warn("Invalid YouTube API response:", json);
+        return await message.reply("_Could not download the video. The video might be private, age-restricted, or unavailable._");
+      }
+      
+      const { url: videoUrl, quality, title, thumbnail } = json.result.video;
+      
+      if (!videoUrl) {
+        return await message.reply("_No download URL found for this video._");
+      }
+      
       let filePath = null;
       let thumbnailBuffer = null;
 
       try {
         // Download thumbnail
         try {
-          thumbnailBuffer = await getBuffer(thumbnail);
+          if (thumbnail) {
+            thumbnailBuffer = await getBuffer(thumbnail);
+          }
         } catch (thumbError) {
           console.warn("Failed to download thumbnail:", thumbError.message);
         }
@@ -346,25 +395,30 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         const filename = `youtube_${Date.now()}.mp4`;
         
         // Download using stream
-        filePath = await downloadFileStream(url, filename);
+        filePath = await downloadFileStream(videoUrl, filename);
         
         // Send the video file
         await message.sendMessage(message.jid, {
           video: fs.readFileSync(filePath),
-          caption: `*${title}*\n_[Quality: ${quality}]_`,
+          caption: `*${title || 'YouTube Video'}*\n_[Quality: ${quality || 'Unknown'}]_`,
           thumbnail: thumbnailBuffer,
           mimetype: "video/mp4",
-          fileName: `${title}.mp4`
+          fileName: `${title || 'youtube_video'}.mp4`
         }, { quoted: message });
         
       } catch (error) {
         console.error("Error in YouTube streaming download:", error);
         // Fallback to direct URL method
-        await message.client.sendMessage(message.jid, {
-          video: { url },
-          caption: `*${title}*\n_[Quality: ${quality}]_`,
-          thumbnail: thumbnailBuffer,
-        }, { quoted: message });
+        try {
+          await message.sendMessage(message.jid, {
+            video: { url: videoUrl },
+            caption: `*${title || 'YouTube Video'}*\n_[Quality: ${quality || 'Unknown'}]_`,
+            thumbnail: thumbnailBuffer,
+          }, { quoted: message });
+        } catch (fallbackError) {
+          console.error("YouTube fallback failed:", fallbackError);
+          await message.reply("_Failed to download the video. Please try again or check if the video is available._");
+        }
       } finally {
         // Clean up temp file
         if (filePath) {
@@ -372,6 +426,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         }
       }
     } catch (error) {
+      console.error("YouTube download error:", error);
       await message.reply(`_Error downloading YouTube media: ${error.message}_`);
     }
   };
