@@ -4,6 +4,8 @@ const fs = require('fs').promises;
 const fss = require('fs');
 
 const workers = {};
+let whatsappConnectionStatus = 'unknown'; // Track WhatsApp connection status
+
 const logger = {
     info: (msg) => console.log(`[INFO] ${new Date().toISOString()} - ${msg}`),
     error: (msg) => console.error(`[ERROR] ${new Date().toISOString()} - ${msg}`),
@@ -37,6 +39,18 @@ function start(file) {
                     break;
                 case 'shutdown':
                     shutdown();
+                    break;
+                case 'whatsapp_connected':
+                    whatsappConnectionStatus = 'connected';
+                    logger.info('WhatsApp connection established');
+                    break;
+                case 'whatsapp_disconnected':
+                    whatsappConnectionStatus = 'disconnected';
+                    logger.info('WhatsApp connection lost');
+                    break;
+                case 'whatsapp_stopped':
+                    whatsappConnectionStatus = 'stopped';
+                    logger.info('WhatsApp connection stopped');
                     break;
                 default:
                     logger.warn(`Unknown message from ${file}: ${data}`);
@@ -170,6 +184,7 @@ app.get('/health', (req, res) => {
         status: 'ok', 
         uptime: process.uptime(),
         workers: Object.keys(workers),
+        botStatus: whatsappConnectionStatus,
         timestamp: new Date().toISOString()
     });
 });
@@ -182,6 +197,43 @@ app.post('/restart', (req, res) => {
     } catch (error) {
         logger.error(`Restart error: ${error.message}`);
         res.status(500).json({ error: 'Restart failed' });
+    }
+});
+
+app.post('/stop-whatsapp', (req, res) => {
+    logger.info("Stop WhatsApp request received");
+    try {
+        const worker = workers['index.js'];
+        if (worker) {
+            worker.send('stop_whatsapp');
+            whatsappConnectionStatus = 'stopped';
+            res.status(200).json({ message: 'WhatsApp connection stopped' });
+        } else {
+            res.status(404).json({ error: 'No WhatsApp process running' });
+        }
+    } catch (error) {
+        logger.error(`Stop WhatsApp error: ${error.message}`);
+        res.status(500).json({ error: 'Stop WhatsApp failed' });
+    }
+});
+
+app.post('/start-whatsapp', (req, res) => {
+    logger.info("Start WhatsApp request received");
+    try {
+        const worker = workers['index.js'];
+        if (worker) {
+            worker.send('start_whatsapp');
+            whatsappConnectionStatus = 'connecting';
+            res.status(200).json({ message: 'WhatsApp connection starting' });
+        } else {
+            // If no worker exists, start the process
+            start("index.js");
+            whatsappConnectionStatus = 'connecting';
+            res.status(200).json({ message: 'WhatsApp process started' });
+        }
+    } catch (error) {
+        logger.error(`Start WhatsApp error: ${error.message}`);
+        res.status(500).json({ error: 'Start WhatsApp failed' });
     }
 });
 
@@ -200,17 +252,6 @@ app.post('/shutdown', (req, res) => {
     logger.info("Shutdown request received");
     res.status(200).json({ message: 'Shutdown initiated' });
     shutdown();
-});
-
-app.post('/bootup', (req, res) => {
-    logger.info("BootUp request received");
-    try {
-        BootUp();
-        res.status(200).json({ message: 'BootUp initiated' });
-    } catch (error) {
-        logger.error(`BootUp error: ${error.message}`);
-        res.status(500).json({ error: 'BootUp failed' });
-    }
 });
 
 app.post('/feksession', (req, res) => {

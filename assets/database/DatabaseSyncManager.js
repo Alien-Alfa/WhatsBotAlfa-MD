@@ -229,7 +229,7 @@ class DatabaseSyncManager {
       
       for (const paused of mongoPaused) {
         const pausedChats = require('./PausedChat');
-        await pausedChats.savePausedChat(paused.chatId);
+        await pausedChats.addPausedChat(paused.chatId || paused.jid);
       }
 
       // Sync back

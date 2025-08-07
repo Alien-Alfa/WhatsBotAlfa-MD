@@ -10,6 +10,77 @@ const { default: got } = require("got");
 
 global.__basedir = __dirname;
 
+// WhatsApp connection state management
+let whatsappClient = null;
+let connectionStopped = false;
+
+// Listen for messages from parent process (server.js)
+process.on('message', async (message) => {
+  console.log(`Received message from server: ${message}`);
+  
+  switch (message) {
+    case 'stop_whatsapp':
+      await stopWhatsAppConnection();
+      break;
+    case 'start_whatsapp':
+      await startWhatsAppConnection();
+      break;
+    default:
+      console.log(`Unknown message: ${message}`);
+  }
+});
+
+async function stopWhatsAppConnection() {
+  try {
+    console.log("🛑 Stopping WhatsApp connection...");
+    connectionStopped = true;
+    
+    if (whatsappClient && whatsappClient.sock) {
+      await whatsappClient.sock.logout();
+      whatsappClient.sock.end();
+    }
+    
+    // Notify server about status change
+    if (process.send) {
+      process.send('whatsapp_stopped');
+    }
+    
+    console.log("✅ WhatsApp connection stopped");
+  } catch (error) {
+    console.error("❌ Error stopping WhatsApp connection:", error);
+  }
+}
+
+async function startWhatsAppConnection() {
+  try {
+    console.log("🚀 Starting WhatsApp connection...");
+    connectionStopped = false;
+    
+    // Import fresh connection module
+    delete require.cache[require.resolve('./lib/connection')];
+    const connect = require("./lib/connection");
+    
+    // Re-initialize the connection
+    const result = await connect();
+    whatsappClient = result;
+    
+    if (result) {
+      // Notify server about status change
+      if (process.send) {
+        process.send('whatsapp_connected');
+      }
+      console.log("✅ WhatsApp connection restarted");
+    } else {
+      console.log("⏸️ WhatsApp connection start cancelled (stopped state)");
+    }
+  } catch (error) {
+    console.error("❌ Error starting WhatsApp connection:", error);
+    if (process.send) {
+      process.send('whatsapp_disconnected');
+    }
+  }
+}
+
 async function auth() {
   try {
     if (!fsx.existsSync("./session/creds.json")) {
@@ -165,6 +236,12 @@ async function initialize() {
     console.log("🔄 Starting connection...");
     const connectionStartTime = Date.now();
     const result = await connect();
+    whatsappClient = result; // Store client reference
+    
+    // Notify server about successful connection
+    if (process.send) {
+      process.send('whatsapp_connected');
+    }
     
     const connectionTime = Date.now() - connectionStartTime;
     const totalTime = Date.now() - startTime;

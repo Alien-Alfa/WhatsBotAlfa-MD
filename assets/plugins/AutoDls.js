@@ -55,10 +55,18 @@ const isYtUrl = (text) => {
   const downloadInstaMedia = async (message, match) => {
     try {
       await message.reply("_Downloading Instagram media..._");
-      const data = await igdl(match);
+      
+      // Extract URL from match string
+      const urlMatch = match.match(/(https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv|stories)\/[\w-]+\/?)/);
+      if (!urlMatch) return await message.reply("_Invalid Instagram URL._");
+      
+      const url = urlMatch[0];
+      const data = await igdl(url);
+      
       if (!data || data.length === 0) {
         return await message.reply("_No media found on the link._");
       }
+      
       for (const item of data) {
         await message.sendFile(item.download_link, { caption: item.caption });
       }
@@ -95,7 +103,7 @@ const isYtUrl = (text) => {
       if (!link) return await message.reply("_Invalid YouTube URL._");
       
       const json = await getJson(`https://api.maher-zubair.tech/download/yt?url=${link[0]}`);
-      if (!json.status === 200 || !json.result.video) {
+      if (json.status !== 200 || !json.result || !json.result.video) {
         return await message.reply("_Could not download the video._");
       }
       
@@ -143,7 +151,7 @@ const isYtUrl = (text) => {
       type: "downloader",
     },
     async (message, match) => {
-      match = match || message.reply_message.text;
+      match = match || (message.reply_message && message.reply_message.text);
       if (!match || !isYtUrl(match)) return await message.reply("_Provide a valid YouTube URL._");
       
       try {
@@ -169,7 +177,7 @@ const isYtUrl = (text) => {
       type: "downloader",
     },
     async (message, match) => {
-      match = match || message.reply_message.text;
+      match = match || (message.reply_message && message.reply_message.text);
       if (!match || !isYtUrl(match)) return await message.reply("_Provide a valid YouTube URL._");
       
       const quality = match.split(";")[1] || "360p";
@@ -198,7 +206,7 @@ const isYtUrl = (text) => {
       type: "downloader",
     },
     async (message, match) => {
-      match = match || message.reply_message.text;
+      match = match || (message.reply_message && message.reply_message.text);
       if (!match) return await message.reply("_Provide a song name to search._");
       
       try {
@@ -223,7 +231,7 @@ const isYtUrl = (text) => {
       type: "downloader",
     },
     async (message, match) => {
-      match = match || message.reply_message.text;
+      match = match || (message.reply_message && message.reply_message.text);
       if (!match) return await message.reply("_Provide a video name to search._");
       
       try {

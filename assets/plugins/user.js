@@ -1,6 +1,7 @@
 const { command, isAdmin ,parsedJid, isPrivate} = require("../../lib");
 const { exec } = require("child_process");
-const { PausedChats, WarnDB } = require("../database");
+const { WarnDB } = require("../database");
+const { PausedChats } = require("../database/UniversalPausedChat");
 const { WARN_COUNT } = require("../../config");
 const { saveWarn, resetWarn } = WarnDB;
 
@@ -34,12 +35,9 @@ command(
     const chatId = message.key.remoteJid;
 
     try {
-      const pausedChat = await PausedChats.PausedChats.findOne({
-        where: { chatId },
-      });
-
-      if (pausedChat) {
-        await pausedChat.destroy();
+      const result = await PausedChats.deletePausedChat(chatId);
+      
+      if (result && (result.deletedCount > 0 || result > 0)) {
         message.reply("Chat resumed successfully.");
       } else {
         message.reply("Chat is not paused.");
