@@ -133,6 +133,180 @@ const cleanupFile = (filePath) => {
 
 // Helper function to add delay between requests
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Y2mate YouTube downloader function
+const downloadFromY2mate = async (url, quality = "360p") => {
+  try {
+    // Step 1: Analyze the YouTube URL
+    const analyzeResponse = await fetch("https://www.y2mate.com/mates/analyzeV2/ajax", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Accept": "*/*",
+        "X-Requested-With": "XMLHttpRequest",
+        "Origin": "https://www.y2mate.com",
+        "Referer": "https://www.y2mate.com/"
+      },
+      body: `k_query=${encodeURIComponent(url)}&k_page=home&hl=en&q_auto=0`
+    });
+
+    if (!analyzeResponse.ok) {
+      throw new Error(`Y2mate analyze failed: ${analyzeResponse.status}`);
+    }
+
+    const analyzeData = await analyzeResponse.json();
+    
+    if (analyzeData.status !== "ok" || !analyzeData.result) {
+      throw new Error("Y2mate analysis failed");
+    }
+
+    const videoData = analyzeData.result;
+    const title = videoData.title;
+    const vid = videoData.vid;
+    
+    // Find the best quality available
+    let selectedFormat = null;
+    const formats = videoData.links?.mp4 || {};
+    
+    // Priority order for quality selection
+    const qualityPriority = [quality, "360p", "480p", "720p", "240p", "144p"];
+    
+    for (const preferredQuality of qualityPriority) {
+      if (formats[preferredQuality]) {
+        selectedFormat = {
+          quality: preferredQuality,
+          k: formats[preferredQuality].k
+        };
+        break;
+      }
+    }
+
+    if (!selectedFormat) {
+      throw new Error("No suitable video format found");
+    }
+
+    // Step 2: Convert/Download the video
+    const convertResponse = await fetch("https://www.y2mate.com/mates/convertV2/index", {
+      method: "POST", 
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Accept": "*/*",
+        "X-Requested-With": "XMLHttpRequest",
+        "Origin": "https://www.y2mate.com",
+        "Referer": "https://www.y2mate.com/"
+      },
+      body: `vid=${vid}&k=${selectedFormat.k}`
+    });
+
+    if (!convertResponse.ok) {
+      throw new Error(`Y2mate convert failed: ${convertResponse.status}`);
+    }
+
+    const convertData = await convertResponse.json();
+    
+    if (convertData.status !== "ok" || !convertData.result?.dlink) {
+      throw new Error("Y2mate conversion failed");
+    }
+
+    return {
+      title,
+      quality: selectedFormat.quality,
+      dlink: convertData.result.dlink,
+      filesize: convertData.result.fsize || "Unknown"
+    };
+
+  } catch (error) {
+    throw new Error(`Y2mate download failed: ${error.message}`);
+  }
+};
+
+// Y2mate audio downloader function
+const downloadAudioFromY2mate = async (url) => {
+  try {
+    // Step 1: Analyze the YouTube URL
+    const analyzeResponse = await fetch("https://www.y2mate.com/mates/analyzeV2/ajax", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Accept": "*/*",
+        "X-Requested-With": "XMLHttpRequest",
+        "Origin": "https://www.y2mate.com",
+        "Referer": "https://www.y2mate.com/"
+      },
+      body: `k_query=${encodeURIComponent(url)}&k_page=home&hl=en&q_auto=0`
+    });
+
+    if (!analyzeResponse.ok) {
+      throw new Error(`Y2mate analyze failed: ${analyzeResponse.status}`);
+    }
+
+    const analyzeData = await analyzeResponse.json();
+    
+    if (analyzeData.status !== "ok" || !analyzeData.result) {
+      throw new Error("Y2mate analysis failed");
+    }
+
+    const videoData = analyzeData.result;
+    const title = videoData.title;
+    const vid = videoData.vid;
+    
+    // Get MP3 format
+    const mp3Formats = videoData.links?.mp3 || {};
+    let selectedFormat = null;
+    
+    // Try to get the best quality MP3 (usually mp3128)
+    if (mp3Formats.mp3128) {
+      selectedFormat = {
+        quality: "128kbps",
+        k: mp3Formats.mp3128.k
+      };
+    } else if (mp3Formats.mp364) {
+      selectedFormat = {
+        quality: "64kbps", 
+        k: mp3Formats.mp364.k
+      };
+    } else {
+      throw new Error("No MP3 format available");
+    }
+
+    // Step 2: Convert/Download the audio
+    const convertResponse = await fetch("https://www.y2mate.com/mates/convertV2/index", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Accept": "*/*",
+        "X-Requested-With": "XMLHttpRequest",
+        "Origin": "https://www.y2mate.com",
+        "Referer": "https://www.y2mate.com/"
+      },
+      body: `vid=${vid}&k=${selectedFormat.k}`
+    });
+
+    if (!convertResponse.ok) {
+      throw new Error(`Y2mate convert failed: ${convertResponse.status}`);
+    }
+
+    const convertData = await convertResponse.json();
+    
+    if (convertData.status !== "ok" || !convertData.result?.dlink) {
+      throw new Error("Y2mate conversion failed");
+    }
+
+    return {
+      title,
+      quality: selectedFormat.quality,
+      dlink: convertData.result.dlink,
+      filesize: convertData.result.fsize || "Unknown"
+    };
+
+  } catch (error) {
+    throw new Error(`Y2mate audio download failed: ${error.message}`);
+  }
+};
   
   command({
       on: "text",
@@ -328,109 +502,144 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
       const url = link[0];
       console.log("🔍 Attempting to download YouTube URL:", url);
       
-      // Try primary API first
+      // Try Y2mate first (most reliable)
       try {
-        const json = await getJson(`https://api.maher-zubair.tech/download/yt?url=${url}`);
-        console.log("🔍 YouTube API response success");
-        
-        if (!json || json.status !== 200 || !json.result || !json.result.video) {
-          throw new Error("Invalid API response");
-        }
-        
-        const { url: videoUrl, quality, title, thumbnail } = json.result.video;
-        
-        if (!videoUrl) {
-          throw new Error("No download URL found");
-        }
-        
+        console.log("🔄 Using Y2mate method...");
+        const { title, quality, dlink, filesize } = await downloadFromY2mate(url, "360p");
         let filePath = null;
-        let thumbnailBuffer = null;
-
+        
         try {
-          // Download thumbnail
-          try {
-            if (thumbnail) {
-              thumbnailBuffer = await getBuffer(thumbnail);
-            }
-          } catch (thumbError) {
-            console.warn("Failed to download thumbnail:", thumbError.message);
-          }
-
-          // Generate unique filename
-          const filename = `youtube_${Date.now()}.mp4`;
+          const filename = `youtube_y2mate_${Date.now()}.mp4`;
+          filePath = await downloadFileStream(dlink, filename);
           
-          // Download using stream
-          filePath = await downloadFileStream(videoUrl, filename);
-          
-          // Send the video file
           await message.sendMessage(message.jid, {
             video: fs.readFileSync(filePath),
-            caption: `*${title || 'YouTube Video'}*\n_[Quality: ${quality || 'Unknown'}]_`,
-            thumbnail: thumbnailBuffer,
+            caption: `*${title}*\n_[Quality: ${quality}]_\n_[Size: ${filesize}]_`,
             mimetype: "video/mp4",
-            fileName: `${title || 'youtube_video'}.mp4`
+            fileName: `${title}.mp4`
           }, { quoted: message });
           
-          console.log("✅ YouTube primary API download successful");
+          console.log("✅ Y2mate download successful");
           return;
-          
-        } catch (error) {
-          console.error("Error in YouTube streaming download:", error);
-          // Fallback to direct URL method
-          try {
-            await message.sendMessage(message.jid, {
-              video: { url: videoUrl },
-              caption: `*${title || 'YouTube Video'}*\n_[Quality: ${quality || 'Unknown'}]_`,
-              thumbnail: thumbnailBuffer,
-            }, { quoted: message });
-            console.log("✅ YouTube direct URL successful");
-            return;
-          } catch (fallbackError) {
-            throw new Error("Both streaming and direct URL methods failed");
-          }
+        } catch (streamError) {
+          console.warn("Y2mate stream download failed, using direct URL:", streamError.message);
+          await message.sendMessage(message.jid, {
+            video: { url: dlink },
+            caption: `*${title}*\n_[Quality: ${quality}]_\n_[Size: ${filesize}]_`,
+          }, { quoted: message });
+          console.log("✅ Y2mate direct URL successful");
+          return;
         } finally {
-          // Clean up temp file
-          if (filePath) {
-            cleanupFile(filePath);
-          }
+          if (filePath) cleanupFile(filePath);
         }
         
-      } catch (apiError) {
-        console.warn("YouTube API error, trying fallback method:", apiError.message);
+      } catch (y2mateError) {
+        console.warn("Y2mate failed, trying original methods:", y2mateError.message);
         
-        // Fallback to ytv function
+        // Fallback to original API
         try {
-          console.log("🔄 Using fallback ytv method...");
-          const { dlink, title } = await ytv(url, "360p");
-          let filePath = null;
+          const json = await getJson(`https://api.maher-zubair.tech/download/yt?url=${url}`);
+          console.log("🔍 YouTube API response success");
           
+          if (!json || json.status !== 200 || !json.result || !json.result.video) {
+            throw new Error("Invalid API response");
+          }
+          
+          const { url: videoUrl, quality, title, thumbnail } = json.result.video;
+          
+          if (!videoUrl) {
+            throw new Error("No download URL found");
+          }
+          
+          let filePath = null;
+          let thumbnailBuffer = null;
+
           try {
-            const filename = `youtube_fallback_${Date.now()}.mp4`;
-            filePath = await downloadFileStream(dlink, filename);
+            // Download thumbnail
+            try {
+              if (thumbnail) {
+                thumbnailBuffer = await getBuffer(thumbnail);
+              }
+            } catch (thumbError) {
+              console.warn("Failed to download thumbnail:", thumbError.message);
+            }
+
+            // Generate unique filename
+            const filename = `youtube_${Date.now()}.mp4`;
             
+            // Download using stream
+            filePath = await downloadFileStream(videoUrl, filename);
+            
+            // Send the video file
             await message.sendMessage(message.jid, {
               video: fs.readFileSync(filePath),
-              caption: `*${title}*\n_[Quality: 360p]_`,
+              caption: `*${title || 'YouTube Video'}*\n_[Quality: ${quality || 'Unknown'}]_`,
+              thumbnail: thumbnailBuffer,
               mimetype: "video/mp4",
-              fileName: `${title}.mp4`
+              fileName: `${title || 'youtube_video'}.mp4`
             }, { quoted: message });
             
-            console.log("✅ YouTube fallback download successful");
+            console.log("✅ YouTube backup API download successful");
             return;
-          } catch (streamError) {
-            console.warn("Stream download failed, using direct URL:", streamError.message);
-            await message.sendMessage(message.jid, {
-              video: { url: dlink },
-              caption: `*${title}*\n_[Quality: 360p]_`,
-            }, { quoted: message });
-            console.log("✅ YouTube direct URL fallback successful");
-            return;
+            
+          } catch (error) {
+            console.error("Error in YouTube streaming download:", error);
+            // Fallback to direct URL method
+            try {
+              await message.sendMessage(message.jid, {
+                video: { url: videoUrl },
+                caption: `*${title || 'YouTube Video'}*\n_[Quality: ${quality || 'Unknown'}]_`,
+                thumbnail: thumbnailBuffer,
+              }, { quoted: message });
+              console.log("✅ YouTube backup direct URL successful");
+              return;
+            } catch (fallbackError) {
+              throw new Error("Both streaming and direct URL methods failed");
+            }
           } finally {
-            if (filePath) cleanupFile(filePath);
+            // Clean up temp file
+            if (filePath) {
+              cleanupFile(filePath);
+            }
           }
-        } catch (fallbackError) {
-          console.error("Fallback ytv also failed:", fallbackError.message);
-          return await message.reply("_YouTube download is currently unavailable. Please try again later._");
+          
+        } catch (apiError) {
+          console.warn("Backup API also failed, trying ytv method:", apiError.message);
+          
+          // Final fallback to ytv function
+          try {
+            console.log("🔄 Using final fallback ytv method...");
+            const { dlink, title } = await ytv(url, "360p");
+            let filePath = null;
+            
+            try {
+              const filename = `youtube_fallback_${Date.now()}.mp4`;
+              filePath = await downloadFileStream(dlink, filename);
+              
+              await message.sendMessage(message.jid, {
+                video: fs.readFileSync(filePath),
+                caption: `*${title}*\n_[Quality: 360p]_`,
+                mimetype: "video/mp4",
+                fileName: `${title}.mp4`
+              }, { quoted: message });
+              
+              console.log("✅ YouTube final fallback download successful");
+              return;
+            } catch (streamError) {
+              console.warn("Final fallback stream failed, using direct URL:", streamError.message);
+              await message.sendMessage(message.jid, {
+                video: { url: dlink },
+                caption: `*${title}*\n_[Quality: 360p]_`,
+              }, { quoted: message });
+              console.log("✅ YouTube final direct URL successful");
+              return;
+            } finally {
+              if (filePath) cleanupFile(filePath);
+            }
+          } catch (finalError) {
+            console.error("All YouTube download methods failed:", finalError.message);
+            return await message.reply("_YouTube download is currently unavailable. Please try again later._");
+          }
         }
       }
       
@@ -477,32 +686,68 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
       
       let filePath = null;
       try {
-        const { dlink, title } = await yta(match);
-        await message.reply(`_Downloading ${title}..._`);
+        // Try Y2mate first
+        try {
+          console.log("🔄 Using Y2mate for audio download...");
+          const { title, quality, dlink, filesize } = await downloadAudioFromY2mate(match);
+          await message.reply(`_Downloading ${title}..._`);
+          
+          // Generate unique filename
+          const filename = `youtube_audio_y2mate_${Date.now()}.mp3`;
+          
+          // Download using stream
+          filePath = await downloadFileStream(dlink, filename);
+          
+          const audioBuffer = fs.readFileSync(filePath);
+          
+          await message.sendMessage(
+            message.jid,
+            { 
+              audio: audioBuffer, 
+              mimetype: "audio/mpeg", 
+              fileName: `${title}.mp3`,
+              ptt: false
+            },
+            { quoted: message }
+          );
+          
+          console.log("✅ Y2mate audio download successful");
+          return;
+          
+        } catch (y2mateError) {
+          console.warn("Y2mate audio failed, using fallback:", y2mateError.message);
+          
+          // Fallback to original yta method
+          const { dlink, title } = await yta(match);
+          await message.reply(`_Downloading ${title}..._`);
+          
+          // Generate unique filename
+          const filename = `youtube_audio_${Date.now()}.mp3`;
+          
+          // Download using stream
+          filePath = await downloadFileStream(dlink, filename);
+          
+          // Convert to audio if needed
+          const audioBuffer = fs.readFileSync(filePath);
+          const convertedAudio = await toAudio(audioBuffer, "mp3");
+          
+          await message.sendMessage(
+            message.jid,
+            { 
+              audio: convertedAudio, 
+              mimetype: "audio/mpeg", 
+              fileName: `${title}.mp3`,
+              ptt: false
+            },
+            { quoted: message }
+          );
+          
+          console.log("✅ Fallback audio download successful");
+        }
         
-        // Generate unique filename
-        const filename = `youtube_audio_${Date.now()}.mp3`;
-        
-        // Download using stream
-        filePath = await downloadFileStream(dlink, filename);
-        
-        // Convert to audio if needed
-        const audioBuffer = fs.readFileSync(filePath);
-        const convertedAudio = await toAudio(audioBuffer, "mp3");
-        
-        await message.sendMessage(
-          message.jid,
-          { 
-            audio: convertedAudio, 
-            mimetype: "audio/mpeg", 
-            fileName: `${title}.mp3`,
-            ptt: false
-          },
-          { quoted: message }
-        );
       } catch (e) {
         console.error("Error in YouTube audio streaming download:", e);
-        // Fallback to buffer method
+        // Final fallback to buffer method
         try {
           const { dlink, title } = await yta(match);
           const buffer = await getBuffer(dlink);
@@ -541,28 +786,62 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
       
       let filePath = null;
       try {
-        const { dlink, title } = await ytv(match.split(";")[0], quality);
-        await message.reply(`_Downloading ${title} (${quality})..._`);
+        // Try Y2mate first
+        try {
+          console.log("🔄 Using Y2mate for video download...");
+          const { title, quality: actualQuality, dlink, filesize } = await downloadFromY2mate(match.split(";")[0], quality);
+          await message.reply(`_Downloading ${title} (${actualQuality})..._`);
+          
+          // Generate unique filename
+          const filename = `youtube_video_y2mate_${Date.now()}.mp4`;
+          
+          // Download using stream
+          filePath = await downloadFileStream(dlink, filename);
+          
+          await message.sendMessage(
+            message.jid,
+            { 
+              video: fs.readFileSync(filePath), 
+              caption: `*${title}*\n_[Quality: ${actualQuality}]_\n_[Size: ${filesize}]_`, 
+              mimetype: "video/mp4", 
+              fileName: `${title}.mp4` 
+            },
+            { quoted: message }
+          );
+          
+          console.log("✅ Y2mate video download successful");
+          return;
+          
+        } catch (y2mateError) {
+          console.warn("Y2mate video failed, using fallback:", y2mateError.message);
+          
+          // Fallback to original ytv method
+          const { dlink, title } = await ytv(match.split(";")[0], quality);
+          await message.reply(`_Downloading ${title} (${quality})..._`);
+          
+          // Generate unique filename
+          const filename = `youtube_video_${Date.now()}.mp4`;
+          
+          // Download using stream
+          filePath = await downloadFileStream(dlink, filename);
+          
+          await message.sendMessage(
+            message.jid,
+            { 
+              video: fs.readFileSync(filePath), 
+              caption: `*${title}*\n_[Quality: ${quality}]_`, 
+              mimetype: "video/mp4", 
+              fileName: `${title}.mp4` 
+            },
+            { quoted: message }
+          );
+          
+          console.log("✅ Fallback video download successful");
+        }
         
-        // Generate unique filename
-        const filename = `youtube_video_${Date.now()}.mp4`;
-        
-        // Download using stream
-        filePath = await downloadFileStream(dlink, filename);
-        
-        await message.sendMessage(
-          message.jid,
-          { 
-            video: fs.readFileSync(filePath), 
-            caption: `*${title}*\n_[Quality: ${quality}]_`, 
-            mimetype: "video/mp4", 
-            fileName: `${title}.mp4` 
-          },
-          { quoted: message }
-        );
       } catch (e) {
         console.error("Error in YouTube video streaming download:", e);
-        // Fallback to direct URL method
+        // Final fallback to direct URL method
         try {
           const { dlink, title } = await ytv(match.split(";")[0], quality);
           await message.sendMessage(
