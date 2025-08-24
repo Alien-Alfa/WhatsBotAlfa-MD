@@ -275,6 +275,15 @@ async function initialize() {
           mongoStoreDb.initialize()
         ]);
         
+        // In dual database mode, also initialize SQLite tables
+        if (config.DATABASE) {
+          await config.DATABASE.sync({ 
+            logging: false,
+            alter: true
+          });
+          logger.database('SQLite tables synchronized for dual database mode');
+        }
+        
         // Display sync status
         logger.database('MongoDB sync system initialized', {
           syncFrequency: 'Every 30 minutes',

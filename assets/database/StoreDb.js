@@ -71,6 +71,7 @@ const chatDb = config.DATABASE.define("Chat", {
     index: true, // Add index for performance
   },
 }, {
+  tableName: 'Chats', // Explicitly set table name to match expected plural form
   indexes: [
     {
       fields: ['conversationTimestamp']
@@ -115,6 +116,7 @@ const contactDb = config.DATABASE.define("contact", {
     allowNull: false,
   },
 }, {
+  tableName: 'contacts', // Explicitly set table name to match expected plural form
   indexes: [
     {
       fields: ['jid']

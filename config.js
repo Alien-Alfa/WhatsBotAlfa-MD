@@ -82,6 +82,10 @@ module.exports = {
         dialect: "sqlite",
         storage: DATABASE_URL,
         logging: false,
+        define: {
+          freezeTableName: true, // Prevent table name pluralization
+          timestamps: true
+        },
         pool: {
           max: 10,
           min: 0,
@@ -98,6 +102,10 @@ module.exports = {
           ssl: { require: true, rejectUnauthorized: false },
         },
         logging: false,
+        define: {
+          freezeTableName: true, // Prevent table name pluralization
+          timestamps: true
+        },
         pool: {
           max: 10,
           min: 0,
