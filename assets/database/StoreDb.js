@@ -6,13 +6,47 @@ const config = require("../../config");
 const { DataTypes, Op } = require("sequelize");
 const logger = require("../../lib/logger");
 
-// MongoDB Safety Check: Prevent database operations in MongoDB mode
+// MongoDB Safety Check: Provide dual-mode support
 if (!config.DATABASE) {
-  // MongoDB mode - provide safe fallback functions
+  // MongoDB mode or no SQLite - provide routing to MongoDB operations
+  logger.info("SQLite not available, routing database operations to MongoDB or fallback");
+  
   module.exports = {
     saveMessage: async () => null,
-    loadMessage: async () => null,
-    loadDeletedMessages: async () => [],
+    loadMessage: async (messageId) => {
+      try {
+        // Try to use MongoDB operations if available
+        if (config.USE_MONGODB && config.MONGODB_URI) {
+          const mongoStoreDb = require("./MongoStoreDb");
+          if (mongoStoreDb && mongoStoreDb.loadMessage) {
+            logger.info(`Routing loadMessage to MongoDB for messageId: ${messageId}`);
+            return await mongoStoreDb.loadMessage(messageId);
+          }
+        }
+        logger.warn("MongoDB not available for loadMessage, returning null");
+        return null;
+      } catch (error) {
+        logger.warn("Failed to load message from MongoDB:", error.message);
+        return null;
+      }
+    },
+    loadDeletedMessages: async (jid, sinceTimestamp) => {
+      try {
+        // Try to use MongoDB operations if available
+        if (config.USE_MONGODB && config.MONGODB_URI) {
+          const mongoStoreDb = require("./MongoStoreDb");
+          if (mongoStoreDb && mongoStoreDb.loadDeletedMessages) {
+            logger.info(`Routing loadDeletedMessages to MongoDB for jid: ${jid}`);
+            return await mongoStoreDb.loadDeletedMessages(jid, sinceTimestamp);
+          }
+        }
+        logger.warn("MongoDB not available for loadDeletedMessages, returning empty array");
+        return [];
+      } catch (error) {
+        logger.warn("Failed to load deleted messages from MongoDB:", error.message);
+        return [];
+      }
+    },
     saveChat: async () => null,
     getName: async (jid) => jid.split("@")[0].replace(/_/g, " "),
   };
