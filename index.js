@@ -287,29 +287,17 @@ async function initialize() {
           error: error.message 
         });
         
-        // Load database models and initialize SQLite
+        // Load database models and use existing SQLite configuration
         await readAndRequireFiles(path.join(__dirname, "/assets/database/"));
         
-        // Create SQLite database instance if not exists
-        const { Sequelize } = require("sequelize");
-        const sqliteDb = new Sequelize({
-          dialect: "sqlite",
-          storage: "./assets/database.db",
-          logging: false,
-          pool: {
-            max: 10,
-            min: 0,
-            acquire: 30000,
-            idle: 10000
-          }
-        });
-        
-        await sqliteDb.sync({ 
-          logging: false,
-          alter: true
-        });
-        
-        logger.database('SQLite fallback initialized successfully');
+        // Sync the existing SQLite database to create any missing tables
+        if (config.DATABASE) {
+          await config.DATABASE.sync({ 
+            logging: false,
+            alter: true
+          });
+          logger.database('SQLite fallback initialized with existing configuration');
+        }
       }
       
     } else {
