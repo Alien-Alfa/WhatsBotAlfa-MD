@@ -3,6 +3,7 @@
 // This ensures all database files use the same MongoDB models instance
 
 const config = require("../../config");
+const logger = require("../../lib/logger");
 
 // Global MongoDB models cache
 let globalModels = null;
@@ -24,7 +25,6 @@ async function initializeMongoModels() {
 
     if (!mongoManager) {
       mongoManager = require("./mongodb");
-const logger = require("../../lib/logger");
     }
 
     logger.info("🔄 Initializing MongoDB models...");
