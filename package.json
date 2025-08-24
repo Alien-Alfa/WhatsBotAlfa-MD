@@ -66,8 +66,14 @@
     "start:direct": "node server.js",
     "start:mongodb": "USE_MONGODB=true node setup-mongodb.js && node server.js",
     "start:sqlite": "USE_MONGODB=false node server.js",
+    "start:production": "NODE_ENV=production LOG_LEVEL=INFO ENABLE_FILE_LOGGING=true node setup-mongodb.js && node server.js",
+    "start:dev": "NODE_ENV=development LOG_LEVEL=DEBUG node server.js",
     "setup": "node setup-mongodb.js",
-    "main": "node index.js"
+    "main": "node index.js",
+    "logs": "tail -f logs/aurora-info.log",
+    "logs:error": "tail -f logs/aurora-error.log",
+    "health": "curl -s http://localhost:8000/health | jq",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "repository": {
     "type": "git",

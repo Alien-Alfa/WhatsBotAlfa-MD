@@ -5,6 +5,7 @@ const { DataTypes } = require('sequelize');
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for GroupStateSave
   const mongoManager = require("./mongodb");
+const logger = require("../../lib/logger");
   let models = null;
 
   const initModels = async () => {
@@ -27,7 +28,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB saveGroupState error:", error);
+        logger.warn("MongoDB saveGroupState error:", error);
         return null;
       }
     },
@@ -38,7 +39,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const groupState = await models.GroupStateSave.findOne({ jid: jid });
         return groupState ? groupState.state : null;
       } catch (error) {
-        console.warn("MongoDB getGroupState error:", error);
+        logger.warn("MongoDB getGroupState error:", error);
         return null;
       }
     },
@@ -49,7 +50,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.GroupStateSave.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB deleteGroupState error:", error);
+        logger.warn("MongoDB deleteGroupState error:", error);
         return false;
       }
     }
@@ -62,7 +63,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for MongoDB mode
 if (!config.DATABASE) {
-  console.log('⚠️ GroupDB feature disabled in MongoDB mode');
+  logger.info('⚠️ GroupDB feature disabled in MongoDB mode');
   module.exports = {
     GroupDB: null,
     saveGroup: async () => null,
@@ -111,7 +112,7 @@ async function setSnapshot(jid = null, pfp = null, metadata = null) {
       });
       return existingSnapshot;
     } catch (error) {
-      console.error("Error updating snapshot:", error);
+      logger.error("Error updating snapshot:", error);
       return null; 
     }
   } else {
@@ -122,7 +123,7 @@ async function setSnapshot(jid = null, pfp = null, metadata = null) {
         metaData: metadata, 
       });
     } catch (error) {
-      console.error("Error creating snapshot:", error);
+      logger.error("Error creating snapshot:", error);
       return null; 
     }
   }
@@ -141,7 +142,7 @@ async function deleteSnapshot(jid = null) {
     await existingSnapshot.destroy();
     return true; 
   } catch (error) {
-    console.error("Error deleting snapshot:", error);
+    logger.error("Error deleting snapshot:", error);
     return false; 
   }
 }

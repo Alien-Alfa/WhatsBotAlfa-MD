@@ -18,23 +18,24 @@ async function initializeMongoModels() {
   try {
     // Only initialize if MongoDB is configured
     if (!config.USE_MONGODB || !config.MONGODB_URI) {
-      console.log("MongoDB not configured, skipping initialization");
+      logger.info("MongoDB not configured, skipping initialization");
       return null;
     }
 
     if (!mongoManager) {
       mongoManager = require("./mongodb");
+const logger = require("../../lib/logger");
     }
 
-    console.log("🔄 Initializing MongoDB models...");
+    logger.info("🔄 Initializing MongoDB models...");
     globalModels = await mongoManager.connect();
     isInitialized = true;
     
-    console.log("✅ MongoDB models initialized and cached globally");
+    logger.info("✅ MongoDB models initialized and cached globally");
     return globalModels;
     
   } catch (error) {
-    console.error("❌ Failed to initialize MongoDB models:", error);
+    logger.error("❌ Failed to initialize MongoDB models:", error);
     isInitialized = false;
     globalModels = null;
     throw error;
@@ -60,7 +61,7 @@ async function getModel(modelName) {
   const models = await getMongoModels();
   
   if (!models || !models[modelName]) {
-    console.warn(`MongoDB model '${modelName}' not available`);
+    logger.warn(`MongoDB model '${modelName}' not available`);
     return null;
   }
   
@@ -69,7 +70,7 @@ async function getModel(modelName) {
 
 // Force reinitialize (for error recovery)
 async function reinitializeModels() {
-  console.log("🔄 Forcing MongoDB models reinitialization...");
+  logger.info("🔄 Forcing MongoDB models reinitialization...");
   isInitialized = false;
   globalModels = null;
   return await initializeMongoModels();

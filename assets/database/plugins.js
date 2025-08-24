@@ -11,7 +11,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     const PluginModel = require("./mongodb/models/Plugin");
     PluginDB = PluginModel;
   } catch (error) {
-    console.warn("MongoDB Plugin model not found, falling back to SQLite");
+    logger.warn("MongoDB Plugin model not found, falling back to SQLite");
     PluginDB = null;
   }
 } else if (config.DATABASE) {
@@ -27,13 +27,13 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     },
   });
 } else {
-  console.warn("No database configuration found for plugins");
+  logger.warn("No database configuration found for plugins");
   PluginDB = null;
 }
 
 async function installPlugin(adres, file) {
   if (!PluginDB) {
-    console.warn("Plugin database not available");
+    logger.warn("Plugin database not available");
     return false;
   }
 
@@ -60,14 +60,14 @@ async function installPlugin(adres, file) {
       }
     }
   } catch (error) {
-    console.error("Plugin installation error:", error);
+    logger.error("Plugin installation error:", error);
     return false;
   }
 }
 
 async function removePlugin(name) {
   if (!PluginDB) {
-    console.warn("Plugin database not available");
+    logger.warn("Plugin database not available");
     return false;
   }
 
@@ -95,14 +95,14 @@ async function removePlugin(name) {
       return false;
     }
   } catch (error) {
-    console.error("Plugin removal error:", error);
+    logger.error("Plugin removal error:", error);
     return false;
   }
 }
 
 async function getandRequirePlugins() {
   if (!PluginDB) {
-    console.warn("Plugin database not available, skipping plugin loading");
+    logger.warn("Plugin database not available, skipping plugin loading");
     return;
   }
 
@@ -134,14 +134,15 @@ async function getandRequirePlugins() {
             res.body
           );
           require(__basedir + "/assets/plugins" + plugin.name);
-          console.log("Installed plugin:", plugin.name);
+const logger = require("../../lib/logger");
+          logger.info("Installed plugin:", plugin.name);
         });
       } catch (e) {
-        console.error("Plugin loading error:", e);
+        logger.error("Plugin loading error:", e);
       }
     });
   } catch (error) {
-    console.error("Plugin retrieval error:", error);
+    logger.error("Plugin retrieval error:", error);
   }
 }
 

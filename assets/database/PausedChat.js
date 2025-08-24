@@ -5,6 +5,7 @@ const { DataTypes } = require("sequelize");
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for PausedChat
   const mongoManager = require("./mongodb");
+const logger = require("../../lib/logger");
   let models = null;
 
   const initModels = async () => {
@@ -27,7 +28,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB addPausedChat error:", error);
+        logger.warn("MongoDB addPausedChat error:", error);
         return null;
       }
     },
@@ -38,7 +39,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.PausedChat.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB removePausedChat error:", error);
+        logger.warn("MongoDB removePausedChat error:", error);
         return false;
       }
     },
@@ -49,7 +50,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const pausedChat = await models.PausedChat.findOne({ jid: jid });
         return pausedChat ? pausedChat.isPaused : false;
       } catch (error) {
-        console.warn("MongoDB isPausedChat error:", error);
+        logger.warn("MongoDB isPausedChat error:", error);
         return false;
       }
     },
@@ -60,7 +61,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const pausedChats = await models.PausedChat.find({ isPaused: true });
         return pausedChats;
       } catch (error) {
-        console.warn("MongoDB getPausedChats error:", error);
+        logger.warn("MongoDB getPausedChats error:", error);
         return [];
       }
     }
@@ -71,7 +72,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
-  console.log('⚠️ PausedChat feature disabled in MongoDB mode');
+  logger.info('⚠️ PausedChat feature disabled in MongoDB mode');
   module.exports = {
     PausedChats: null,
     addPausedChat: async () => null,
@@ -94,7 +95,7 @@ async function addPausedChat(chatId) {
   try {
     return await PausedChats.create({ chatId });
   } catch (error) {
-    console.error('Error adding paused chat:', error);
+    logger.error('Error adding paused chat:', error);
     return null;
   }
 }
@@ -103,7 +104,7 @@ async function removePausedChat(chatId) {
   try {
     return await PausedChats.destroy({ where: { chatId } });
   } catch (error) {
-    console.error('Error removing paused chat:', error);
+    logger.error('Error removing paused chat:', error);
     return null;
   }
 }
@@ -113,7 +114,7 @@ async function isPaused(chatId) {
     const result = await PausedChats.findOne({ where: { chatId } });
     return !!result;
   } catch (error) {
-    console.error('Error checking paused chat:', error);
+    logger.error('Error checking paused chat:', error);
     return false;
   }
 }
@@ -123,7 +124,7 @@ async function getPausedChats() {
     const results = await PausedChats.findAll();
     return results.map(chat => chat.chatId);
   } catch (error) {
-    console.error('Error getting paused chats:', error);
+    logger.error('Error getting paused chats:', error);
     return [];
   }
 }

@@ -20,8 +20,8 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const PausedChatModel = mongoManager.getModels().PausedChat;
         return await PausedChatModel.find({});
       } catch (error) {
-        console.warn("Get paused chats error:", error);
-        console.error("Full error details:", error);
+        logger.warn("Get paused chats error:", error);
+        logger.error("Full error details:", error);
         return [];
       }
     },
@@ -37,9 +37,9 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const PausedChatModel = mongoManager.getModels().PausedChat;
         
         // Debug: Check if model exists and log schema
-        console.log("🔍 PausedChat model exists:", !!PausedChatModel);
+        logger.info("🔍 PausedChat model exists:", !!PausedChatModel);
         if (PausedChatModel) {
-          console.log("🔍 PausedChat schema paths:", Object.keys(PausedChatModel.schema.paths));
+          logger.info("🔍 PausedChat schema paths:", Object.keys(PausedChatModel.schema.paths));
         }
         
         // Since the current schema uses 'jid' field, use that instead of 'chatId'
@@ -59,7 +59,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
             { upsert: true, new: true, strict: false }
           );
         } catch (error) {
-          console.warn("findOneAndUpdate failed, trying create:", error.message);
+          logger.warn("findOneAndUpdate failed, trying create:", error.message);
           // Fallback to create
           try {
             return await PausedChatModel.create(pauseData);
@@ -72,8 +72,8 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           }
         }
       } catch (error) {
-        console.warn("Save paused chat error:", error);
-        console.error("Full error details:", error);
+        logger.warn("Save paused chat error:", error);
+        logger.error("Full error details:", error);
         return null;
       }
     },
@@ -89,8 +89,8 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         // Use jid field to match the current schema
         return await PausedChatModel.deleteOne({ jid: chatId });
       } catch (error) {
-        console.warn("Delete paused chat error:", error);
-        console.error("Full error details:", error);
+        logger.warn("Delete paused chat error:", error);
+        logger.error("Full error details:", error);
         return null;
       }
     },
@@ -105,8 +105,8 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const PausedChatModel = mongoManager.getModels().PausedChat;
         return await PausedChatModel.deleteMany({});
       } catch (error) {
-        console.warn("Delete all paused chats error:", error);
-        console.error("Full error details:", error);
+        logger.warn("Delete all paused chats error:", error);
+        logger.error("Full error details:", error);
         return null;
       }
     }
@@ -114,6 +114,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 } else {
   // Fallback to Sequelize operations
   const { DataTypes } = require('sequelize');
+const logger = require("../../lib/logger");
   
   const PausedChats = config.DATABASE.define('pausedChats', {
     chatId: {

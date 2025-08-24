@@ -1,8 +1,9 @@
 // Made with ❤ by AlienAlfa
-// Database Synchronization Manager - MongoDB ↔ SQLite Sync
+// Database Synchronization Manager - Local SQLite → MongoDB Sync
 
 const cron = require('node-cron');
 const config = require('../../config');
+const logger = require('../../lib/logger');
 
 class DatabaseSyncManager {
   constructor() {
@@ -16,503 +17,307 @@ class DatabaseSyncManager {
     };
   }
 
-  // Helper method to get MongoDB models safely
-  getMongoModels() {
-    const models = this.mongoDb?.getModels();
-    if (!models) {
-      console.warn("MongoDB models not available");
-      return null;
-    }
-    return models;
-  }
-
   async initialize() {
     try {
-      // Only initialize sync if we have both MongoDB AND SQLite configured
-      // If USE_MONGODB is true but DATABASE is null, we're in MongoDB-only mode
-      if (!config.USE_MONGODB || !config.MONGODB_URI || config.DATABASE === null) {
-        console.log("⏭️ Database sync not needed - using single database");
+      // Only initialize sync if MongoDB is enabled and we have local database
+      // Local database is always primary, MongoDB is optional sync target
+      if (!config.USE_MONGODB || !config.MONGODB_URI) {
+        logger.info("MongoDB sync disabled - using local database only", {
+          component: 'DatabaseSyncManager',
+          useMongoDb: config.USE_MONGODB,
+          hasMongoUri: !!config.MONGODB_URI,
+          localDbActive: !!config.DATABASE
+        });
         return;
       }
 
-      console.log("🔄 Initializing database synchronization manager...");
-      
-      // Initialize both database connections
-      this.mongoDb = require('./MongoStoreDb');
-      this.sqliteDb = require('./StoreDb');
-      
-      await this.mongoDb.initialize();
-      
-      // Start sync scheduler (every 30 minutes)
-      this.startSyncScheduler();
-      
-      // Initial sync
-      await this.performSync('initial');
-      
-      console.log("✅ Database sync manager initialized");
-      
+      logger.info("Initializing database synchronization manager", {
+        component: 'DatabaseSyncManager',
+        mongoUri: config.MONGODB_URI ? 'configured' : 'missing',
+        localDatabase: 'always active',
+        syncDirection: 'Local SQLite → MongoDB'
+      });
+
+      // Initialize MongoDB connection
+      this.mongoDb = require('./mongodb');
+      await this.mongoDb.connect();
+
+      // Start periodic sync (every 5 minutes)
+      this.startPeriodicSync();
+
+      logger.info("Database synchronization manager initialized successfully", {
+        component: 'DatabaseSyncManager'
+      });
+
     } catch (error) {
-      console.error("❌ Database sync initialization failed:", error);
-      throw error;
+      logger.error("Failed to initialize database sync manager", {
+        component: 'DatabaseSyncManager',
+        error: error.message,
+        stack: error.stack
+      });
     }
   }
 
-  startSyncScheduler() {
-    // Schedule sync every 30 minutes
-    this.syncInterval = cron.schedule('*/30 * * * *', async () => {
+  startPeriodicSync() {
+    // Run sync every 5 minutes
+    this.syncInterval = cron.schedule('*/5 * * * *', async () => {
       await this.performSync('scheduled');
     }, {
       scheduled: true,
       timezone: "UTC"
     });
 
-    console.log("⏰ Database sync scheduled every 30 minutes");
+    logger.info("Periodic sync scheduled", {
+      component: 'DatabaseSyncManager',
+      interval: '5 minutes'
+    });
   }
 
   async performSync(syncType = 'manual') {
     if (this.isRunning) {
-      console.log("⏳ Sync already in progress, skipping...");
+      logger.warn("Sync already in progress, skipping", {
+        component: 'DatabaseSyncManager'
+      });
       return;
     }
 
     this.isRunning = true;
     const startTime = Date.now();
-    
+
     try {
-      console.log(`🔄 Starting ${syncType} database synchronization...`);
-      
-      // Sync all collections/tables
-      const syncResults = await Promise.allSettled([
-        this.syncChats(),
-        this.syncMessages(),
-        this.syncContacts(),
-        this.syncPausedChats(),
-        this.syncGreetings(),
-        this.syncWarnings(),
-        this.syncNotes(),
-        this.syncFilters(),
-        this.syncPlugins(),
-        this.syncCallActions(),
-        this.syncAutoReact(),
-        this.syncAutoTranslate(),
-        this.syncBanBot(),
-        this.syncBannedAccounts(),
-        this.syncStickBan(),
-        this.syncPDM(),
-        this.syncAiChat(),
-        this.syncGemini(),
-        this.syncGroupStateSave()
-      ]);
+      logger.info("Starting database synchronization", {
+        component: 'DatabaseSyncManager',
+        syncType,
+        direction: 'Local → MongoDB'
+      });
 
-      // Process results
-      const successful = syncResults.filter(r => r.status === 'fulfilled').length;
-      const failed = syncResults.filter(r => r.status === 'rejected').length;
+      // Perform sync operations (local to MongoDB only)
+      await this.syncFromLocalToMongo();
 
-      const duration = Date.now() - startTime;
       this.syncStats.totalSyncs++;
-      this.syncStats.lastSyncDuration = duration;
+      this.syncStats.lastSyncDuration = Date.now() - startTime;
       this.lastSyncTime = new Date();
 
-      if (failed > 0) {
-        this.syncStats.errors++;
-        console.warn(`⚠️ Sync completed with ${failed} errors (${successful} successful)`);
-      } else {
-        console.log(`✅ Database sync completed successfully in ${duration}ms`);
-      }
+      logger.info("Database synchronization completed", {
+        component: 'DatabaseSyncManager',
+        syncType,
+        duration: this.syncStats.lastSyncDuration,
+        totalSyncs: this.syncStats.totalSyncs
+      });
 
     } catch (error) {
       this.syncStats.errors++;
       this.syncStats.lastError = error.message;
-      console.error("❌ Database sync failed:", error);
+      logger.error("Database sync failed", {
+        component: 'DatabaseSyncManager',
+        syncType,
+        error: error.message,
+        stack: error.stack
+      });
     } finally {
       this.isRunning = false;
     }
   }
 
-  // Sync individual collections
-  async syncChats() {
+  async syncFromLocalToMongo() {
+    // Get MongoDB models
+    const models = this.mongoDb?.getModels();
+    if (!models) {
+      logger.warn("MongoDB models not available for sync");
+      return;
+    }
+
+    if (!config.DATABASE) {
+      logger.warn("Local database not available for sync");
+      return;
+    }
+
+    // Sync only recent data to avoid overwhelming the system
+    const recentTime = new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
+
     try {
-      // Get MongoDB models from the correct path
-      const models = this.mongoDb.getModels();
-      if (!models) {
-        console.warn("MongoDB models not available for chat sync");
+      // Sync Chats
+      await this.syncChatsToMongo(models, recentTime);
+      
+      // Sync Messages
+      await this.syncMessagesToMongo(models, recentTime);
+      
+      // Sync other important data
+      await this.syncPausedChatsToMongo(models);
+      
+      logger.debug("All sync operations completed successfully");
+      
+    } catch (error) {
+      logger.error("Error during sync operations", {
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }
+
+  async syncChatsToMongo(models, recentTime) {
+    try {
+      const ChatModel = config.DATABASE.models.Chat;
+      if (!ChatModel) {
+        logger.warn("Local Chat model not found");
         return;
       }
-      
-      // Get latest data from MongoDB
-      const mongoChats = await models.Chat.find({})
-        .sort({ updatedAt: -1 })
-        .limit(1000);
 
-      for (const chat of mongoChats) {
-        await this.sqliteDb.saveChat({
-          id: chat.id,
-          conversationTimestamp: chat.conversationTimestamp,
-          isGroup: chat.isGroup
-        });
-      }
-
-      // Sync back from SQLite to MongoDB (bidirectional)
-      const sqliteChats = await this.sqliteDb.chatDb.findAll({
-        order: [['updatedAt', 'DESC']],
-        limit: 100
-      });
-
-      for (const chat of sqliteChats) {
-        await this.mongoDb.saveChat({
-          id: chat.id,
-          conversationTimestamp: chat.conversationTimestamp,
-          isGroup: chat.isGroup
-        });
-      }
-
-    } catch (error) {
-      console.warn("Chat sync error:", error);
-    }
-  }
-
-  async syncMessages() {
-    try {
-      // Sync recent messages only to avoid overwhelming
-      const recentTime = new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
-
-      const mongoMessages = await this.mongoDb.models.Message.find({
-        createdAt: { $gte: recentTime }
-      }).limit(500);
-
-      for (const msg of mongoMessages) {
-        if (msg.message && msg.message.key) {
-          await this.sqliteDb.saveMessage(msg.message, msg.sender);
-        }
-      }
-
-      // Sync back from SQLite
-      const sqliteMessages = await this.sqliteDb.messageDb.findAll({
+      const localChats = await ChatModel.findAll({
         where: {
-          createdAt: { [require('sequelize').Op.gte]: recentTime }
+          conversationTimestamp: {
+            [config.DATABASE.Sequelize.Op.gte]: recentTime.getTime()
+          }
         },
-        limit: 500
+        limit: 1000,
+        order: [['conversationTimestamp', 'DESC']]
       });
 
-      for (const msg of sqliteMessages) {
-        await this.mongoDb.saveMessage(msg.message, msg.jid);
-      }
-
-    } catch (error) {
-      console.warn("Message sync error:", error);
-    }
-  }
-
-  async syncContacts() {
-    try {
-      const mongoContacts = await this.mongoDb.models.Contact.find({}).limit(1000);
-
-      for (const contact of mongoContacts) {
-        await this.sqliteDb.saveContact(contact.jid, contact.name);
-      }
-
-      // Sync back
-      const sqliteContacts = await this.sqliteDb.contactDb.findAll({ limit: 1000 });
-
-      for (const contact of sqliteContacts) {
-        await this.mongoDb.saveContact(contact.jid, contact.name);
-      }
-
-    } catch (error) {
-      console.warn("Contact sync error:", error);
-    }
-  }
-
-  async syncPausedChats() {
-    try {
-      const mongoPaused = await this.mongoDb.models.PausedChat.find({});
-      
-      for (const paused of mongoPaused) {
-        const pausedChats = require('./PausedChat');
-        await pausedChats.addPausedChat(paused.chatId || paused.jid);
-      }
-
-      // Sync back
-      const pausedChats = require('./PausedChat');
-      const sqlitePaused = await pausedChats.getPausedChats();
-
-      for (const paused of sqlitePaused) {
-        await this.mongoDb.models.PausedChat.findOneAndUpdate(
-          { chatId: paused.chatId },
-          { chatId: paused.chatId, pausedBy: 'system' },
-          { upsert: true }
-        );
-      }
-
-    } catch (error) {
-      console.warn("PausedChat sync error:", error);
-    }
-  }
-
-  async syncGreetings() {
-    try {
-      const mongoGreetings = await this.mongoDb.models.Greeting.find({});
-
-      // Sync greeting data - implement based on your greeting structure
-      for (const greeting of mongoGreetings) {
-        // Update SQLite greeting equivalent
-        const greetingDb = require('./greetings');
-        if (greetingDb && greetingDb.setGreeting) {
-          await greetingDb.setGreeting(greeting.chatId, greeting.type, greeting.message);
+      let syncedCount = 0;
+      for (const chat of localChats) {
+        try {
+          await models.Chat.updateOne(
+            { id: chat.id },
+            {
+              id: chat.id,
+              conversationTimestamp: chat.conversationTimestamp,
+              isGroup: chat.isGroup,
+              updatedAt: new Date()
+            },
+            { upsert: true }
+          );
+          syncedCount++;
+        } catch (error) {
+          logger.warn("Error syncing chat to MongoDB", { 
+            chatId: chat.id, 
+            error: error.message 
+          });
         }
       }
 
+      logger.debug(`Synced ${syncedCount}/${localChats.length} chats to MongoDB`);
+
     } catch (error) {
-      console.warn("Greeting sync error:", error);
+      logger.warn("Chat sync error", { error: error.message });
     }
   }
 
-  async syncWarnings() {
+  async syncMessagesToMongo(models, recentTime) {
     try {
-      const mongoWarnings = await this.mongoDb.models.Warning.find({});
+      const MessageModel = config.DATABASE.models.message;
+      if (!MessageModel) {
+        logger.warn("Local Message model not found");
+        return;
+      }
 
-      for (const warning of mongoWarnings) {
-        const warnDb = require('./warn');
-        if (warnDb && warnDb.addWarning) {
-          await warnDb.addWarning(warning.chatId, warning.userId, warning.warnCount);
+      const localMessages = await MessageModel.findAll({
+        where: {
+          createdAt: {
+            [config.DATABASE.Sequelize.Op.gte]: recentTime
+          }
+        },
+        limit: 500,
+        order: [['createdAt', 'DESC']]
+      });
+
+      let syncedCount = 0;
+      for (const message of localMessages) {
+        try {
+          await models.Message.updateOne(
+            { 'key.id': message.jid },
+            {
+              key: { id: message.jid },
+              message: message.message,
+              messageTimestamp: message.timestamp,
+              sender: message.sender,
+              updatedAt: new Date()
+            },
+            { upsert: true }
+          );
+          syncedCount++;
+        } catch (error) {
+          logger.warn("Error syncing message to MongoDB", { 
+            messageId: message.jid, 
+            error: error.message 
+          });
         }
       }
 
+      logger.debug(`Synced ${syncedCount}/${localMessages.length} messages to MongoDB`);
+
     } catch (error) {
-      console.warn("Warning sync error:", error);
+      logger.warn("Message sync error", { error: error.message });
     }
   }
 
-  async syncNotes() {
+  async syncPausedChatsToMongo(models) {
     try {
-      const mongoNotes = await this.mongoDb.models.Note.find({});
+      // Sync paused chats from local database
+      const { PausedChats } = require('../');
+      const pausedChats = await PausedChats.getPausedChats();
 
-      for (const note of mongoNotes) {
-        const noteDb = require('./notes');
-        if (noteDb && noteDb.addNote) {
-          await noteDb.addNote(note.chatId, note.noteName, note.noteContent);
+      let syncedCount = 0;
+      for (const pausedChat of pausedChats) {
+        try {
+          const chatId = pausedChat.chatId || pausedChat.jid;
+          if (chatId) {
+            await models.PausedChat.updateOne(
+              { chatId: chatId },
+              {
+                chatId: chatId,
+                isPaused: true,
+                updatedAt: new Date()
+              },
+              { upsert: true }
+            );
+            syncedCount++;
+          }
+        } catch (error) {
+          logger.warn("Error syncing paused chat to MongoDB", { 
+            chatId: pausedChat.chatId || pausedChat.jid, 
+            error: error.message 
+          });
         }
       }
 
+      logger.debug(`Synced ${syncedCount} paused chats to MongoDB`);
+
     } catch (error) {
-      console.warn("Note sync error:", error);
+      logger.warn("Paused chat sync error", { error: error.message });
     }
   }
 
-  async syncFilters() {
-    try {
-      const mongoFilters = await this.mongoDb.models.Filter.find({});
-
-      for (const filter of mongoFilters) {
-        const filterDb = require('./filters');
-        if (filterDb && filterDb.addFilter) {
-          await filterDb.addFilter(filter.chatId, filter.pattern, filter.response);
-        }
-      }
-
-    } catch (error) {
-      console.warn("Filter sync error:", error);
-    }
+  async forceSync() {
+    logger.info("Force sync requested", {
+      component: 'DatabaseSyncManager'
+    });
+    await this.performSync('force');
   }
 
-  async syncPlugins() {
-    try {
-      const mongoPlugins = await this.mongoDb.models.Plugin.find({});
-
-      for (const plugin of mongoPlugins) {
-        const pluginDb = require('./plugins');
-        if (pluginDb && pluginDb.setPluginConfig) {
-          await pluginDb.setPluginConfig(plugin.name, plugin.enabled, plugin.config);
-        }
-      }
-
-    } catch (error) {
-      console.warn("Plugin sync error:", error);
-    }
-  }
-
-  async syncCallActions() {
-    try {
-      const mongoCallActions = await this.mongoDb.models.CallAction.find({});
-
-      for (const callAction of mongoCallActions) {
-        const callDb = require('./callAction');
-        if (callDb && callDb.setCallAction) {
-          await callDb.setCallAction(callAction.chatId, callAction.action);
-        }
-      }
-
-    } catch (error) {
-      console.warn("CallAction sync error:", error);
-    }
-  }
-
-  // Implement remaining sync methods for all other collections
-  async syncAutoReact() {
-    try {
-      const mongoAutoReact = await this.mongoDb.models.AutoReact.find({});
-      
-      for (const autoReact of mongoAutoReact) {
-        const autoReactDb = require('./autoreact');
-        if (autoReactDb && autoReactDb.setAutoReact) {
-          await autoReactDb.setAutoReact(autoReact.chatId, autoReact.enabled, autoReact.reactions);
-        }
-      }
-    } catch (error) {
-      console.warn("AutoReact sync error:", error);
-    }
-  }
-
-  async syncAutoTranslate() {
-    try {
-      const mongoAutoTranslate = await this.mongoDb.models.AutoTranslate.find({});
-      
-      for (const autoTranslate of mongoAutoTranslate) {
-        const autoTranslateDb = require('./autotranslate');
-        if (autoTranslateDb && autoTranslateDb.setAutoTranslate) {
-          await autoTranslateDb.setAutoTranslate(autoTranslate.chatId, autoTranslate.enabled, autoTranslate.targetLanguage);
-        }
-      }
-    } catch (error) {
-      console.warn("AutoTranslate sync error:", error);
-    }
-  }
-
-  async syncBanBot() {
-    try {
-      const mongoBanBot = await this.mongoDb.models.BanBot.find({});
-      
-      for (const banBot of mongoBanBot) {
-        const banBotDb = require('./banbot');
-        if (banBotDb && banBotDb.setBanBot) {
-          await banBotDb.setBanBot(banBot.chatId, banBot.enabled, banBot.reason);
-        }
-      }
-    } catch (error) {
-      console.warn("BanBot sync error:", error);
-    }
-  }
-
-  async syncBannedAccounts() {
-    try {
-      const mongoBannedAccounts = await this.mongoDb.models.BannedAccount.find({});
-      
-      for (const bannedAccount of mongoBannedAccounts) {
-        const bannedAccountDb = require('./BannedAccount');
-        if (bannedAccountDb && bannedAccountDb.addBannedAccount) {
-          await bannedAccountDb.addBannedAccount(bannedAccount.userId, bannedAccount.reason, bannedAccount.bannedBy);
-        }
-      }
-    } catch (error) {
-      console.warn("BannedAccount sync error:", error);
-    }
-  }
-
-  async syncStickBan() {
-    try {
-      const mongoStickBan = await this.mongoDb.models.StickBan.find({});
-      
-      for (const stickBan of mongoStickBan) {
-        const stickBanDb = require('./stickban');
-        if (stickBanDb && stickBanDb.addStickBan) {
-          await stickBanDb.addStickBan(stickBan.chatId, stickBan.stickerId, stickBan.bannedBy);
-        }
-      }
-    } catch (error) {
-      console.warn("StickBan sync error:", error);
-    }
-  }
-
-  async syncPDM() {
-    try {
-      const mongoPDM = await this.mongoDb.models.PDM.find({});
-      
-      for (const pdm of mongoPDM) {
-        const pdmDb = require('./pdm');
-        if (pdmDb && pdmDb.setPDM) {
-          await pdmDb.setPDM(pdm.chatId, pdm.enabled, pdm.deleteTime);
-        }
-      }
-    } catch (error) {
-      console.warn("PDM sync error:", error);
-    }
-  }
-
-  async syncAiChat() {
-    try {
-      const mongoAiChat = await this.mongoDb.models.AiChat.find({});
-      
-      for (const aiChat of mongoAiChat) {
-        const aiChatDb = require('./aiChat');
-        if (aiChatDb && aiChatDb.setAiChat) {
-          await aiChatDb.setAiChat(aiChat.chatId, aiChat.enabled, aiChat.model);
-        }
-      }
-    } catch (error) {
-      console.warn("AiChat sync error:", error);
-    }
-  }
-
-  async syncGemini() {
-    try {
-      const mongoGemini = await this.mongoDb.models.Gemini.find({});
-      
-      for (const gemini of mongoGemini) {
-        const geminiDb = require('./gemini');
-        if (geminiDb && geminiDb.setGemini) {
-          await geminiDb.setGemini(gemini.chatId, gemini.enabled, gemini.apiKey);
-        }
-      }
-    } catch (error) {
-      console.warn("Gemini sync error:", error);
-    }
-  }
-
-  async syncGroupStateSave() {
-    try {
-      const mongoGroupState = await this.mongoDb.models.GroupStateSave.find({});
-      
-      for (const groupState of mongoGroupState) {
-        const groupStateDb = require('./GroupStateSave');
-        if (groupStateDb && groupStateDb.saveGroupState) {
-          await groupStateDb.saveGroupState(groupState.chatId, groupState.state);
-        }
-      }
-    } catch (error) {
-      console.warn("GroupStateSave sync error:", error);
-    }
-  }
-
-  // Utility methods
-  getSyncStats() {
+  getStatus() {
     return {
-      ...this.syncStats,
-      lastSyncTime: this.lastSyncTime,
       isRunning: this.isRunning,
-      nextSync: this.syncInterval ? 'Every 30 minutes' : 'Not scheduled'
+      lastSyncTime: this.lastSyncTime,
+      stats: this.syncStats,
+      isEnabled: config.USE_MONGODB && !!config.MONGODB_URI
     };
   }
 
-  async forcSync() {
-    console.log("🔄 Force sync requested...");
-    await this.performSync('manual');
-  }
-
-  stopSync() {
+  async stop() {
     if (this.syncInterval) {
-      this.syncInterval.stop();
-      console.log("⏹️ Database sync stopped");
+      this.syncInterval.destroy();
+      this.syncInterval = null;
     }
-  }
 
-  restartSync() {
-    this.stopSync();
-    this.startSyncScheduler();
-    console.log("🔄 Database sync restarted");
+    if (this.mongoDb) {
+      await this.mongoDb.disconnect();
+    }
+
+    logger.info("Database sync manager stopped", {
+      component: 'DatabaseSyncManager'
+    });
   }
 }
 
-// Create singleton instance
-const dbSyncManager = new DatabaseSyncManager();
-
-module.exports = dbSyncManager;
+module.exports = new DatabaseSyncManager();

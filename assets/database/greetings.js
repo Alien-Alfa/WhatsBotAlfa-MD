@@ -5,6 +5,7 @@ const { DataTypes } = require("sequelize");
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for greetings
   const mongoManager = require("./mongodb");
+const logger = require("../../lib/logger");
   let models = null;
 
   const initModels = async () => {
@@ -23,7 +24,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const greeting = await models.Greeting.findOne({ jid: id });
         return greeting || false;
       } catch (error) {
-        console.warn("MongoDB getGreeting error:", error);
+        logger.warn("MongoDB getGreeting error:", error);
         return false;
       }
     },
@@ -38,7 +39,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB setGreeting error:", error);
+        logger.warn("MongoDB setGreeting error:", error);
         return null;
       }
     },
@@ -49,7 +50,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.Greeting.deleteOne({ jid: id });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB deleteGreeting error:", error);
+        logger.warn("MongoDB deleteGreeting error:", error);
         return false;
       }
     },
@@ -64,7 +65,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB enableGreeting error:", error);
+        logger.warn("MongoDB enableGreeting error:", error);
         return null;
       }
     },
@@ -79,7 +80,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB disableGreeting error:", error);
+        logger.warn("MongoDB disableGreeting error:", error);
         return null;
       }
     },
@@ -90,7 +91,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const greeting = await models.Greeting.findOne({ jid: id });
         return greeting ? greeting.isEnable : false;
       } catch (error) {
-        console.warn("MongoDB getGreetingStatus error:", error);
+        logger.warn("MongoDB getGreetingStatus error:", error);
         return false;
       }
     },
@@ -105,7 +106,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB setMessage error:", error);
+        logger.warn("MongoDB setMessage error:", error);
         return null;
       }
     },
@@ -116,7 +117,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const greeting = await models.Greeting.findOne({ jid: id });
         return greeting ? greeting.message : null;
       } catch (error) {
-        console.warn("MongoDB getMessage error:", error);
+        logger.warn("MongoDB getMessage error:", error);
         return null;
       }
     },
@@ -131,7 +132,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result !== null;
       } catch (error) {
-        console.warn("MongoDB delMessage error:", error);
+        logger.warn("MongoDB delMessage error:", error);
         return false;
       }
     },
@@ -148,7 +149,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB toggleStatus error:", error);
+        logger.warn("MongoDB toggleStatus error:", error);
         return null;
       }
     },
@@ -159,7 +160,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const greeting = await models.Greeting.findOne({ jid: id });
         return greeting ? greeting.isEnable : false;
       } catch (error) {
-        console.warn("MongoDB getStatus error:", error);
+        logger.warn("MongoDB getStatus error:", error);
         return false;
       }
     }
@@ -170,7 +171,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
-  console.log('⚠️ Greetings feature disabled in MongoDB mode');
+  logger.info('⚠️ Greetings feature disabled in MongoDB mode');
   module.exports = {
     GreetingsDB: null,
     getGreeting: async () => false,

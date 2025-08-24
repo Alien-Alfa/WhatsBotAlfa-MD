@@ -1,6 +1,7 @@
 const { command, isPrivate, getBuffer, reply } = require("../../lib/");
 const ytsr = require('ytsr');
 const acrcloud = require("acrcloud");
+const logger = require("../../lib/logger");
 
 command(
   {
@@ -47,7 +48,7 @@ command(
         try {
           youtubeData = await searchYoutube(album?.name || title);
         } catch (e) {
-          console.error("YouTube search error:", e);
+          logger.error("YouTube search error:", e);
         }
 
         let text = `🎵 *Music Found*\n\n`;
@@ -79,12 +80,12 @@ command(
         }
 
       } catch (identifyError) {
-        console.error("Music identification error:", identifyError);
+        logger.error("Music identification error:", identifyError);
         return await message.reply("_Failed to identify music. Please try again._");
       }
 
     } catch (error) {
-      console.error("[Find Music Error]:", error);
+      logger.error("[Find Music Error]:", error);
       await message.reply("_An error occurred while processing the audio_");
     }
   }
@@ -103,7 +104,7 @@ async function searchYoutube(query) {
     const searchResult = await ytsr(filter.url, options);
     return searchResult.items[0] || null;
   } catch (error) {
-    console.error("YouTube search error:", error);
+    logger.error("YouTube search error:", error);
     return null;
   }
 }

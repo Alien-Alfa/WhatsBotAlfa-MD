@@ -1,6 +1,7 @@
 const { command, isPrivate } = require("../../lib/");
 const { isAdmin, parsedJid,fromMe } = require("../../lib");
 const fs = require('fs');
+const logger = require("../../lib/logger");
 
 command(
   {
@@ -102,7 +103,7 @@ command(
     await message.SetFullPP(message.jid , buff, message);
     return await message.reply("_Profile Picture Updated_");
   } catch (error) {
-    console.error("[Error]:", error);
+    logger.error("[Error]:", error);
   }
   }
 );
@@ -265,7 +266,7 @@ command(
     type: "group",
   },
   async (message, match) => {
-    console.log("match")
+    logger.info("match")
     match = match || message.reply_message.text;
     if (!match) return message.reply("_Enter or reply to a text to tag_");
     if (!message.isGroup) return;
@@ -331,7 +332,7 @@ return await message.reply(msg,{
 );
 
       } catch (error) {
-          console.error("[Error]:", error);
+          logger.error("[Error]:", error);
           return await message.reply("_Error occurred while fetching group info_");
       }
   });
@@ -403,7 +404,7 @@ return await message.reply(msg,{
   mentions: [jid],
 }
 );} catch (error) {
-  console.error("[Error]:", error);
+  logger.error("[Error]:", error);
   return await message.reply("_Error occurred while fetching group info_");
 }
 });
@@ -439,7 +440,7 @@ command(
                   mes += "Name: " + group.subject + "\nJid: " + group.id + "\nSize: " + group.size + "\nCreation Date: " + await msToDateTime(group.creation) + "\n----------------\n";
               }
           } else {
-              console.error("res is not in the expected format");
+              logger.error("res is not in the expected format");
               return await message.reply("Failed to fetch group list.");
           }
       
@@ -448,7 +449,7 @@ command(
               edit: message.key
           });
       } catch (error) {
-          console.error(error);
+          logger.error(error);
           message.reply("An error occurred while fetching the group list.");
       }
   }
@@ -482,11 +483,11 @@ command(
               // Convert Set to Array and proceed to save and reply
               await extractAndSaveParticipantIDs(Array.from(uniqueIDs), message);
           } else {
-              console.error("res is not in the expected format");
+              logger.error("res is not in the expected format");
               return await message.reply("Failed to fetch group list.");
           }
       } catch (error) {
-          console.error(error);
+          logger.error(error);
           message.reply("An error occurred while fetching the group list.");
       }
   }

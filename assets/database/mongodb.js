@@ -3,6 +3,7 @@
 
 const mongoose = require("mongoose");
 const config = require("../../config");
+const logger = require("../../lib/logger");
 
 // Global connection state
 let isConnected = false;
@@ -154,22 +155,22 @@ async function migrateSchemas() {
     const hasOldIdIndex = indexes.some(index => index.key && index.key.id);
     
     if (hasOldIdIndex) {
-      console.log("🔄 Migrating old Chat schema...");
+      logger.info("🔄 Migrating old Chat schema...");
       
       // Drop the old 'id' index
       try {
         await chatCollection.dropIndex({ id: 1 });
-        console.log("✅ Dropped old 'id' index");
+        logger.info("✅ Dropped old 'id' index");
       } catch (error) {
         if (error.code !== 27) { // Index not found error is OK
-          console.warn("Warning dropping old index:", error.message);
+          logger.warn("Warning dropping old index:", error.message);
         }
       }
       
       // Migrate existing documents from 'id' to 'jid' field
       const documentsWithId = await chatCollection.find({ id: { $exists: true } }).toArray();
       if (documentsWithId.length > 0) {
-        console.log(`🔄 Migrating ${documentsWithId.length} chat documents...`);
+        logger.info(`🔄 Migrating ${documentsWithId.length} chat documents...`);
         
         for (const doc of documentsWithId) {
           if (doc.id && !doc.jid) {
@@ -182,11 +183,11 @@ async function migrateSchemas() {
             );
           }
         }
-        console.log("✅ Chat documents migrated successfully");
+        logger.info("✅ Chat documents migrated successfully");
       }
     }
   } catch (error) {
-    console.warn("Schema migration warning:", error.message);
+    logger.warn("Schema migration warning:", error.message);
   }
 }
 
@@ -201,7 +202,7 @@ async function connect() {
       throw new Error("MongoDB URI is not configured");
     }
 
-    console.log("🔄 Connecting to MongoDB...");
+    logger.info("🔄 Connecting to MongoDB...");
     
     // Close any existing connections
     if (mongoose.connection.readyState !== 0) {
@@ -214,14 +215,14 @@ async function connect() {
       cleanUri = cleanUri.replace(/[&?]bufferMaxEntries=\d+/gi, '');
       cleanUri = cleanUri.replace(/[&?]buffermaxentries=\d+/gi, '');
       cleanUri = cleanUri.replace(/[&?]bufferCommands=(true|false)/gi, '');
-      console.log("🧹 Cleaned deprecated options from MongoDB URI");
+      logger.info("🧹 Cleaned deprecated options from MongoDB URI");
     }
     
     // Connect to MongoDB with minimal options
     await mongoose.connect(cleanUri);
 
     isConnected = true;
-    console.log("✅ MongoDB connected successfully!");
+    logger.info("✅ MongoDB connected successfully!");
 
     // Run schema migrations
     await migrateSchemas();
@@ -236,21 +237,21 @@ async function connect() {
           models[modelName] = mongoose.model(modelName, schema);
         }
       } catch (error) {
-        console.warn(`Warning creating model ${modelName}:`, error.message);
+        logger.warn(`Warning creating model ${modelName}:`, error.message);
         // Try to get existing model
         try {
           models[modelName] = mongoose.model(modelName);
         } catch (e) {
-          console.error(`Failed to initialize model ${modelName}:`, e.message);
+          logger.error(`Failed to initialize model ${modelName}:`, e.message);
         }
       }
     }
 
-    console.log("✅ MongoDB models initialized successfully");
+    logger.info("✅ MongoDB models initialized successfully");
     return models;
 
   } catch (error) {
-    console.error("❌ MongoDB connection failed:", error);
+    logger.error("❌ MongoDB connection failed:", error);
     isConnected = false;
     models = {};
     throw error;
@@ -263,7 +264,7 @@ async function disconnect() {
     await mongoose.disconnect();
     isConnected = false;
     models = {};
-    console.log("📤 MongoDB disconnected");
+    logger.info("📤 MongoDB disconnected");
   }
 }
 

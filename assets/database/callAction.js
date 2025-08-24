@@ -5,6 +5,7 @@ const { DataTypes } = require('sequelize');
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for CallAction
   const mongoManager = require("./mongodb");
+const logger = require("../../lib/logger");
   let models = null;
 
   const initModels = async () => {
@@ -33,7 +34,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB addCallAction error:", error);
+        logger.warn("MongoDB addCallAction error:", error);
         return null;
       }
     },
@@ -44,7 +45,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.CallAction.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB removeCallAction error:", error);
+        logger.warn("MongoDB removeCallAction error:", error);
         return false;
       }
     },
@@ -55,7 +56,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const callAction = await models.CallAction.findOne({ jid: jid });
         return callAction ? callAction.isEnabled : false;
       } catch (error) {
-        console.warn("MongoDB isCallAction error:", error);
+        logger.warn("MongoDB isCallAction error:", error);
         return false;
       }
     }
@@ -66,7 +67,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
-  console.log('⚠️ CallAction feature disabled in MongoDB mode');
+  logger.info('⚠️ CallAction feature disabled in MongoDB mode');
   module.exports = {
     call: null,
     saveCall: async () => null,

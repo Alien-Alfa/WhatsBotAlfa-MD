@@ -5,6 +5,7 @@ const { DataTypes } = require("sequelize");
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for filters
   const mongoManager = require("./mongodb");
+const logger = require("../../lib/logger");
   let models = null;
 
   const initModels = async () => {
@@ -27,7 +28,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB setFilter error:", error);
+        logger.warn("MongoDB setFilter error:", error);
         return null;
       }
     },
@@ -38,7 +39,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.Filter.deleteOne({ jid: id, text: text });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB deleteFilter error:", error);
+        logger.warn("MongoDB deleteFilter error:", error);
         return false;
       }
     },
@@ -49,7 +50,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const filter = await models.Filter.findOne({ jid: id, text: text });
         return filter;
       } catch (error) {
-        console.warn("MongoDB getFilter error:", error);
+        logger.warn("MongoDB getFilter error:", error);
         return null;
       }
     },
@@ -60,7 +61,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const filters = await models.Filter.find({ jid: id });
         return filters;
       } catch (error) {
-        console.warn("MongoDB getFilters error:", error);
+        logger.warn("MongoDB getFilters error:", error);
         return [];
       }
     }
@@ -71,7 +72,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
-  console.log('⚠️ Filters feature disabled in MongoDB mode');
+  logger.info('⚠️ Filters feature disabled in MongoDB mode');
   module.exports = {
     FiltersDB: null,
     getFilter: async () => false,

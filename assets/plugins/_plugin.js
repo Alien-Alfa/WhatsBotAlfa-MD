@@ -17,7 +17,7 @@ command(
     try {
       var url = new URL(match);
     } catch (e) {
-      console.log(e);
+      logger.info(e);
       return await message.sendMessage(message.jid, "_Invalid Url_");
     }
 
@@ -40,6 +40,7 @@ command(
         fs.writeFileSync(__dirname + "/" + plugin_name + ".js", data);
         try {
           require("./" + plugin_name);
+const logger = require("../../lib/logger");
         } catch (e) {
           fs.unlinkSync(__dirname + "/" + plugin_name + ".js");
           return await message.sendMessage(
@@ -56,7 +57,7 @@ command(
         );
       }
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       return await message.sendMessage(message.jid, "Failed to fetch plugin");
     }
   }

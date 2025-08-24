@@ -64,7 +64,7 @@ function getUptimeEmoji(uptime) {
 
 // Improved Ping Command
 command({
-  pattern: "pong",
+  pattern: "ping",
   fromMe: isPrivate,
   desc: "Check bot latency and response time",
   type: "user",
@@ -75,7 +75,7 @@ command({
     const start = Date.now();
     
     // Initial checking message
-    const checkingText = "```⚡ Checking server response...```";
+    const checkingText = "```Checking server response...```";
     let key;
     
     if (me) {
@@ -94,9 +94,16 @@ command({
     const ping = end - start;
     const emoji = getPingEmoji(ping);
     
+
     // Detailed response
-    const responseText = `
+    const responseText = `${emoji} *Latency:* ${ping}ms`.trim();
+
+
+    // Detailed response
+    const lresponseText = `
 ┌─「 🏓 PING STATUS 」
+│
+├ ${emoji} *Latency:* ${ping}ms
 │
 ├ ${emoji} *Latency:* ${ping}ms
 ├ 📡 *Network:* ${ping < 200 ? 'Excellent' : ping < 400 ? 'Good' : ping < 600 ? 'Fair' : 'Poor'}
@@ -114,7 +121,7 @@ command({
     }, 1000);
     
   } catch (error) {
-    console.error("[Ping Error]:", error);
+    logger.error("[Ping Error]:", error);
     const errorText = "❌ Failed to check ping. Please try again.";
     
     if (me) {
@@ -164,8 +171,13 @@ command({
     const memUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
     const memTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
     
+
+
     // Detailed response
-    const responseText = `
+    const responseText = `${emoji} *Uptime:* ${formattedUptime}`.trim();
+
+    // Detailed response
+    const lresponseText = `
 ┌─「 ⏰ UPTIME STATUS 」
 │
 ├ ${emoji} *Uptime:* ${formattedUptime}
@@ -186,7 +198,7 @@ command({
     }, 1000);
     
   } catch (error) {
-    console.error("[Uptime Error]:", error);
+    logger.error("[Uptime Error]:", error);
     const errorText = "❌ Failed to fetch uptime. Please try again.";
     
     if (me) {
@@ -248,6 +260,7 @@ command({
 ├ 📡 *Network:* ${ping < 200 ? 'Excellent' : 'Good'}
 ├ 🔋 *Performance:* ${memUsedMB < 100 ? 'Optimal' : 'Good'}
 ├ 🌐 *Database:* ${require("../../config").USE_MONGODB ? 'MongoDB' : 'SQLite'}
+const logger = require("../../lib/logger");
 ├ 🕐 *Time:* ${new Date().toLocaleString()}
 │
 └─「 Aurora-MD System Info 」`.trim();
@@ -261,7 +274,7 @@ command({
     }, 1500);
     
   } catch (error) {
-    console.error("[Status Error]:", error);
+    logger.error("[Status Error]:", error);
     const errorText = "❌ Failed to fetch status. Please try again.";
     
     if (me) {

@@ -5,6 +5,7 @@ const { DataTypes } = require('sequelize');
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for StickBan
   const mongoManager = require("./mongodb");
+const logger = require("../../lib/logger");
   let models = null;
 
   const initModels = async () => {
@@ -27,7 +28,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB addStickBan error:", error);
+        logger.warn("MongoDB addStickBan error:", error);
         return null;
       }
     },
@@ -38,7 +39,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.StickBan.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB removeStickBan error:", error);
+        logger.warn("MongoDB removeStickBan error:", error);
         return false;
       }
     },
@@ -49,7 +50,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const stickBan = await models.StickBan.findOne({ jid: jid });
         return stickBan ? stickBan.isBanned : false;
       } catch (error) {
-        console.warn("MongoDB isStickBan error:", error);
+        logger.warn("MongoDB isStickBan error:", error);
         return false;
       }
     }
@@ -60,7 +61,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
-  console.log('⚠️ StickBan feature disabled in MongoDB mode');
+  logger.info('⚠️ StickBan feature disabled in MongoDB mode');
   module.exports = {
     StickBan: null,
     addBan: async () => null,
@@ -93,7 +94,7 @@ async function getConfig() {
       return allConfigs;
     }
   } catch (error) {
-    console.error("Error fetching configurations:", error);
+    logger.error("Error fetching configurations:", error);
     return false;
   }
 }

@@ -5,6 +5,7 @@ const { DataTypes } = require("sequelize");
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for AutoReact
   const mongoManager = require("./mongodb");
+const logger = require("../../lib/logger");
   let models = null;
 
   const initModels = async () => {
@@ -33,7 +34,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB addAutoReact error:", error);
+        logger.warn("MongoDB addAutoReact error:", error);
         return null;
       }
     },
@@ -44,7 +45,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.AutoReact.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB removeAutoReact error:", error);
+        logger.warn("MongoDB removeAutoReact error:", error);
         return false;
       }
     },
@@ -55,7 +56,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const autoReact = await models.AutoReact.findOne({ jid: jid });
         return autoReact ? autoReact.isEnabled : false;
       } catch (error) {
-        console.warn("MongoDB isAutoReact error:", error);
+        logger.warn("MongoDB isAutoReact error:", error);
         return false;
       }
     },
@@ -66,7 +67,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const autoReacts = await models.AutoReact.find({ isEnabled: true });
         return autoReacts;
       } catch (error) {
-        console.warn("MongoDB getAutoReacts error:", error);
+        logger.warn("MongoDB getAutoReacts error:", error);
         return [];
       }
     },
@@ -82,7 +83,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
-  console.log('⚠️ AutoReact feature disabled in MongoDB mode');
+  logger.info('⚠️ AutoReact feature disabled in MongoDB mode');
   module.exports = {
     React: null,
     saveReact: async () => null,

@@ -36,6 +36,7 @@ command(
   async (message, match, m) => {
     {
       let TicTacToe = require("../../lib/tictactoe");
+const logger = require("../../lib/logger");
       this.game = this.game ? this.game : {};
       if (
         Object.values(this.game).find(

@@ -1,5 +1,6 @@
 const { getFilter, setFilter, deleteFilter } = require("../database/filters");
 const { command, isPrivate} = require("../../lib");
+const logger = require("../../lib/logger");
 
 command(
   {
@@ -80,7 +81,7 @@ command({ on: "text", fromMe: false,   }, async (message, match) => {
     }
   });
 } catch (error) {
-  console.error("[Error]:", error);
+  logger.error("[Error]:", error);
 }
 
 });

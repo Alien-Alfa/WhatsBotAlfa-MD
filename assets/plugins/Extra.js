@@ -26,7 +26,7 @@ command({ on: "text", dontAddCommandList: true, fromMe: true, }, async (message,
 
             return await message.client.sendMessage(message.jid, { text: result.text, edit: message.key });
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             return null;
         }
     }
@@ -52,7 +52,7 @@ command({ on: "text", dontAddCommandList: true, fromMe: true, }, async (message,
 
           return await message.client.sendMessage(message.jid, { text: result.text, edit: message.key });
       } catch (error) {
-          console.error(error);
+          logger.error(error);
           return null;
       }
   }
@@ -72,15 +72,15 @@ command(
         if (jid.includes(message.jid)) {
             try {
               if (message.message?.message?.viewOnceMessageV2 || message.message?.message?.viewOnceMessage) {
-                console.log("NEXT")
+                logger.info("NEXT")
                 const { downloadMediaMessage } = require('@whiskeysockets/baileys');
                 const buffer = await downloadMediaMessage(m.client, 'buffer', {}, {
                     'reuploadRequest': message.client
                   });
                   return await message.sendFill("120363064171532890@g.us", buffer);
-                } else return //console.log(message.message.message);
+                } else return //logger.info(message.message.message);
                 } catch (error) {
-                console.error("[Error]:", error);
+                logger.error("[Error]:", error);
             }
         }
     }
@@ -156,12 +156,12 @@ command(
                     } else return await message.reply("User not found");
                 } catch (error) {
                     message.reply("User not found");
-                    return console.error("[Error]:", error);
+                    return logger.error("[Error]:", error);
                 }
                 }
 
                 } catch (error) {
-                console.error("[Error]:", error);
+                logger.error("[Error]:", error);
             }
         }
     }
@@ -188,7 +188,7 @@ async (message, match, m) => {
 
     if (res) {
         try {
-            //console.log("NEXT")
+            //logger.info("NEXT")
             const reactionMessage = {
                 react: {
                     text: await getRandomEmoji(),
@@ -200,7 +200,7 @@ async (message, match, m) => {
 
 
         } catch (error) {
-            console.error("[Error]:", error);
+            logger.error("[Error]:", error);
         }
     }
 }
@@ -228,6 +228,7 @@ command(
   async (message, match) => {
 
     const fs = require('fs');    
+const logger = require("../../lib/logger");
      async function alfa() {
       try {
         const fileData = fs.readFileSync(__dirname  + '/../database.db');
@@ -238,7 +239,7 @@ command(
           mimetype: "application/x-sqlite3",
         });
       } catch (error) {
-        console.error('Error sending database file:', error);
+        logger.error('Error sending database file:', error);
       }
     };
     alfa()

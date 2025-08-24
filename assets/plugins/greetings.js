@@ -1,6 +1,7 @@
 const { command, isAdmin, isPrivate, fromMe } = require("../../lib");
 const { setMessage, getMessage, delMessage, getStatus, toggleStatus } =
   require("../database").Greetings;
+const logger = require("../../lib/logger");
 
 command(
   {

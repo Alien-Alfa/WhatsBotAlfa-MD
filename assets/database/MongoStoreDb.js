@@ -31,10 +31,10 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const dbSyncManager = require("./DatabaseSyncManager");
         await dbSyncManager.initialize();
         
-        console.log("✅ MongoDB models initialized successfully");
+        logger.info("✅ MongoDB models initialized successfully");
         return models;
       } catch (error) {
-        console.error("MongoDB initialization failed:", error);
+        logger.error("MongoDB initialization failed:", error);
         throw error;
       }
     },
@@ -64,7 +64,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         
         const models = this.models || dbOperations.models;
         if (!models || !models.Contact) {
-          console.warn("MongoDB models not initialized for saveContact");
+          logger.warn("MongoDB models not initialized for saveContact");
           return null;
         }
         
@@ -83,7 +83,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         contactCache.set(cacheKey, { name, data: result, timestamp: Date.now() });
         return result;
       } catch (e) {
-        console.warn("Save contact error:", e);
+        logger.warn("Save contact error:", e);
         return null;
       }
     },
@@ -92,7 +92,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = this.models || dbOperations.models;
         if (!models || !models.Message) {
-          console.warn("MongoDB models not initialized for saveMessage");
+          logger.warn("MongoDB models not initialized for saveMessage");
           return null;
         }
         
@@ -118,7 +118,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         
         return result;
       } catch (e) {
-        console.warn("Save message error:", e);
+        logger.warn("Save message error:", e);
         return null;
       }
     },
@@ -129,7 +129,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         
         const models = this.models || dbOperations.models;
         if (!models || !models.Message) {
-          console.warn("MongoDB models not initialized for loadMessage");
+          logger.warn("MongoDB models not initialized for loadMessage");
           return null;
         }
         
@@ -145,7 +145,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         messageCache.set(cacheKey, { data: result, timestamp: Date.now() });
         return result;
       } catch (e) {
-        console.warn("Load message error:", e);
+        logger.warn("Load message error:", e);
         return null;
       }
     },
@@ -154,7 +154,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = this.models || dbOperations.models;
         if (!models || !models.Chat) {
-          console.warn("MongoDB models not initialized for saveChat");
+          logger.warn("MongoDB models not initialized for saveChat");
           return null;
         }
         
@@ -183,7 +183,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         } catch (error) {
           // Handle duplicate key errors gracefully
           if (error.code === 11000) {
-            console.warn(`Duplicate chat entry for ${chat.id}, attempting to find existing...`);
+            logger.warn(`Duplicate chat entry for ${chat.id}, attempting to find existing...`);
             try {
               const existing = await models.Chat.findOne({ jid: chat.id });
               if (existing) {
@@ -191,13 +191,13 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
                 return existing;
               }
             } catch (findError) {
-              console.error("Error finding existing chat:", findError.message);
+              logger.error("Error finding existing chat:", findError.message);
             }
           }
           throw error;
         }
       } catch (e) {
-        console.warn("Save chat error:", e);
+        logger.warn("Save chat error:", e);
         return null;
       }
     },
@@ -212,7 +212,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         
         const models = this.models || dbOperations.models;
         if (!models || !models.Contact) {
-          console.warn("MongoDB models not initialized for getName");
+          logger.warn("MongoDB models not initialized for getName");
           return jid.split("@")[0].replace(/_/g, " ");
         }
         
@@ -222,7 +222,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         contactCache.set(cacheKey, { name, timestamp: Date.now() });
         return name;
       } catch (e) {
-        console.warn("Get name error:", e);
+        logger.warn("Get name error:", e);
         return jid.split("@")[0].replace(/_/g, " ");
       }
     },
@@ -231,7 +231,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = this.models || dbOperations.models;
         if (!models || !models.Message) {
-          console.warn("MongoDB models not initialized for loadDeletedMessages");
+          logger.warn("MongoDB models not initialized for loadDeletedMessages");
           return [];
         }
         
@@ -244,7 +244,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         
         return messages;
       } catch (error) {
-        console.error("Error loading deleted messages:", error);
+        logger.error("Error loading deleted messages:", error);
         return [];
       }
     },
@@ -258,7 +258,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     async findContact(jid) {
       const models = this.models || dbOperations.models;
       if (!models || !models.Contact) {
-        console.warn("MongoDB models not initialized for findContact");
+        logger.warn("MongoDB models not initialized for findContact");
         return null;
       }
       return await models.Contact.findOne({ jid });
@@ -271,7 +271,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     async findChat(id) {
       const models = this.models || dbOperations.models;
       if (!models || !models.Chat) {
-        console.warn("MongoDB models not initialized for findChat");
+        logger.warn("MongoDB models not initialized for findChat");
         return null;
       }
       return await models.Chat.findOne({ id });
@@ -282,7 +282,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = this.models || dbOperations.models;
         if (!models || !models.Message) {
-          console.warn("MongoDB models not initialized for saveMessages");
+          logger.warn("MongoDB models not initialized for saveMessages");
           return null;
         }
         
@@ -302,7 +302,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
         return await models.Message.bulkWrite(operations);
       } catch (e) {
-        console.warn("Bulk save messages error:", e);
+        logger.warn("Bulk save messages error:", e);
         return null;
       }
     },
@@ -311,7 +311,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = this.models || dbOperations.models;
         if (!models || !models.Contact) {
-          console.warn("MongoDB models not initialized for saveContacts");
+          logger.warn("MongoDB models not initialized for saveContacts");
           return null;
         }
         
@@ -325,7 +325,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
         return await models.Contact.bulkWrite(operations);
       } catch (e) {
-        console.warn("Bulk save contacts error:", e);
+        logger.warn("Bulk save contacts error:", e);
         return null;
       }
     },
@@ -371,8 +371,9 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
   
   try {
     sequelizeOperations = require("./StoreDb");
+const logger = require("../../lib/logger");
   } catch (error) {
-    console.warn("StoreDb not available, creating mock operations");
+    logger.warn("StoreDb not available, creating mock operations");
     sequelizeOperations = {
       saveContact: async () => null,
       saveMessage: async () => null,
@@ -385,7 +386,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
   dbOperations = {
     async initialize() {
-      console.log("🗃️ Using SQLite database operations");
+      logger.info("🗃️ Using SQLite database operations");
       return Promise.resolve();
     },
     
@@ -397,7 +398,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
     },
 
     async performSync() {
-      console.log("ℹ️ Sync not available with SQLite-only mode");
+      logger.info("ℹ️ Sync not available with SQLite-only mode");
       return null;
     },
 

@@ -2,6 +2,7 @@ const { command, isPrivate } = require("../../lib");
 const config = require("../../config");
 const { hostname, uptime, totalmem, freemem } = require("os");
 const { fancy10, typewriter, tiny } = require("../../lib/fancy")
+const logger = require("../../lib/logger");
 
 function formatTime(seconds) {
   if (isNaN(seconds) || seconds < 0) {
@@ -205,7 +206,7 @@ let data = {
 return await message.sendMessage(message.jid, data, {}, "interactive");
 
     } catch (error) {
-      console.error("[Error]:", error);
+      logger.error("[Error]:", error);
     }
 })
 // Made with ❤ by AlienAlfa

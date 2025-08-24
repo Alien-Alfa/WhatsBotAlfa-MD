@@ -4,6 +4,7 @@ const { command, isPrivate } = require("../../lib");
 const {
     translate
   } = require('@vitalets/google-translate-api');
+const logger = require("../../lib/logger");
   const defaultLang = 'en'
   
   command({
@@ -49,7 +50,7 @@ const {
         return await message.sendMessage(message.jid, `*Translation (${lang}):*\n${result.text}`);
 
       } catch (error) {
-        console.error("[Translate Error]:", error);
+        logger.error("[Translate Error]:", error);
         await message.reply("_Error occurred during translation_");
       }
     })

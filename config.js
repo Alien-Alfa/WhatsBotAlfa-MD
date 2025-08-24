@@ -17,6 +17,8 @@ module.exports = {
 //-------------------------------------------------------------------------------------------------------------------------------------------
   LOGS: toBool(process.env.LOGS) || true,
 //-------------------------------------------------------------------------------------------------------------------------------------------
+  SIMPLE_LOGS: toBool(process.env.SIMPLE_LOGS) || false,
+//-------------------------------------------------------------------------------------------------------------------------------------------
   ANTILINK_ACTION: process.env.ANTILINK_ACTION || "kick",
 //-------------------------------------------------------------------------------------------------------------------------------------------
   SESSION_ID: process.env.SESSION_ID || "",
@@ -74,36 +76,34 @@ module.exports = {
   MONGODB_URI: MONGODB_URI,
   DATABASE_URL: DATABASE_URL,
 //-------------------------------------------------------------------------------------------------------------------------------------------
-  DATABASE:
-    USE_MONGODB && MONGODB_URI
-      ? null // MongoDB connection handled separately
-      : DATABASE_URL === "./assets/database.db"
-      ? new Sequelize({
-          dialect: "sqlite",
-          storage: DATABASE_URL,
-          logging: false,
-          pool: {
-            max: 10,
-            min: 0,
-            acquire: 30000,
-            idle: 10000
-          }
-        })
-      : new Sequelize(DATABASE_URL, {
-          dialect: "postgres",
-          ssl: true,
-          protocol: "postgres",
-          dialectOptions: {
-            native: true,
-            ssl: { require: true, rejectUnauthorized: false },
-          },
-          logging: false,
-          pool: {
-            max: 10,
-            min: 0,
-            acquire: 30000,
-            idle: 10000
-          }
-        }),
+  // Always use local SQLite database as primary
+  DATABASE: DATABASE_URL === "./assets/database.db"
+    ? new Sequelize({
+        dialect: "sqlite",
+        storage: DATABASE_URL,
+        logging: false,
+        pool: {
+          max: 10,
+          min: 0,
+          acquire: 30000,
+          idle: 10000
+        }
+      })
+    : new Sequelize(DATABASE_URL, {
+        dialect: "postgres",
+        ssl: true,
+        protocol: "postgres",
+        dialectOptions: {
+          native: true,
+          ssl: { require: true, rejectUnauthorized: false },
+        },
+        logging: false,
+        pool: {
+          max: 10,
+          min: 0,
+          acquire: 30000,
+          idle: 10000
+        }
+      }),
 //============================================================================================================================================
 };

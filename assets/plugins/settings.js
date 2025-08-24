@@ -22,6 +22,7 @@ const {
   delay
 } = require("@whiskeysockets/baileys");
 const axios = require("axios");
+const logger = require("../../lib/logger");
 
 
 async function getUserProfilePicture(message, user) {
@@ -60,7 +61,7 @@ command({
      desc: "Save a snapshot of the Group setings",
   },
   async (message, match) => {
-   console.log("'"+match+"'")
+   logger.info("'"+match+"'")
      const {
         key
      } = await message.reply("_Procesing that request!_");
@@ -213,7 +214,7 @@ Saved Values:
               return jsonResponse;
            }
            catch (err) {
-              console.log("[Snap Save Error]:" + err);
+              logger.info("[Snap Save Error]:" + err);
               return JSON.stringify({
                  error: err.message
               });
@@ -307,7 +308,7 @@ Saved Values:
 
            }
            catch (err) {
-              console.log("[Snap Save Error]:" + err);
+              logger.info("[Snap Save Error]:" + err);
               return JSON.stringify({
                  error: err.message
               });
@@ -344,7 +345,7 @@ Saved:
               });
            }
            catch (err) {
-              console.log("[Snap Save Error]:" + err)
+              logger.info("[Snap Save Error]:" + err)
            }
 
         }
@@ -352,7 +353,7 @@ Saved:
 
      }
      catch (error) {
-        console.error(error);
+        logger.error(error);
         return message.reply("_Error activating Bot Banning!_");
      }
 
@@ -391,7 +392,7 @@ command({
 
      }
      catch (error) {
-        console.error(error);
+        logger.error(error);
         return message.reply("_Error Deactivating Call Blocking!_");
      }
 
@@ -428,7 +429,7 @@ command({
         }
      }
      catch (error) {
-        console.error(error);
+        logger.error(error);
         return message.reply("_Error activating PDM!_");
      }
 
@@ -469,7 +470,7 @@ async (message, match) => {
       }
    }
    catch (error) {
-      console.error(error);
+      logger.error(error);
       return message.reply("_Error activating Auto React!_");
    }
 
@@ -505,7 +506,7 @@ command({
         }
      }
      catch (error) {
-        console.error(error);
+        logger.error(error);
         return message.reply("_Error activating Bot Banning!_");
      }
 
@@ -526,7 +527,7 @@ command({
         }
      });
      if (banbotlist) {
-        console.log(message.isBaileys)
+        logger.info(message.isBaileys)
         if (message.isBaileys) {
            let {
               key
@@ -565,14 +566,14 @@ command({
      const chatId = message.key.remoteJid;
      const BannIds = await stickban.getStickBan(chatId);
      if (!BannIds) return;
-     console.log(BannIds)
+     logger.info(BannIds)
      let sudoList = config.SUDO.split(',').map(Number);
      const zjid = message.key.participant;
      const id = message.key.participant.split("@")[0];
      BannIds.forEach(async (BanneUsers) => {
         if (BanneUsers === mediakey) {
            if (!sudoList.includes(Number(id))) {
-              console.log("Banned Sticker");
+              logger.info("Banned Sticker");
               await message.client.sendMessage(chatId, {
                  text: "_Banned Sticker_"
               });
@@ -625,7 +626,7 @@ command({
 
      }
      catch (error) {
-        console.error(error);
+        logger.error(error);
         return message.reply("_Error Deactivating Call Blocking!_");
      }
 
@@ -687,7 +688,7 @@ command(
         }
      }
      catch (error) {
-        console.error("[Error]:", error);
+        logger.error("[Error]:", error);
      }
 
   }
@@ -747,7 +748,7 @@ command({
         }
      }
      catch (error) {
-        console.error("[Error]:", error);
+        logger.error("[Error]:", error);
      }
 
   }
@@ -778,12 +779,12 @@ command(
         let isadmin = await isAdmin(message.jid, message.key.participant, message.client);
         if (!isadmin) return
         const StickId = await message.reply_message.sticker.mediaKey
-        // console.log( await StickId)
+        // logger.info( await StickId)
         await stickban.saveStickBan(message.jid, StickId);
         return await message.reply(`_Sticker Banned successfully._`);
      }
      catch (error) {
-        console.error("[Error]:", error);
+        logger.error("[Error]:", error);
      }
 
   }
@@ -813,7 +814,7 @@ command({
         }
      }
      catch (error) {
-        console.error("[Error]:", error);
+        logger.error("[Error]:", error);
      }
 
   }
@@ -851,7 +852,7 @@ async (message, match) => {
       }
    }
    catch (error) {
-      console.error(error);
+      logger.error(error);
       return message.reply("_Error activating Ai Chat!_");
    }
 
@@ -881,12 +882,12 @@ command(
          else if (!match) return await message.reply("_Reply to sticker_");
 
          const language = await message.reply_message.sticker.mediaKey
-         // console.log( await StickId)
+         // logger.info( await StickId)
          await Trans.saveAutoTrans(message.jid, language);
          return await message.reply(`_Sticker Banned successfully._`);
       }
       catch (error) {
-         console.error("[Error]:", error);
+         logger.error("[Error]:", error);
       }
  
    }

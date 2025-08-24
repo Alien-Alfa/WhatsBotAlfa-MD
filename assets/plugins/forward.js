@@ -1,4 +1,5 @@
 const { command, parsedJid, fromMe } = require("../../lib/");
+const logger = require("../../lib/logger");
 
 command(
   {
@@ -37,13 +38,13 @@ command(
                   edit: key
                 });
               } catch (e) {
-                console.error("[Edit Error]:", e);
+                logger.error("[Edit Error]:", e);
               }
             }, 100);
           }
           
         } catch (error) {
-          console.error("[Forward Error]:", error);
+          logger.error("[Forward Error]:", error);
           await message.reply("_Error forwarding message_");
         }
         return;
@@ -72,7 +73,7 @@ command(
             const relayOptions = { ptt: true, messageId: m.quoted.key.id };
             await message.client.relayMessage(jid, m.quoted.message, relayOptions);
           } catch (error) {
-            console.error(`[PTT Forward Error to ${jid}]:`, error);
+            logger.error(`[PTT Forward Error to ${jid}]:`, error);
           }
         }
       } else {
@@ -82,7 +83,7 @@ command(
             const relayOptions = { messageId: m.quoted.key.id };
             await message.client.relayMessage(jid, m.quoted.message, relayOptions);
           } catch (error) {
-            console.error(`[Forward Error to ${jid}]:`, error);
+            logger.error(`[Forward Error to ${jid}]:`, error);
           }
         }
       }
@@ -90,7 +91,7 @@ command(
       await message.reply(`_Message forwarded to ${jids.length} chat(s)_`);
       
     } catch (error) {
-      console.error("[Forward Command Error]:", error);
+      logger.error("[Forward Command Error]:", error);
       await message.reply("_Error processing forward command_");
     }
   }

@@ -1,6 +1,7 @@
 const config = require("../../config");
 const util = require("util");
 const { DataTypes } = require("sequelize");
+const logger = require("../../lib/logger");
 
 // MongoDB Safety Check: Prevent database operations in MongoDB mode
 if (!config.DATABASE) {
@@ -34,7 +35,7 @@ const SaveGemini = async (chatid, parts) => {
       part.push(parts);
       return await gemini.update({ chatid, history: part }).then(resolve);
     } catch (e) {
-      console.log(util.format(e));
+      logger.info(util.format(e));
     }
   });
 };
@@ -45,7 +46,7 @@ const GetGemini = async (chatid) => {
       const gemini = await GeminiDB.findOne({ where: { chatid } });
       if (!gemini) return resolve([]);
     } catch (e) {
-      console.log(util.format(e));
+      logger.info(util.format(e));
       return resolve([]);
     }
   });

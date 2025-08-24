@@ -89,6 +89,7 @@ Description: ${i.desc}\`\`\``;
 ┃✧│ Commands: ${plugins.commands.length}
 ┃✧│ Uptime: ${await formatTime(process.uptime().toFixed(0))}
 ┃✧│ Version: ${require("../../package.json").version}
+const logger = require("../../lib/logger");
 ┃✧│
 ┃✧│
 ┃✧│  ▎▍▌▌▉▏▎▌▉▐▏▌▎
@@ -140,7 +141,7 @@ Description: ${i.desc}\`\`\``;
 
     }
   } catch (error) {
-    console.error("[Error]:", error);
+    logger.error("[Error]:", error);
   }
   }
 );
@@ -181,7 +182,7 @@ command(
     let fin = await menu.toUpperCase()
     return await message.client.sendMessage(message.jid, {text: typewriter(fin)});
   } catch (error) {
-    console.error("[Error]:", error);
+    logger.error("[Error]:", error);
   }
   }
 );

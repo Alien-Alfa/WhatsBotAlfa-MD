@@ -97,6 +97,7 @@ Function(
       const conn = message.client;
       const client = conn;
       const util = require("util");
+const logger = require("../../lib/logger");
       const json = (x) => JSON.stringify(x, null, 2);
       
       try {

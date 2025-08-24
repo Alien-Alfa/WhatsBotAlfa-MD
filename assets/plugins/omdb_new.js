@@ -1,8 +1,9 @@
 const { command, isPrivate, getBuffer } = require("../../lib/");
+const logger = require("../../lib/logger");
 
 async function fetcher(apiUrl, message, m) {
     try {
-        console.log(`Fetching IMDB data: ${apiUrl}`);
+        logger.info(`Fetching IMDB data: ${apiUrl}`);
         const response = await fetch(apiUrl);
         
         if (!response.ok) {
@@ -54,7 +55,7 @@ ${ratings}`;
         });
 
     } catch (error) {
-        console.error('[IMDB Error]:', error);
+        logger.error('[IMDB Error]:', error);
         await message.reply("_Error fetching movie information. Please try again._");
     }
 }
@@ -78,7 +79,7 @@ command(
             await message.reply("_Searching movie information..._");
             return await fetcher(apiUrl, message, m);
         } catch (error) {
-            console.error('[IMDB Command Error]:', error);
+            logger.error('[IMDB Command Error]:', error);
             await message.reply("_Error processing your request_");
         }
     }

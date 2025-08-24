@@ -1,4 +1,5 @@
   const { command, isPrivate } = require("../../lib");
+const logger = require("../../lib/logger");
   let db = {};
 
   command(

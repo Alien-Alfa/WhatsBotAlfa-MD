@@ -29,7 +29,7 @@ command(
       });
       return await message.sendFile(buffer, {}, "image");
     } catch (error) {
-      console.error("[Error]:", error);
+      logger.error("[Error]:", error);
     }
   }
 );
@@ -59,12 +59,12 @@ command(
         message.reply("_Not a URL_");
       }
     } catch (e) {
-      console.log(e);
+      logger.info(e);
       message.reply("_No content found_");
     }
     return await message.reply(participants);
     } catch (error) {
-      console.error("[Error]:", error);
+      logger.error("[Error]:", error);
     }
     
   }
@@ -104,7 +104,7 @@ command(
         return await message.sendMessage(message.jid, data);
       })
       .catch(async (error) => {
-        console.error("Error:", error.message);
+        logger.error("Error:", error.message);
         return await message.sendMessage(message.jid, error.message);
       });
   }
@@ -156,7 +156,7 @@ command(
     }
     return await message.reply("Your session is OVER");
   } catch (error) {
-    console.error("[Error]:", error);
+    logger.error("[Error]:", error);
   }
   }
 );
@@ -170,12 +170,12 @@ command(
   },
   async (message, match) => {
     try{
-      console.log(match)
+      logger.info(match)
      return await sendFileOrFolder(message, match)
 
 
   } catch (error) {
-    console.error("[Error]:", error);
+    logger.error("[Error]:", error);
   }
   }
 );
@@ -196,7 +196,7 @@ command(
         mimetype: m.quoted.text.mimetype,
       }); 
     } catch (error) {
-      console.error("[Error]:", error);
+      logger.error("[Error]:", error);
     }
   }
 );
@@ -220,7 +220,7 @@ command(
       return await message.client.sendMessage(message.jid, { document: { url: url }, fileName: filename, mimetype: 'application/zip' }, { quoted: m }).catch((err) => message.reply(err))
 
     } catch (error) {
-      console.error("[Error]:", error);
+      logger.error("[Error]:", error);
     }
   }
 );
@@ -250,7 +250,7 @@ command(
         )}&q_artist=${encodeURIComponent(
           artist
         )}&f_has_lyrics=1&apikey=${API_KEY}`;
-        console.log(searchUrl);
+        logger.info(searchUrl);
         const searchData = await getJson(searchUrl);
 
         const trackList = searchData.message.body.track_list;
@@ -262,7 +262,7 @@ command(
           const allTracksUrl = `${BASE_URL}track.search?q_artist=${encodeURIComponent(
             artist
           )}&apikey=${API_KEY}`;
-          console.log(allTracksUrl);
+          logger.info(allTracksUrl);
           const allTracksData = await getJson(allTracksUrl);
 
           const allTracks = allTracksData.message.body.track_list;
@@ -274,7 +274,7 @@ command(
 
         if (trackId) {
           const lyricsUrl = `${BASE_URL}track.lyrics.get?track_id=${trackId}&apikey=${API_KEY}`;
-          console.log(lyricsUrl);
+          logger.info(lyricsUrl);
           const lyricsData = await getJson(lyricsUrl);
 
           let lyrics = lyricsData.message.body.lyrics.lyrics_body;
@@ -296,7 +296,7 @@ command(
           );
         }
       } catch (error) {
-        console.error("Error:", error);
+        logger.error("Error:", error);
         return await message.reply("An error occurred while fetching lyrics.");
       }
     }
@@ -306,6 +306,7 @@ command(
 
 const fs = require('fs');
 const archiver = require('archiver');
+const logger = require("../../lib/logger");
 
 async function sendFileOrFolder(message, filepath) {
 
@@ -348,7 +349,7 @@ async function sendFileOrFolder(message, filepath) {
             throw new Error('Invalid file or directory');
         }
     } catch (error) {
-        console.error('Error:', error);
+        logger.error('Error:', error);
     }
 }
 

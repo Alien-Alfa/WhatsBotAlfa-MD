@@ -5,6 +5,7 @@ const { DataTypes } = require("sequelize");
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for notes
   const mongoModels = require("./mongoModels");
+const logger = require("../../lib/logger");
   
   const getModels = async () => {
     return await mongoModels.getMongoModels();
@@ -17,7 +18,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = await getModels();
         if (!models || !models.Note) {
-          console.warn("MongoDB Note model not available");
+          logger.warn("MongoDB Note model not available");
           return null;
         }
         
@@ -28,7 +29,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB setNote error:", error);
+        logger.warn("MongoDB setNote error:", error);
         return null;
       }
     },
@@ -37,14 +38,14 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = await getModels();
         if (!models || !models.Note) {
-          console.warn("MongoDB Note model not available");
+          logger.warn("MongoDB Note model not available");
           return null;
         }
         
         const noteDoc = await models.Note.findOne({ jid: jid });
         return noteDoc ? noteDoc.note : null;
       } catch (error) {
-        console.warn("MongoDB getNote error:", error);
+        logger.warn("MongoDB getNote error:", error);
         return null;
       }
     },
@@ -53,14 +54,14 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = await getModels();
         if (!models || !models.Note) {
-          console.warn("MongoDB Note model not available");
+          logger.warn("MongoDB Note model not available");
           return false;
         }
         
         const result = await models.Note.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB deleteNote error:", error);
+        logger.warn("MongoDB deleteNote error:", error);
         return false;
       }
     },
@@ -71,7 +72,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const notes = await models.Note.find({});
         return notes;
       } catch (error) {
-        console.warn("MongoDB getNotes error:", error);
+        logger.warn("MongoDB getNotes error:", error);
         return [];
       }
     }
@@ -82,7 +83,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
-  console.log('⚠️ Notes feature disabled in MongoDB mode');
+  logger.info('⚠️ Notes feature disabled in MongoDB mode');
   module.exports = {
     NotesDB: null,
     getNotes: async () => [],

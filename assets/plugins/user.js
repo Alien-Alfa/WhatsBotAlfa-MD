@@ -3,6 +3,7 @@ const { exec } = require("child_process");
 const { WarnDB } = require("../database");
 const { PausedChats } = require("../database/UniversalPausedChat");
 const { WARN_COUNT } = require("../../config");
+const logger = require("../../lib/logger");
 const { saveWarn, resetWarn } = WarnDB;
 
 command(
@@ -14,13 +15,13 @@ command(
   },
   async (message) => {
     const chatId = message.key.remoteJid;
-    console.log("🔍 Attempting to pause chat:", chatId);
+    logger.info("🔍 Attempting to pause chat:", chatId);
     try {
       const result = await PausedChats.savePausedChat(chatId);
-      console.log("✅ Pause chat result:", result);
+      logger.info("✅ Pause chat result:", result);
       message.reply("Chat paused successfully.");
     } catch (error) {
-      console.error("❌ Pause chat error:", error);
+      logger.error("❌ Pause chat error:", error);
       message.reply("Error pausing the chat.");
     }
   }
@@ -45,7 +46,7 @@ command(
         message.reply("Chat is not paused.");
       }
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       message.reply("Error resuming the chat.");
     }
   }
@@ -86,7 +87,7 @@ command(
       
       return await message.reply("_Profile Picture Updated_");
     } catch (error) {
-      console.error("[❌ Error]:", error);
+      logger.error("[❌ Error]:", error);
       return await message.reply("_Failed to update profile picture_");
     }
   }
@@ -182,7 +183,7 @@ command(
   },
   async (message, match, m, client) => {
     if (message.isGroup) {
-      console.log(message.reply_message.key);
+      logger.info(message.reply_message.key);
       return await message.client.sendMessage(message.jid, { delete: await message.reply_message.key })
     }
   }

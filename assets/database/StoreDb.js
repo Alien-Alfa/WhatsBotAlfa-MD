@@ -4,6 +4,7 @@
 const { isJidGroup } = require("@whiskeysockets/baileys");
 const config = require("../../config");
 const { DataTypes, Op } = require("sequelize");
+const logger = require("../../lib/logger");
 
 // MongoDB Safety Check: Prevent database operations in MongoDB mode
 if (!config.DATABASE) {
@@ -179,7 +180,7 @@ const saveContact = async (jid, name) => {
     contactCache.set(cacheKey, { name, timestamp: Date.now() });
     return result;
   } catch (e) {
-    console.warn("Save contact error:", e.message || e);
+    logger.warn("Save contact error:", e.message || e);
     return null;
   }
 };
@@ -242,11 +243,11 @@ const saveMessage = async (message, user) => {
           );
         });
       } catch (error) {
-        console.warn("Batch message save error:", error.message || error);
+        logger.warn("Batch message save error:", error.message || error);
       }
     }, 100); // Batch every 100ms
   } catch (e) {
-    console.warn("Save message error:", e.message || e);
+    logger.warn("Save message error:", e.message || e);
   }
 };
 
@@ -267,7 +268,7 @@ const loadMessage = async (id) => {
     messageCache.set(cacheKey, { data: result, timestamp: Date.now() });
     return result;
   } catch (e) {
-    console.warn("Load message error:", e);
+    logger.warn("Load message error:", e);
     return null;
   }
 };
@@ -287,7 +288,7 @@ const loadDeletedMessages = async (jid, sinceTimestamp) => {
 
     return messages;
   } catch (error) {
-    console.error("Error loading deleted messages:", error);
+    logger.error("Error loading deleted messages:", error);
     throw new Error("Error loading deleted messages");
   }
 };
@@ -349,7 +350,7 @@ const saveChat = async (chat) => {
     chatCache.set(cacheKey, { timestamp: chat.conversationTimestamp });
     return result;
   } catch (e) {
-    console.warn("Save chat error:", e.message || e);
+    logger.warn("Save chat error:", e.message || e);
     return null;
   }
 };
@@ -369,7 +370,7 @@ const getName = async (jid) => {
     contactCache.set(cacheKey, { name, timestamp: Date.now() });
     return name;
   } catch (e) {
-    console.warn("Get name error:", e);
+    logger.warn("Get name error:", e);
     return jid.split("@")[0].replace(/_/g, " ");
   }
 };

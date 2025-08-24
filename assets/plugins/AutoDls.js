@@ -15,6 +15,7 @@ const {
   const fs = require('fs');
   const path = require('path');
   const { Readable } = require('stream');
+const logger = require("../../lib/logger");
   
   const isIgUrl = (text) => {
     const regex = /(https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|tv|stories)\/[\w-]+\/?)/;
@@ -105,7 +106,7 @@ const downloadFileStream = async (url, filename) => {
       try {
         fs.unlinkSync(filePath);
       } catch (cleanupError) {
-        console.warn(`Failed to cleanup incomplete file: ${cleanupError.message}`);
+        logger.warn(`Failed to cleanup incomplete file: ${cleanupError.message}`);
       }
     }
     
@@ -127,7 +128,7 @@ const cleanupFile = (filePath) => {
       fs.unlinkSync(filePath);
     }
   } catch (error) {
-    console.warn(`Failed to cleanup file ${filePath}:`, error.message);
+    logger.warn(`Failed to cleanup file ${filePath}:`, error.message);
   }
 };
 
@@ -328,10 +329,10 @@ const downloadAudioFromY2mate = async (url) => {
           await downloadYoutubeMedia(message, text);
         }
       } catch (error) {
-        console.error("Auto download error:", error);
+        logger.error("Auto download error:", error);
         // Don't send error message for auto-downloads to avoid spam
         if (error.message.includes('rate-overlimit')) {
-          console.warn("Rate limit hit for auto-download, skipping...");
+          logger.warn("Rate limit hit for auto-download, skipping...");
         }
       }
     }
@@ -351,13 +352,13 @@ const downloadAudioFromY2mate = async (url) => {
       try {
         data = await igdl(url);
       } catch (igdlError) {
-        console.warn("Instagram download API error:", igdlError.message);
+        logger.warn("Instagram download API error:", igdlError.message);
         return await message.reply("_Instagram download failed. Please try again later._");
       }
       
       // Validate that data is an array and not an error string
       if (!data || !Array.isArray(data) || data.length === 0) {
-        console.warn("Instagram download failed or returned invalid data:", data);
+        logger.warn("Instagram download failed or returned invalid data:", data);
         return await message.reply("_No media found on the link or download failed._");
       }
       
@@ -374,7 +375,7 @@ const downloadAudioFromY2mate = async (url) => {
         try {
           // Check if download_link exists and is valid
           if (!item.download_link || typeof item.download_link !== 'string') {
-            console.warn("Invalid download link for Instagram media:", item);
+            logger.warn("Invalid download link for Instagram media:", item);
             continue;
           }
 
@@ -410,7 +411,7 @@ const downloadAudioFromY2mate = async (url) => {
           
           mediaCount++;
         } catch (error) {
-          console.error(`Error downloading Instagram media ${mediaCount}:`, error);
+          logger.error(`Error downloading Instagram media ${mediaCount}:`, error);
           // Try fallback method for this media item
           try {
             if (item.download_link) {
@@ -428,7 +429,7 @@ const downloadAudioFromY2mate = async (url) => {
               mediaCount++;
             }
           } catch (fallbackError) {
-            console.error(`Fallback failed for Instagram media ${mediaCount}:`, fallbackError);
+            logger.error(`Fallback failed for Instagram media ${mediaCount}:`, fallbackError);
           }
         } finally {
           // Clean up temp file
@@ -442,7 +443,7 @@ const downloadAudioFromY2mate = async (url) => {
         await message.reply("_Failed to download any media from the Instagram link._");
       }
     } catch (e) {
-      console.error("Instagram download error:", e);
+      logger.error("Instagram download error:", e);
       await message.reply(`_Error downloading Instagram media: ${e.message}_`);
     }
   };
@@ -476,7 +477,7 @@ const downloadAudioFromY2mate = async (url) => {
         }, { quoted: message });
         
       } catch (error) {
-        console.error("Error in Facebook streaming download:", error);
+        logger.error("Error in Facebook streaming download:", error);
         // Fallback to direct URL method
         await message.client.sendMessage(message.jid, {
           video: { url },
@@ -500,11 +501,11 @@ const downloadAudioFromY2mate = async (url) => {
       if (!link) return await message.reply("_Invalid YouTube URL._");
       
       const url = link[0];
-      console.log("🔍 Attempting to download YouTube URL:", url);
+      logger.info("🔍 Attempting to download YouTube URL:", url);
       
       // Try Y2mate first (most reliable)
       try {
-        console.log("🔄 Using Y2mate method...");
+        logger.info("🔄 Using Y2mate method...");
         const { title, quality, dlink, filesize } = await downloadFromY2mate(url, "360p");
         let filePath = null;
         
@@ -519,27 +520,27 @@ const downloadAudioFromY2mate = async (url) => {
             fileName: `${title}.mp4`
           }, { quoted: message });
           
-          console.log("✅ Y2mate download successful");
+          logger.info("✅ Y2mate download successful");
           return;
         } catch (streamError) {
-          console.warn("Y2mate stream download failed, using direct URL:", streamError.message);
+          logger.warn("Y2mate stream download failed, using direct URL:", streamError.message);
           await message.sendMessage(message.jid, {
             video: { url: dlink },
             caption: `*${title}*\n_[Quality: ${quality}]_\n_[Size: ${filesize}]_`,
           }, { quoted: message });
-          console.log("✅ Y2mate direct URL successful");
+          logger.info("✅ Y2mate direct URL successful");
           return;
         } finally {
           if (filePath) cleanupFile(filePath);
         }
         
       } catch (y2mateError) {
-        console.warn("Y2mate failed, trying original methods:", y2mateError.message);
+        logger.warn("Y2mate failed, trying original methods:", y2mateError.message);
         
         // Fallback to original API
         try {
           const json = await getJson(`https://api.maher-zubair.tech/download/yt?url=${url}`);
-          console.log("🔍 YouTube API response success");
+          logger.info("🔍 YouTube API response success");
           
           if (!json || json.status !== 200 || !json.result || !json.result.video) {
             throw new Error("Invalid API response");
@@ -561,7 +562,7 @@ const downloadAudioFromY2mate = async (url) => {
                 thumbnailBuffer = await getBuffer(thumbnail);
               }
             } catch (thumbError) {
-              console.warn("Failed to download thumbnail:", thumbError.message);
+              logger.warn("Failed to download thumbnail:", thumbError.message);
             }
 
             // Generate unique filename
@@ -579,11 +580,11 @@ const downloadAudioFromY2mate = async (url) => {
               fileName: `${title || 'youtube_video'}.mp4`
             }, { quoted: message });
             
-            console.log("✅ YouTube backup API download successful");
+            logger.info("✅ YouTube backup API download successful");
             return;
             
           } catch (error) {
-            console.error("Error in YouTube streaming download:", error);
+            logger.error("Error in YouTube streaming download:", error);
             // Fallback to direct URL method
             try {
               await message.sendMessage(message.jid, {
@@ -591,7 +592,7 @@ const downloadAudioFromY2mate = async (url) => {
                 caption: `*${title || 'YouTube Video'}*\n_[Quality: ${quality || 'Unknown'}]_`,
                 thumbnail: thumbnailBuffer,
               }, { quoted: message });
-              console.log("✅ YouTube backup direct URL successful");
+              logger.info("✅ YouTube backup direct URL successful");
               return;
             } catch (fallbackError) {
               throw new Error("Both streaming and direct URL methods failed");
@@ -604,11 +605,11 @@ const downloadAudioFromY2mate = async (url) => {
           }
           
         } catch (apiError) {
-          console.warn("Backup API also failed, trying ytv method:", apiError.message);
+          logger.warn("Backup API also failed, trying ytv method:", apiError.message);
           
           // Final fallback to ytv function
           try {
-            console.log("🔄 Using final fallback ytv method...");
+            logger.info("🔄 Using final fallback ytv method...");
             const { dlink, title } = await ytv(url, "360p");
             let filePath = null;
             
@@ -623,28 +624,28 @@ const downloadAudioFromY2mate = async (url) => {
                 fileName: `${title}.mp4`
               }, { quoted: message });
               
-              console.log("✅ YouTube final fallback download successful");
+              logger.info("✅ YouTube final fallback download successful");
               return;
             } catch (streamError) {
-              console.warn("Final fallback stream failed, using direct URL:", streamError.message);
+              logger.warn("Final fallback stream failed, using direct URL:", streamError.message);
               await message.sendMessage(message.jid, {
                 video: { url: dlink },
                 caption: `*${title}*\n_[Quality: 360p]_`,
               }, { quoted: message });
-              console.log("✅ YouTube final direct URL successful");
+              logger.info("✅ YouTube final direct URL successful");
               return;
             } finally {
               if (filePath) cleanupFile(filePath);
             }
           } catch (finalError) {
-            console.error("All YouTube download methods failed:", finalError.message);
+            logger.error("All YouTube download methods failed:", finalError.message);
             return await message.reply("_YouTube download is currently unavailable. Please try again later._");
           }
         }
       }
       
     } catch (error) {
-      console.error("YouTube download error:", error);
+      logger.error("YouTube download error:", error);
       await message.reply(`_Error downloading YouTube media: ${error.message}_`);
     }
   };
@@ -688,7 +689,7 @@ const downloadAudioFromY2mate = async (url) => {
       try {
         // Try Y2mate first
         try {
-          console.log("🔄 Using Y2mate for audio download...");
+          logger.info("🔄 Using Y2mate for audio download...");
           const { title, quality, dlink, filesize } = await downloadAudioFromY2mate(match);
           await message.reply(`_Downloading ${title}..._`);
           
@@ -711,11 +712,11 @@ const downloadAudioFromY2mate = async (url) => {
             { quoted: message }
           );
           
-          console.log("✅ Y2mate audio download successful");
+          logger.info("✅ Y2mate audio download successful");
           return;
           
         } catch (y2mateError) {
-          console.warn("Y2mate audio failed, using fallback:", y2mateError.message);
+          logger.warn("Y2mate audio failed, using fallback:", y2mateError.message);
           
           // Fallback to original yta method
           const { dlink, title } = await yta(match);
@@ -742,11 +743,11 @@ const downloadAudioFromY2mate = async (url) => {
             { quoted: message }
           );
           
-          console.log("✅ Fallback audio download successful");
+          logger.info("✅ Fallback audio download successful");
         }
         
       } catch (e) {
-        console.error("Error in YouTube audio streaming download:", e);
+        logger.error("Error in YouTube audio streaming download:", e);
         // Final fallback to buffer method
         try {
           const { dlink, title } = await yta(match);
@@ -788,7 +789,7 @@ const downloadAudioFromY2mate = async (url) => {
       try {
         // Try Y2mate first
         try {
-          console.log("🔄 Using Y2mate for video download...");
+          logger.info("🔄 Using Y2mate for video download...");
           const { title, quality: actualQuality, dlink, filesize } = await downloadFromY2mate(match.split(";")[0], quality);
           await message.reply(`_Downloading ${title} (${actualQuality})..._`);
           
@@ -809,11 +810,11 @@ const downloadAudioFromY2mate = async (url) => {
             { quoted: message }
           );
           
-          console.log("✅ Y2mate video download successful");
+          logger.info("✅ Y2mate video download successful");
           return;
           
         } catch (y2mateError) {
-          console.warn("Y2mate video failed, using fallback:", y2mateError.message);
+          logger.warn("Y2mate video failed, using fallback:", y2mateError.message);
           
           // Fallback to original ytv method
           const { dlink, title } = await ytv(match.split(";")[0], quality);
@@ -836,11 +837,11 @@ const downloadAudioFromY2mate = async (url) => {
             { quoted: message }
           );
           
-          console.log("✅ Fallback video download successful");
+          logger.info("✅ Fallback video download successful");
         }
         
       } catch (e) {
-        console.error("Error in YouTube video streaming download:", e);
+        logger.error("Error in YouTube video streaming download:", e);
         // Final fallback to direct URL method
         try {
           const { dlink, title } = await ytv(match.split(";")[0], quality);
@@ -894,7 +895,7 @@ const downloadAudioFromY2mate = async (url) => {
           { quoted: message }
         );
       } catch (e) {
-        console.error("Error in song streaming download:", e);
+        logger.error("Error in song streaming download:", e);
         // Fallback to buffer method
         try {
           const { dlink, title } = await ytsdl(match + " song");
@@ -948,7 +949,7 @@ const downloadAudioFromY2mate = async (url) => {
           { quoted: message }
         );
       } catch (e) {
-        console.error("Error in video streaming download:", e);
+        logger.error("Error in video streaming download:", e);
         // Fallback to direct URL method
         try {
           const { dlink, title } = await ytsdl(match, "video");

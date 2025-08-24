@@ -6,6 +6,7 @@ const {
 } = require("../../lib")
 const { isAdmin, parsedJid } = require("../../lib");
 const { getDevice } = require("@whiskeysockets/baileys");
+const logger = require("../../lib/logger");
 
 command(
   {
@@ -50,7 +51,7 @@ async (message, match) => {
               return await message.client.sendMessage(message.jid, {text: `Device: ${bb === "unknown" ? "Baileys or Other" : bb === "ios" ? "iPhone iOS" : bb === "android" ? "Android Device" : bb === "web" ? "WhatsApp Web Client" : bb}`,edit: message.key});
           }, 1000)
       } catch (error) {
-          console.error("[Error]:", error);
+          logger.error("[Error]:", error);
       }
   } else if (!me) {
       try {
@@ -60,7 +61,7 @@ async (message, match) => {
               return await message.client.sendMessage(message.jid, {text: `Device: ${bb === "unknown" ? "Baileys or Other" : bb === "ios" ? "iPhone iOS" : bb === "android" ? "Android Device" : bb === "web" ? "WhatsApp Web Client" : bb}`,edit: key});
           }, 1000)
       } catch (error) {
-          console.error("[Error]:", error);
+          logger.error("[Error]:", error);
       }
   }
   })

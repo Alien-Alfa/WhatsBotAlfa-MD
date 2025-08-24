@@ -5,6 +5,7 @@ const { DataTypes } = require('sequelize');
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for Banbot
   const mongoManager = require("./mongodb");
+const logger = require("../../lib/logger");
   let models = null;
 
   const initModels = async () => {
@@ -33,7 +34,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB addBanBot error:", error);
+        logger.warn("MongoDB addBanBot error:", error);
         return null;
       }
     },
@@ -44,7 +45,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.BanBot.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB removeBanBot error:", error);
+        logger.warn("MongoDB removeBanBot error:", error);
         return false;
       }
     },
@@ -55,7 +56,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const banBot = await models.BanBot.findOne({ jid: jid });
         return banBot ? banBot.isBanned : false;
       } catch (error) {
-        console.warn("MongoDB isBanBot error:", error);
+        logger.warn("MongoDB isBanBot error:", error);
         return false;
       }
     }
@@ -66,7 +67,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
-  console.log('⚠️ Banbot feature disabled in MongoDB mode');
+  logger.info('⚠️ Banbot feature disabled in MongoDB mode');
   module.exports = {
     banbot: null,
     saveBan: async () => null,

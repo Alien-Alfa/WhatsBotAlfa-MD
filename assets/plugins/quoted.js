@@ -61,7 +61,7 @@ command(
       return await message.reply(`_Recalled ${count} deleted message(s)_`);
 
     } catch (error) {
-      console.error("Error recalling messages:", error);
+      logger.error("Error recalling messages:", error);
       return await message.reply("_Failed to recall messages. Please check logs for details._");
     }
   }
@@ -125,7 +125,7 @@ command(
       return await message.forward(message.jid, serializedMsg.quoted);
       
     } catch (error) {
-      console.error("Error getting quoted message:", error);
+      logger.error("Error getting quoted message:", error);
       await message.reply("_Error retrieving quoted message_");
     }
   }
@@ -135,6 +135,7 @@ command(
 
 /*
 > const { command, isPrivate, serialize } = require("../../lib/");
+const logger = require("../../lib/logger");
 
 
 command({

@@ -1,5 +1,6 @@
 const { command } = require("../../lib/");
 const axios = require("axios");
+const logger = require("../../lib/logger");
 
 command( 
   {
@@ -77,7 +78,7 @@ const grades = [
         if (gradeValues.hasOwnProperty(grade)) {
             total += gradeValues[grade];
         } else {
-            console.error(`Grade "${grade}" not recognized.`);
+            logger.error(`Grade "${grade}" not recognized.`);
         }
     });
 
@@ -124,7 +125,7 @@ const totalValue = await addGradeValues(grades);
       
       await message.sendMessage(message.jid, "```"+resultMessage+"```"+percen+"\n```──────────────────────────────────```");
     } catch (error) {
-      console.error("Error fetching SSLC result:", error);
+      logger.error("Error fetching SSLC result:", error);
       await message.sendMessage(
         message.jid,
         "Failed to fetch SSLC result. Please try again later."

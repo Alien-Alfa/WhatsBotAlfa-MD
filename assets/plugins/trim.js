@@ -1,6 +1,7 @@
 const { fromBuffer } = require("file-type");
 const { command, isPrivate } = require("../../lib/");
 const { ffmpeg, parseTimeToSeconds } = require("../../lib/functions");
+const logger = require("../../lib/logger");
 command(
   {
     pattern: "trim",

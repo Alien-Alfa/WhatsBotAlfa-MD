@@ -4,6 +4,7 @@ const {
   sleep,
   isPrivate
 } = require("../../lib")
+const logger = require("../../lib/logger");
 
 function formatTime(seconds) {
   if (isNaN(seconds) || seconds < 0) {
@@ -35,7 +36,7 @@ function formatTime(seconds) {
 
 
 command({
-    pattern: "ping",
+    pattern: "pling",
     fromMe: isPrivate,
     desc: "Check bot response time",
     type: "utility",
@@ -43,11 +44,12 @@ command({
 async (message, match) => {
     try {
         const start = new Date().getTime();
-        const { key } = await message.reply("```Pinging...```");
+        const { key } = await message.reply("```Processing...```");
         const end = new Date().getTime();
         
         const latency = end - start;
-        const responseText = `🏓 *Pong!*\n\n⚡ *Latency:* ${latency}ms\n⏱️ *Response Time:* ${latency < 100 ? 'Excellent' : latency < 300 ? 'Good' : 'Fair'}`;
+        const responseText = `*Latency:* ${latency}ms`;
+        //const responseText = `🏓 *Pong!*\n\n⚡ *Latency:* ${latency}ms\n⏱️ *Response Time:* ${latency < 100 ? 'Excellent' : latency < 300 ? 'Good' : 'Fair'}`;
         
         setTimeout(async () => {
             await message.client.sendMessage(message.jid, {
@@ -56,7 +58,7 @@ async (message, match) => {
             });
         }, 500);
     } catch (error) {
-        console.error("[Ping Error]:", error);
+        logger.error("[Ping Error]:", error);
         await message.reply("_Error checking ping._");
     }
 });
@@ -71,8 +73,9 @@ async (message, match) => {
         const { key } = await message.reply("```Fetching uptime...```");
         const uptime = process.uptime();
         const formattedUptime = formatTime(Math.floor(uptime));
-        
-        const uptimeText = `⏰ *Bot Uptime*\n\n🚀 *Running for:* ${formattedUptime}\n📊 *Process ID:* ${process.pid}\n💾 *Memory Usage:* ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`;
+
+        const uptimeText = `Uptime: ${formattedUptime}`;
+        //const uptimeText = `⏰ *Bot Uptime*\n\n🚀 *Running for:* ${formattedUptime}\n📊 *Process ID:* ${process.pid}\n💾 *Memory Usage:* ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`;
         
         setTimeout(async () => {
             await message.client.sendMessage(message.jid, {
@@ -81,7 +84,7 @@ async (message, match) => {
             });
         }, 500);
     } catch (error) {
-        console.error("[Uptime Error]:", error);
+        logger.error("[Uptime Error]:", error);
         await message.reply("_Error fetching uptime._");
     }
 });
@@ -167,11 +170,11 @@ async function processOnwa(client, numberPattern) {
           let setAt = '';
           try {
             const statusData = await client.client.fetchStatus(await contact);
-            console.log(contact)
+            logger.info(contact)
             status = statusData.status;
             setAt = statusData.setAt;
           } catch (error) {
-            console.error(`Failed to fetch status for ${await contact}: ${error.message}`);
+            logger.error(`Failed to fetch status for ${await contact}: ${error.message}`);
           }
       
           if (status) {
@@ -184,7 +187,7 @@ async function processOnwa(client, numberPattern) {
                 day: "numeric"
               });
             } catch (error) {
-              console.error(`Failed to format date for ${await contact}: ${error.message}`);
+              logger.error(`Failed to format date for ${await contact}: ${error.message}`);
               date = "null";
             }
       

@@ -5,6 +5,7 @@ const { DataTypes } = require("sequelize");
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for AiChat
   const mongoManager = require("./mongodb");
+const logger = require("../../lib/logger");
   let models = null;
 
   const initModels = async () => {
@@ -33,7 +34,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB addAiChat error:", error);
+        logger.warn("MongoDB addAiChat error:", error);
         return null;
       }
     },
@@ -44,7 +45,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.AiChat.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB removeAiChat error:", error);
+        logger.warn("MongoDB removeAiChat error:", error);
         return false;
       }
     },
@@ -55,7 +56,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const aiChat = await models.AiChat.findOne({ jid: jid });
         return aiChat ? aiChat.isEnabled : false;
       } catch (error) {
-        console.warn("MongoDB isAiChat error:", error);
+        logger.warn("MongoDB isAiChat error:", error);
         return false;
       }
     },
@@ -66,7 +67,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const aiChats = await models.AiChat.find({ isEnabled: true });
         return aiChats;
       } catch (error) {
-        console.warn("MongoDB getAiChats error:", error);
+        logger.warn("MongoDB getAiChats error:", error);
         return [];
       }
     }
@@ -77,7 +78,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
-  console.log('⚠️ AiChat feature disabled in MongoDB mode');
+  logger.info('⚠️ AiChat feature disabled in MongoDB mode');
   module.exports = {
     Ai: null,
     saveAi: async () => null,

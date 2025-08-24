@@ -96,7 +96,7 @@ command(
         await message.reply(response);
       }
     } catch (error) {
-      console.error("Database info error:", error);
+      logger.error("Database info error:", error);
       await message.reply(`❌ Info retrieval failed: ${error.message}`);
     }
   }
@@ -198,7 +198,7 @@ Database sync is only available with MongoDB setup, which allows:
         await message.reply(response);
       }
     } catch (error) {
-      console.error("Sync error:", error);
+      logger.error("Sync error:", error);
       await message.reply(`❌ Sync failed: ${error.message}`);
     }
   }
@@ -217,6 +217,7 @@ command(
       if (config.USE_MONGODB && config.MONGODB_URI) {
         // MongoDB status
         const mongoStoreDb = require("../database/MongoStoreDb");
+const logger = require("../../lib/logger");
         const models = mongoStoreDb.getModels();
         
         let counts = { messages: 0, contacts: 0, chats: 0 };
@@ -230,7 +231,7 @@ command(
             isConnected = true;
           }
         } catch (e) {
-          console.warn("Count error:", e.message);
+          logger.warn("Count error:", e.message);
         }
         
         const response = `
@@ -294,7 +295,7 @@ command(
         await message.reply(response);
       }
     } catch (error) {
-      console.error("Status check error:", error);
+      logger.error("Status check error:", error);
       await message.reply(`❌ Status check failed: ${error.message}`);
     }
   }

@@ -3,6 +3,7 @@ const { command, isPrivate } = require("../../lib");
 const gemini = require("../../lib/Gemini");
 const config = require("../../config"); 
 const { AiChat } = require("../database");
+const logger = require("../../lib/logger");
 
 command(
   {
@@ -80,7 +81,7 @@ command(
       return await message.reply(response || "_Failed to generate response_");
       
     } catch (error) {
-      console.error("[AI Chat Error]:", error);
+      logger.error("[AI Chat Error]:", error);
       await message.reply("_An error occurred while processing your request_");
     }
   }

@@ -1,5 +1,6 @@
 const { command, isPrivate, XKCDComic, getJson } = require("../../lib");
 const axios = require("axios");
+const logger = require("../../lib/logger");
 
 let triviaGames = {};
 
@@ -113,7 +114,7 @@ async function fetchTriviaQuestion() {
 
     return formattedQuestion;
   } catch (error) {
-    console.error("Error fetching trivia question:", error.message);
+    logger.error("Error fetching trivia question:", error.message);
     throw error;
   }
 }
@@ -156,7 +157,7 @@ command(
         "image"
       );
     } catch (error) {
-      console.error("Error:", error.message);
+      logger.error("Error:", error.message);
       message.reply("Error fetching XKCD comic.");
     }
   }
@@ -195,11 +196,11 @@ command(
         const jokeMessage = jokeData.setup + "\n" + jokeData.delivery;
         message.sendMessage(message.jid, jokeMessage);
       } else {
-        console.error("Error fetching joke:", jokeData);
+        logger.error("Error fetching joke:", jokeData);
         message.reply("Failed to fetch a joke. Please try again later.");
       }
     } catch (error) {
-      console.error("Error fetching joke:", error);
+      logger.error("Error fetching joke:", error);
       message.reply("Failed to fetch a joke. Please try again later.");
     }
   }

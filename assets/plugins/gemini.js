@@ -2,6 +2,7 @@ const fs = require("fs");
 const { command, isPrivate } = require("../../lib");
 const gemini = require("../../lib/Gemini");
 const config = require("../../config"); 
+const logger = require("../../lib/logger");
 
 command(
   {
@@ -10,7 +11,7 @@ command(
     desc: "Generate text with gemini",
   },
   async (message, match, m) => {
-    if(config.GEMINI_API === false) return console.log("Please add GEMINI_API in config.js or Config Variables")
+    if(config.GEMINI_API === false) return logger.info("Please add GEMINI_API in config.js or Config Variables")
     match = match || message.reply_message.text;
     const id = message.participant;
     if (!match) return await message.reply("Provide a prompt");

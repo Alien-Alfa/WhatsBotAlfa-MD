@@ -5,6 +5,7 @@ const { DataTypes } = require("sequelize");
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for PDM
   const mongoModels = require("./mongoModels");
+const logger = require("../../lib/logger");
 
   const getModels = async () => {
     return await mongoModels.getMongoModels();
@@ -25,7 +26,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB addPDM error:", error);
+        logger.warn("MongoDB addPDM error:", error);
         return null;
       }
     },
@@ -36,7 +37,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.PDM.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB removePDM error:", error);
+        logger.warn("MongoDB removePDM error:", error);
         return false;
       }
     },
@@ -47,7 +48,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const pdm = await models.PDM.findOne({ jid: jid });
         return pdm ? pdm.isEnabled : false;
       } catch (error) {
-        console.warn("MongoDB isPDM error:", error);
+        logger.warn("MongoDB isPDM error:", error);
         return false;
       }
     },
@@ -58,7 +59,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const pdms = await models.PDM.find({ isEnabled: true });
         return pdms;
       } catch (error) {
-        console.warn("MongoDB getPDM error:", error);
+        logger.warn("MongoDB getPDM error:", error);
         return [];
       }
     },
@@ -74,7 +75,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           }
           return await models.PDM.findOne(query);
         } catch (error) {
-          console.warn("MongoDB PDM.findOne error:", error);
+          logger.warn("MongoDB PDM.findOne error:", error);
           return null;
         }
       },
@@ -83,7 +84,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           const models = await getModels();
           return await models.PDM.create({ jid: data.chatId, isEnabled: true });
         } catch (error) {
-          console.warn("MongoDB PDM.create error:", error);
+          logger.warn("MongoDB PDM.create error:", error);
           return null;
         }
       },
@@ -92,7 +93,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           const models = await getModels();
           return await models.PDM.find({});
         } catch (error) {
-          console.warn("MongoDB PDM.findAll error:", error);
+          logger.warn("MongoDB PDM.findAll error:", error);
           return [];
         }
       },
@@ -105,7 +106,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           }
           return 0;
         } catch (error) {
-          console.warn("MongoDB PDM.destroy error:", error);
+          logger.warn("MongoDB PDM.destroy error:", error);
           return 0;
         }
       }
@@ -121,7 +122,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           { upsert: true, new: true }
         );
       } catch (error) {
-        console.warn("MongoDB savePDM error:", error);
+        logger.warn("MongoDB savePDM error:", error);
         return null;
       }
     },
@@ -132,7 +133,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.PDM.deleteMany({});
         return result.deletedCount;
       } catch (error) {
-        console.warn("MongoDB deleteAllPDM error:", error);
+        logger.warn("MongoDB deleteAllPDM error:", error);
         return 0;
       }
     }
@@ -145,7 +146,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for SQLite mode when DATABASE is not configured
 if (!config.DATABASE) {
-  console.log('⚠️ PDM feature disabled in MongoDB mode');
+  logger.info('⚠️ PDM feature disabled in MongoDB mode');
   module.exports = {
     PDM: null,
     savePDM: async () => null,

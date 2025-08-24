@@ -5,6 +5,7 @@ const { exec, spawn, execSync } = require("child_process")
 const fetch = require('node-fetch')
 const ffmpeg = require("../../lib/myffmpeg");
 const googleTTS = require('google-tts-api');
+const logger = require("../../lib/logger");
 
 const getRandom = (text) => { return `${Math.floor(Math.random() * 10000)}${text}` }
 
@@ -32,7 +33,7 @@ command(
         );
       }
     } catch (error) {
-      console.error("[Error]:", error);
+      logger.error("[Error]:", error);
     }
   }
 );
@@ -102,7 +103,7 @@ command({
     }
 
   } catch (error) {
-    console.error("[Error]:", error);
+    logger.error("[Error]:", error);
     await message.reply("_Error processing TTS request_");
   }
 });

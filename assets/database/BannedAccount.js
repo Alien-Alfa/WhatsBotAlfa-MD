@@ -5,6 +5,7 @@ const { DataTypes } = require('sequelize');
 if (config.USE_MONGODB && config.MONGODB_URI) {
   // Use MongoDB for BannedAccount
   const mongoModels = require("./mongoModels");
+const logger = require("../../lib/logger");
 
   const getModels = async () => {
     return await mongoModels.getMongoModels();
@@ -17,7 +18,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = await getModels();
         if (!models || !models.BannedAccount) {
-          console.warn("MongoDB BannedAccount model not available");
+          logger.warn("MongoDB BannedAccount model not available");
           return null;
         }
         
@@ -28,7 +29,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB addBannedAccount error:", error);
+        logger.warn("MongoDB addBannedAccount error:", error);
         return null;
       }
     },
@@ -39,7 +40,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.BannedAccount.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB removeBannedAccount error:", error);
+        logger.warn("MongoDB removeBannedAccount error:", error);
         return false;
       }
     },
@@ -50,7 +51,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const bannedAccount = await models.BannedAccount.findOne({ jid: jid });
         return bannedAccount ? bannedAccount.isBanned : false;
       } catch (error) {
-        console.warn("MongoDB isBannedAccount error:", error);
+        logger.warn("MongoDB isBannedAccount error:", error);
         return false;
       }
     },
@@ -59,7 +60,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = await getModels();
         if (!models || !models.BannedAccount) {
-          console.warn("MongoDB BannedAccount model not available");
+          logger.warn("MongoDB BannedAccount model not available");
           return [];
         }
         
@@ -71,7 +72,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           return bannedAccounts;
         }
       } catch (error) {
-        console.warn("MongoDB getUserBan error:", error);
+        logger.warn("MongoDB getUserBan error:", error);
         return [];
       }
     }
@@ -84,7 +85,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
       try {
         const models = await getModels();
         if (!models || !models.BannedAccount) {
-          console.warn("MongoDB BannedAccount model not available");
+          logger.warn("MongoDB BannedAccount model not available");
           return [];
         }
         if (jid) {
@@ -95,7 +96,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
           return bannedAccounts;
         }
       } catch (error) {
-        console.warn("MongoDB getUserBan error:", error);
+        logger.warn("MongoDB getUserBan error:", error);
         return [];
       }
     },
@@ -109,7 +110,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         );
         return result;
       } catch (error) {
-        console.warn("MongoDB saveUserBan error:", error);
+        logger.warn("MongoDB saveUserBan error:", error);
         return null;
       }
     },
@@ -119,7 +120,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
         const result = await models.BannedAccount.deleteOne({ jid: jid });
         return result.deletedCount > 0;
       } catch (error) {
-        console.warn("MongoDB deleteUserBan error:", error);
+        logger.warn("MongoDB deleteUserBan error:", error);
         return false;
       }
     }
@@ -132,7 +133,7 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 
 // Safety check for MongoDB mode
 if (!config.DATABASE) {
-  console.log('⚠️ UserBan feature disabled in MongoDB mode');
+  logger.info('⚠️ UserBan feature disabled in MongoDB mode');
   module.exports = {
     UserBan: null,
     addBan: async () => null,
@@ -164,7 +165,7 @@ async function getchatid() {
       return allchatids;
     }
   } catch (error) {
-    console.error("Error fetching chatidurations:", error);
+    logger.error("Error fetching chatidurations:", error);
     return false;
   }
 }

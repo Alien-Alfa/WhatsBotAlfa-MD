@@ -1,5 +1,6 @@
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
+const logger = require("../../lib/logger");
 
 // MongoDB Safety Check: Prevent database operations in MongoDB mode
 if (!config.DATABASE) {

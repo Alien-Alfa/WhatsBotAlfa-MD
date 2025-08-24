@@ -1,5 +1,6 @@
 const { command, isPrivate } = require("../../lib/");
 const { listall } = require("../../lib/fancy");
+const logger = require("../../lib/logger");
 
 command(
   {

@@ -1,4 +1,5 @@
 const { command } = require("../../lib");
+const logger = require("../../lib/logger");
 
 // Simple debug command with no restrictions
 command({
@@ -8,13 +9,13 @@ command({
     type: "utility",
 }, async (message, match) => {
     try {
-        console.log("🧪 DEBUG COMMAND EXECUTED!");
-        console.log("Message from:", message.from);
-        console.log("Message text:", message.body);
-        console.log("Message prefix:", message.prefix);
+        logger.info("🧪 DEBUG COMMAND EXECUTED!");
+        logger.info("Message from:", message.from);
+        logger.info("Message text:", message.body);
+        logger.info("Message prefix:", message.prefix);
         await message.reply("✅ Debug: Bot is receiving and processing commands correctly!");
     } catch (error) {
-        console.error("Debug command error:", error);
+        logger.error("Debug command error:", error);
         await message.reply("❌ Debug command failed: " + error.message);
     }
 });

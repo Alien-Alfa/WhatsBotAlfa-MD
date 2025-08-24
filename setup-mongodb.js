@@ -6,33 +6,33 @@
  */
 
 function setupMongoDB() {
-  console.log('\n🍃 Aurora-MD Database Configuration');
+  console.log('\nAurora-MD Database Configuration');
   console.log('=====================================');
 
   // Check if MongoDB is already configured
   if (process.env.MONGODB_URI && process.env.USE_MONGODB === 'true') {
-    console.log('✅ MongoDB is already configured!');
+    console.log('MongoDB is already configured!');
     console.log(`   MONGODB_URI: ${process.env.MONGODB_URI.substring(0, 30)}...`);
     console.log(`   USE_MONGODB: ${process.env.USE_MONGODB}`);
-    console.log('🔄 Dual database mode: MongoDB + SQLite with auto-sync');
-    console.log('🚀 Starting Aurora-MD...\n');
+    console.log('Dual database mode: MongoDB + SQLite with auto-sync');
+    console.log('Starting Aurora-MD...\n');
     return Promise.resolve();
   }
 
   // Check if MongoDB URI is set but USE_MONGODB is false
   if (process.env.MONGODB_URI && process.env.USE_MONGODB !== 'true') {
-    console.log('⚠️  MongoDB URI detected but not enabled');
-    console.log('💡 Set USE_MONGODB=true to enable dual database mode');
-    console.log('📁 Using SQLite database only');
-    console.log('🚀 Starting Aurora-MD...\n');
+    console.log('MongoDB URI detected but not enabled');
+    console.log('Set USE_MONGODB=true to enable dual database mode');
+    console.log('Using SQLite database only');
+    console.log('Starting Aurora-MD...\n');
     return Promise.resolve();
   }
 
   // If no MongoDB configuration found
   if (!process.env.MONGODB_URI) {
-    console.log('📁 Using SQLite database (default)');
-    console.log('💡 Set MONGODB_URI and USE_MONGODB=true for MongoDB support');
-    console.log('🚀 Starting Aurora-MD...\n');
+    console.log('Using SQLite database (default)');
+    console.log('Set MONGODB_URI and USE_MONGODB=true for MongoDB support');
+    console.log('Starting Aurora-MD...\n');
     return Promise.resolve();
   }
 

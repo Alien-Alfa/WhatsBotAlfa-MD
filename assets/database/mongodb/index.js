@@ -3,6 +3,7 @@
 
 const mongoose = require("mongoose");
 const config = require("../../../config");
+const logger = require("../../../lib/logger");
 
 // Import all MongoDB models
 const Chat = require("./models/Chat");
@@ -37,7 +38,7 @@ class MongoDBManager {
         throw new Error("MONGODB_URI is required for MongoDB connection");
       }
 
-      console.log("🔄 Connecting to MongoDB...");
+      logger.info("🔄 Connecting to MongoDB...");
       
       await mongoose.connect(config.MONGODB_URI, {
         maxPoolSize: 10,
@@ -46,7 +47,7 @@ class MongoDBManager {
       });
 
       this.isConnected = true;
-      console.log("✅ MongoDB connected successfully!");
+      logger.info("✅ MongoDB connected successfully!");
 
       // Initialize models
       this.models = {
@@ -72,29 +73,29 @@ class MongoDBManager {
       };
       
       // Debug: Verify PausedChat model schema
-      console.log("🔍 Initializing MongoDB models...");
-      console.log("🔍 PausedChat model schema paths:", Object.keys(PausedChat.schema.paths));
-      console.log("🔍 PausedChat model name:", PausedChat.modelName);
-      console.log("🔍 PausedChat collection name:", PausedChat.collection.name);
+      logger.info("🔍 Initializing MongoDB models...");
+      logger.info("🔍 PausedChat model schema paths:", Object.keys(PausedChat.schema.paths));
+      logger.info("🔍 PausedChat model name:", PausedChat.modelName);
+      logger.info("🔍 PausedChat collection name:", PausedChat.collection.name);
 
       // Set up connection event handlers
       mongoose.connection.on("error", (error) => {
-        console.error("❌ MongoDB connection error:", error);
+        logger.error("❌ MongoDB connection error:", error);
       });
 
       mongoose.connection.on("disconnected", () => {
-        console.warn("⚠️ MongoDB disconnected");
+        logger.warn("⚠️ MongoDB disconnected");
         this.isConnected = false;
       });
 
       mongoose.connection.on("reconnected", () => {
-        console.log("🔄 MongoDB reconnected");
+        logger.info("🔄 MongoDB reconnected");
         this.isConnected = true;
       });
 
       return this.models;
     } catch (error) {
-      console.error("❌ MongoDB connection failed:", error);
+      logger.error("❌ MongoDB connection failed:", error);
       throw error;
     }
   }
@@ -103,9 +104,9 @@ class MongoDBManager {
     try {
       await mongoose.disconnect();
       this.isConnected = false;
-      console.log("✅ MongoDB disconnected gracefully");
+      logger.info("✅ MongoDB disconnected gracefully");
     } catch (error) {
-      console.error("❌ Error disconnecting from MongoDB:", error);
+      logger.error("❌ Error disconnecting from MongoDB:", error);
       throw error;
     }
   }

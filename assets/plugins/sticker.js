@@ -1,6 +1,7 @@
 const config = require("../../config");
 const { command, fromMe, isPrivate, toAudio } = require("../../lib/");
 const { webp2mp4, textToImg } = require("../../lib/functions");
+const logger = require("../../lib/logger");
 
 command(
   {
@@ -37,7 +38,7 @@ command(
         "sticker"
       );
     } catch (error) {
-      console.error("[Sticker Error]:", error);
+      logger.error("[Sticker Error]:", error);
       await message.reply("_Error creating sticker_");
     }
   }
@@ -72,7 +73,7 @@ command(
       
       return await message.sendMessage(message.jid, buff, { packname, author }, "sticker");
     } catch (error) {
-      console.error("[Take Sticker Error]:", error);
+      logger.error("[Take Sticker Error]:", error);
       await message.reply("_Error processing sticker_");
     }
   }
@@ -95,7 +96,7 @@ command(
       
       return await message.sendMessage(message.jid, buff, {}, "image");
     } catch (error) {
-      console.error("[Photo Convert Error]:", error);
+      logger.error("[Photo Convert Error]:", error);
       await message.reply("_Error converting sticker to photo_");
     }
   }
@@ -126,7 +127,7 @@ command(
         "audio"
       );
     } catch (error) {
-      console.error("[MP3 Convert Error]:", error);
+      logger.error("[MP3 Convert Error]:", error);
       await message.reply("_Error converting to MP3_");
     }
   }
@@ -166,7 +167,7 @@ command(
         "video"
       );
     } catch (error) {
-      console.error("[MP4 Convert Error]:", error);
+      logger.error("[MP4 Convert Error]:", error);
       await message.reply("_Error converting to MP4_");
     }
   }
@@ -190,7 +191,7 @@ command(
       
       return await message.sendMessage(message.jid, buff, {}, "image");
     } catch (error) {
-      console.error("[Image Convert Error]:", error);
+      logger.error("[Image Convert Error]:", error);
       await message.reply("_Error converting sticker to image_");
     }
   }
