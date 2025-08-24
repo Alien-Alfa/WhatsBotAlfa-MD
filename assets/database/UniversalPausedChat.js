@@ -2,6 +2,7 @@
 // Universal PausedChat adapter for both MongoDB and SQL
 
 const config = require('../../config');
+const logger = require("../../lib/logger");
 
 let PausedChatOperations;
 
@@ -114,7 +115,6 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
 } else {
   // Fallback to Sequelize operations
   const { DataTypes } = require('sequelize');
-const logger = require("../../lib/logger");
   
   const PausedChats = config.DATABASE.define('pausedChats', {
     chatId: {
