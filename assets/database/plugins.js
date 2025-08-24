@@ -135,7 +135,6 @@ async function getandRequirePlugins() {
             res.body
           );
           require(__basedir + "/assets/plugins" + plugin.name);
-const logger = require("../../lib/logger");
           logger.info("Installed plugin:", plugin.name);
         });
       } catch (e) {

@@ -372,7 +372,6 @@ if (config.USE_MONGODB && config.MONGODB_URI) {
   
   try {
     sequelizeOperations = require("./StoreDb");
-const logger = require("../../lib/logger");
   } catch (error) {
     logger.warn("StoreDb not available, creating mock operations");
     sequelizeOperations = {
