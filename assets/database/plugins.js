@@ -1,6 +1,7 @@
 const { default: got } = require("got");
 const config = require("../../config");
 const { DataTypes } = require("sequelize");
+const logger = require("../../lib/logger");
 
 // Handle both MongoDB and SQLite configurations
 let PluginDB;
