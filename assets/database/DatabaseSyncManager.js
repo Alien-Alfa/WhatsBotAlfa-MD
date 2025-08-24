@@ -225,12 +225,13 @@ class DatabaseSyncManager {
       for (const message of localMessages) {
         try {
           await models.Message.updateOne(
-            { 'key.id': message.jid },
+            { id: message.id || message.jid },
             {
-              key: { id: message.jid },
+              id: message.id || message.jid,
+              jid: message.jid,
               message: message.message,
-              messageTimestamp: message.timestamp,
               sender: message.sender,
+              messageType: this.getMessageType(message.message),
               updatedAt: new Date()
             },
             { upsert: true }
@@ -254,7 +255,7 @@ class DatabaseSyncManager {
   async syncPausedChatsToMongo(models) {
     try {
       // Sync paused chats from local database
-      const { PausedChats } = require('../');
+      const { PausedChats } = require('./index');
       const pausedChats = await PausedChats.getPausedChats();
 
       let syncedCount = 0;
@@ -302,6 +303,24 @@ class DatabaseSyncManager {
       stats: this.syncStats,
       isEnabled: config.USE_MONGODB && !!config.MONGODB_URI
     };
+  }
+
+  // Helper method to determine message type
+  getMessageType(message) {
+    if (!message?.message) return 'unknown';
+    
+    const msgContent = message.message;
+    if (msgContent.conversation) return 'text';
+    if (msgContent.imageMessage) return 'image';
+    if (msgContent.videoMessage) return 'video';
+    if (msgContent.audioMessage) return 'audio';
+    if (msgContent.documentMessage) return 'document';
+    if (msgContent.stickerMessage) return 'sticker';
+    if (msgContent.locationMessage) return 'location';
+    if (msgContent.contactMessage) return 'contact';
+    if (msgContent.extendedTextMessage) return 'text';
+    
+    return 'unknown';
   }
 
   async stop() {
