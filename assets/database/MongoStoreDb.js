@@ -3,6 +3,7 @@
 
 const { isJidGroup } = require("@whiskeysockets/baileys");
 const config = require("../../config");
+const logger = require("../../lib/logger");
 
 // Dynamic database loading based on configuration
 let dbOperations;
