@@ -49,6 +49,7 @@ if (!config.DATABASE) {
     },
     saveChat: async () => null,
     getName: async (jid) => jid.split("@")[0].replace(/_/g, " "),
+    flushMessageQueue: async () => null,
   };
   return;
 }
@@ -225,65 +226,106 @@ const saveContact = async (jid, name) => {
 const messageBatch = [];
 let messageBatchTimer = null;
 
-const saveMessage = async (message, user) => {
+// Core single-message write (used by both batched and immediate paths)
+const persistOne = async ({ message, user }) => {
+  const cacheKey = `msg_${message.key.id}`;
+  if (messageCache.has(cacheKey)) return;
+
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      await messageDb.upsert({
+        id: message.key.id,
+        jid: message.key.remoteJid,
+        message: message,
+      });
+
+      messageCache.set(cacheKey, { timestamp: Date.now() });
+
+      if (user && message.pushName) {
+        await saveContact(user, message.pushName);
+      }
+
+      break; // Success, exit retry loop
+    } catch (error) {
+      retries--;
+
+      if (error.name === 'SequelizeTimeoutError' || error.parent?.code === 'SQLITE_BUSY') {
+        if (retries > 0) {
+          await new Promise(resolve => setTimeout(resolve, 50 * (4 - retries)));
+          continue;
+        }
+      }
+
+      throw error;
+    }
+  }
+};
+
+const writeMessages = (batch) =>
+  dbQueue.add(async () => {
+    await Promise.allSettled(batch.map(persistOne));
+  });
+
+/**
+ * Save a message.
+ * @param {Object} message - raw WA message
+ * @param {String} user - sender jid (for contact save)
+ * @param {Object} [options]
+ * @param {Boolean} [options.immediate] - write to DB NOW and await it.
+ *   Used for command messages so a restart/reboot can never lose them
+ *   from the store (they would replay as "new" after boot - issue #2).
+ */
+const saveMessage = async (message, user, options = {}) => {
   try {
     if (!message?.key?.id) return;
-    
+
+    // Immediate path: awaited write, bypasses the 100ms batch window
+    if (options && options.immediate) {
+      try {
+        await writeMessages([{ message, user }]);
+      } catch (error) {
+        logger.warn("Immediate message save error:", error.message || error);
+      }
+      return;
+    }
+
     // Performance: Add to batch instead of immediate save
     messageBatch.push({ message, user });
-    
+
     if (messageBatchTimer) clearTimeout(messageBatchTimer);
     messageBatchTimer = setTimeout(async () => {
+      messageBatchTimer = null;
       const batch = [...messageBatch];
       messageBatch.length = 0;
-      
+
       try {
-        // Queue the batch operation to prevent SQLite locking
-        await dbQueue.add(async () => {
-          await Promise.allSettled(
-            batch.map(async ({ message, user }) => {
-              const cacheKey = `msg_${message.key.id}`;
-              if (messageCache.has(cacheKey)) return;
-              
-              let retries = 3;
-              
-              while (retries > 0) {
-                try {
-                  await messageDb.upsert({
-                    id: message.key.id,
-                    jid: message.key.remoteJid,
-                    message: message,
-                  });
-                  
-                  messageCache.set(cacheKey, { timestamp: Date.now() });
-                  
-                  if (user && message.pushName) {
-                    await saveContact(user, message.pushName);
-                  }
-                  
-                  break; // Success, exit retry loop
-                } catch (error) {
-                  retries--;
-                  
-                  if (error.name === 'SequelizeTimeoutError' || error.parent?.code === 'SQLITE_BUSY') {
-                    if (retries > 0) {
-                      await new Promise(resolve => setTimeout(resolve, 50 * (4 - retries)));
-                      continue;
-                    }
-                  }
-                  
-                  throw error;
-                }
-              }
-            })
-          );
-        });
+        await writeMessages(batch);
       } catch (error) {
         logger.warn("Batch message save error:", error.message || error);
       }
     }, 100); // Batch every 100ms
   } catch (e) {
     logger.warn("Save message error:", e.message || e);
+  }
+};
+
+/**
+ * Flush any pending batched message writes immediately.
+ * Called before command execution and on SIGINT/SIGTERM shutdown.
+ */
+const flushMessageQueue = async () => {
+  if (messageBatchTimer) {
+    clearTimeout(messageBatchTimer);
+    messageBatchTimer = null;
+  }
+  if (!messageBatch.length) return;
+  const batch = [...messageBatch];
+  messageBatch.length = 0;
+  try {
+    await writeMessages(batch);
+  } catch (error) {
+    logger.warn("Flush message queue error:", error.message || error);
   }
 };
 
@@ -416,4 +458,5 @@ module.exports = {
   loadDeletedMessages,
   saveChat,
   getName,
+  flushMessageQueue,
 };

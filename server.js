@@ -3,11 +3,75 @@ const path = require('path');
 const fs = require('fs').promises;
 const fss = require('fs');
 const { logger } = require('./lib/logger');
+const configSchema = require('./lib/configSchema');
 
 const workers = {};
 let whatsappConnectionStatus = 'unknown';
 let serverStartTime = Date.now();
 let isShuttingDown = false;
+
+// ---------------------------------------------------------------------------
+// In-memory telemetry for the dashboard: recent logs, error counter, worker
+// stats. Errors from the worker process arrive over IPC ('log' messages),
+// the server's own logs are captured through logger.onEntry.
+// ---------------------------------------------------------------------------
+const logBuffer = [];   // all recent entries (cap 500)
+const errorBuffer = []; // ERROR/WARN entries (cap 300)
+const MAX_LOG_BUFFER = 500;
+const MAX_ERROR_BUFFER = 300;
+let errorCounts = { ERROR: 0, WARN: 0 };
+let workerStats = null;
+let workerStatsUpdatedAt = 0;
+
+function pushLogEntry(entry) {
+  if (!entry || !entry.level) return;
+  logBuffer.push(entry);
+  if (logBuffer.length > MAX_LOG_BUFFER) logBuffer.shift();
+  if (entry.level === 'ERROR' || entry.level === 'WARN') {
+    errorBuffer.push(entry);
+    if (errorBuffer.length > MAX_ERROR_BUFFER) errorBuffer.shift();
+    errorCounts[entry.level] = (errorCounts[entry.level] || 0) + 1;
+  }
+}
+
+// Capture this process's own log entries for the dashboard
+logger.onEntry = pushLogEntry;
+
+// Correlated request/response with the worker process (for config API)
+let ipcSeq = 0;
+const pendingIpc = new Map();
+
+function requestFromWorker(payload, timeoutMs = 3000) {
+  return new Promise((resolve) => {
+    const worker = workers['index.js'];
+    if (!worker || !worker.send) return resolve(null);
+    const id = ++ipcSeq;
+    const timer = setTimeout(() => {
+      pendingIpc.delete(id);
+      resolve(null);
+    }, timeoutMs);
+    pendingIpc.set(id, (value) => {
+      clearTimeout(timer);
+      pendingIpc.delete(id);
+      resolve(value);
+    });
+    try {
+      worker.send({ ...payload, id });
+    } catch {
+      clearTimeout(timer);
+      pendingIpc.delete(id);
+      resolve(null);
+    }
+  });
+}
+
+function settleIpc(message) {
+  if (!message || typeof message !== 'object' || !message.id) return false;
+  const resolver = pendingIpc.get(message.id);
+  if (!resolver) return false;
+  resolver(message);
+  return true;
+}
 
 function start(file) {
     if (workers[file]) {
@@ -26,12 +90,46 @@ function start(file) {
         const worker = cluster.fork();
         
         worker.on('message', async (data) => {
+            // Structured telemetry / config IPC from the worker
+            if (data && typeof data === 'object') {
+                if (settleIpc(data)) return;
+                switch (data.type) {
+                    case 'log':
+                        // Batched ERROR/WARN entries for the dashboard
+                        (data.entries || []).forEach(pushLogEntry);
+                        return;
+                    case 'stats':
+                        workerStats = data.data || null;
+                        workerStatsUpdatedAt = Date.now();
+                        return;
+                    default:
+                        logger.debug('Worker structured message', { file, type: data.type });
+                        // Structured stats heartbeats from the worker carry the
+                        // live socket state - keep the dashboard status in sync
+                        // even when string 'whatsapp_*' signals were missed
+                        // (e.g. worker restarted but status stayed stale).
+                        if (data.type === 'stats' && data.data && typeof data.data === 'object') {
+                            const d = data.data;
+                            if (d.connectionStopped === true) whatsappConnectionStatus = 'stopped';
+                            else if (d.connectionActive === true || d.connectionActive === 'true') whatsappConnectionStatus = 'connected';
+                            // Never overwrite with 'disconnected' from a stats
+                            // heartbeat alone - transients flap; explicit
+                            // 'whatsapp_disconnected' below handles real drops.
+                        }
+                        return;
+                }
+            }
+
             logger.debug('Worker message received', { file, message: data });
             
             switch (data) {
                 case 'reset':
                     logger.system('Worker reset requested', { file });
                     resetProcess(file);
+                    break;
+                case 'Kill':
+                    logger.system('Shutdown requested by worker', { file });
+                    shutdown();
                     break;
                 case 'uptime':
                     const uptime = Math.floor(process.uptime());
@@ -79,10 +177,15 @@ function start(file) {
 
             delete workers[file];
 
-            // Only restart if not gracefully shutting down
-            if (!isShuttingDown && code !== 0) {
+            // Restart the worker unless the WHOLE server is shutting down.
+            // NOTE: the condition used to be `code !== 0`, but the worker now
+            // exits gracefully with code 0 on SIGTERM (flush + socket close),
+            // which silently disabled auto-restart and left the bot dead after
+            // a dashboard/chat "restart". A stopped worker is never intended.
+            if (!isShuttingDown) {
                 // Add delay before restart to prevent rapid restart loops
                 setTimeout(() => {
+                    if (isShuttingDown) return;
                     logger.system('Restarting worker process', { file, delay: '2000ms' });
                     start(file);
                 }, 2000);
@@ -256,6 +359,7 @@ app.get('/health', (req, res) => {
         uptime: Math.floor(process.uptime()),
         workers: Object.keys(workers),
         botStatus: whatsappConnectionStatus,
+        errorCounts,
         timestamp: new Date().toISOString(),
         memory: {
             used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
@@ -266,6 +370,112 @@ app.get('/health', (req, res) => {
     
     logger.trace('Health check requested', { ip: req.ip });
     res.json(healthData);
+});
+
+// ---------------------------------------------------------------------------
+// Dashboard API - stats, logs, errors, configuration
+// ---------------------------------------------------------------------------
+
+// Runtime stats (server + worker + counters)
+app.get('/api/stats', (req, res) => {
+    res.json({
+        status: whatsappConnectionStatus,
+        server: {
+            uptime: Math.floor(process.uptime()),
+            startedAt: new Date(serverStartTime).toISOString(),
+            pid: process.pid,
+            memory: {
+                used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+                total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+            },
+            version: require('./package.json').version,
+            node: process.version,
+            environment: process.env.NODE_ENV || 'development'
+        },
+        workers: Object.keys(workers),
+        bot: workerStats,
+        botStatsUpdatedAt: workerStatsUpdatedAt ? new Date(workerStatsUpdatedAt).toISOString() : null,
+        logs: {
+            errorCounts,
+            recentCount: logBuffer.length,
+            errorCount: errorBuffer.length
+        },
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Recent log entries (level filter optional: ?level=ERROR&limit=200)
+app.get('/api/logs', (req, res) => {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 200, 500);
+    const level = req.query.level ? String(req.query.level).toUpperCase() : null;
+    const entries = level ? logBuffer.filter(e => e.level === level) : logBuffer;
+    res.json({
+        entries: entries.slice(-limit),
+        total: logBuffer.length,
+        errorCounts
+    });
+});
+
+// Every ERROR/WARN that occurred (+ counters)
+app.get('/api/errors', (req, res) => {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 100, 300);
+    res.json({
+        entries: errorBuffer.slice(-limit),
+        counts: errorCounts,
+        total: errorBuffer.length
+    });
+});
+
+// Clear the error counter + error list
+app.post('/api/clear-errors', (req, res) => {
+    logger.system('Error log cleared from dashboard', { ip: req.ip });
+    errorBuffer.length = 0;
+    errorCounts = { ERROR: 0, WARN: 0 };
+    try { logger.clearErrors(); } catch { /* ignore */ }
+    res.json({ ok: true, counts: errorCounts });
+});
+
+// Effective configuration (live values from the worker when it's alive)
+app.get('/api/config', async (req, res) => {
+    const reply = await requestFromWorker({ type: 'get_config' }, 3000);
+    res.json({
+        schema: configSchema.schema,
+        keys: configSchema.editableKeys,
+        values: reply?.values || null,
+        overrides: configSchema.loadOverrides(),
+        workerAlive: !!workers['index.js']
+    });
+});
+
+// Persist + live-apply configuration overrides
+app.post('/api/config', async (req, res) => {
+    logger.system('Config update requested', { ip: req.ip });
+    try {
+        const body = req.body || {};
+        const save = configSchema.saveOverrides(body);
+        if (!save.ok) {
+            return res.status(400).json({ ok: false, error: save.error });
+        }
+
+        // Live-apply in the worker process (shared config object)
+        const reply = await requestFromWorker(
+            { type: 'config_update', overrides: save.values },
+            3000
+        );
+
+        res.json({
+            ok: true,
+            values: save.values,
+            appliedLive: reply ? !!reply.ok : false,
+            applyError: reply?.error || null,
+            note: reply
+                ? 'Applied live'
+                : 'Saved - worker not reachable, will apply on next start'
+        });
+    } catch (error) {
+        logger.error('Config update failed', { error: error.message });
+        res.status(500).json({ ok: false, error: error.message });
+    }
 });
 
 app.post('/restart', (req, res) => {
@@ -505,6 +715,12 @@ process.on('message', (message) => {
 async function initialize() {
     try {
         await initializeServer();
+        // Dev/test mode: run the API server WITHOUT forking the WhatsApp
+        // worker (never opens a second WhatsApp connection).
+        if (process.env.AURORA_NO_WORKER === 'true') {
+            logger.system('AURORA_NO_WORKER=true - API server only, worker not started');
+            return;
+        }
         logger.system('Starting main worker process');
         start("index.js");
     } catch (error) {

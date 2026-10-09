@@ -5,45 +5,11 @@ const path = require("path");
 // Set global base directory
 global.__basedir = __dirname;
 
-// Filter out verbose technical messages
-const originalConsoleLog = console.log;
-console.log = (...args) => {
-  const message = args.join(' ');
-  
-  // Filter out verbose session messages
-  if (message.includes('Closing session:') || 
-      message.includes('SessionEntry') ||
-      message.includes('_chains:') ||
-      message.includes('registrationId:') ||
-      message.includes('currentRatchet:') ||
-      message.includes('ephemeralKeyPair:') ||
-      message.includes('lastRemoteEphemeralKey:') ||
-      message.includes('previousCounter:') ||
-      message.includes('rootKey:') ||
-      message.includes('indexInfo:') ||
-      message.includes('baseKey:') ||
-      message.includes('baseKeyType:') ||
-      message.includes('remoteIdentityKey:') ||
-      message.includes('pendingPreKey:') ||
-      message.includes('pubKey:') ||
-      message.includes('privKey:') ||
-      message.includes('<Buffer ') ||
-      message.includes('Buffer(') ||
-      message.includes('chainKey: [Object]') ||
-      message.includes('chainType:') ||
-      message.includes('messageKeys: {}') ||
-      message.includes('  }') && (message.includes('chains') || message.includes('Ratchet') || message.includes('Info'))) {
-    return; // Suppress these messages
-  }
-  
-  // Show only the summary for session closing
-  if (message.includes('Closing open session in favor of incoming prekey bundle')) {
-    originalConsoleLog('WHATSAPP: Session updated - incoming prekey bundle');
-    return;
-  }
-  
-  originalConsoleLog(...args);
-};
+// Filter raw libsignal/Baileys session noise & aggregate signal failures.
+// (The old console.log-only filter missed console.info/warn/error output -
+//  that's why "prekey bundle"/session dumps kept flooding the terminal.)
+const consoleGuard = require("./lib/consoleGuard");
+consoleGuard.install();
 
 const config = require("./config");
 const connect = require("./lib/connection");
@@ -75,8 +41,81 @@ let whatsappClient = null;
 let connectionStopped = false;
 let initializationStartTime = Date.now();
 
+// ---- Dashboard telemetry: forward ERROR/WARN entries + runtime stats to
+// server.js over IPC (batched - error storms can't flood the channel). ----
+const pendingLogEntries = [];
+let logFlushTimer = null;
+
+if (process.send) {
+  logger.onEntry = (entry) => {
+    if (entry.level !== 'ERROR' && entry.level !== 'WARN') return;
+    pendingLogEntries.push(entry);
+    if (pendingLogEntries.length > 100) {
+      pendingLogEntries.splice(0, pendingLogEntries.length - 100);
+    }
+    if (!logFlushTimer) {
+      logFlushTimer = setTimeout(() => {
+        logFlushTimer = null;
+        const batch = pendingLogEntries.splice(0, pendingLogEntries.length);
+        try { process.send({ type: 'log', entries: batch }); } catch { /* parent gone */ }
+      }, 1000);
+    }
+  };
+
+  setInterval(() => {
+    try {
+      if (typeof connect.getStats === 'function') {
+        process.send({ type: 'stats', data: connect.getStats() });
+      }
+    } catch { /* parent gone */ }
+  }, 10000);
+
+  // Push current stats immediately - otherwise the server's workerStats stays
+  // null for the first 10s after every restart and the dashboard shows an
+  // empty bot panel. Delay to let the connection module finish init first.
+  setTimeout(() => {
+    try {
+      if (typeof connect.getStats === 'function') {
+        process.send({ type: 'stats', data: connect.getStats() });
+      }
+    } catch { /* parent gone */ }
+  }, 5000);
+}
+
 // Listen for messages from parent process (server.js)
 process.on('message', async (message) => {
+  // Structured messages (dashboard config IPC)
+  if (message && typeof message === 'object') {
+    switch (message.type) {
+      case 'config_update': {
+        try {
+          const { applyOverrides } = require('./lib/configSchema');
+          const result = applyOverrides(config, message.overrides || {});
+          logger.system('Config overrides applied', { keys: Object.keys(message.overrides || {}) });
+          if (process.send) process.send({ type: 'config_applied', id: message.id, ok: result.ok, error: result.error });
+        } catch (error) {
+          logger.error('Failed to apply config overrides', { error });
+          if (process.send) process.send({ type: 'config_applied', id: message.id, ok: false, error: error.message });
+        }
+        break;
+      }
+      case 'get_config': {
+        try {
+          const { editableKeys } = require('./lib/configSchema');
+          const values = {};
+          for (const key of editableKeys) values[key] = config[key];
+          if (process.send) process.send({ type: 'config_values', id: message.id, values });
+        } catch (error) {
+          logger.warn('Failed to read config values', { error: error.message });
+        }
+        break;
+      }
+      default:
+        logger.debug('Unknown structured message from server', { type: message.type });
+    }
+    return;
+  }
+
   logger.debug('Message received from server', { message });
   
   switch (message) {
@@ -93,19 +132,12 @@ process.on('message', async (message) => {
 
 async function stopWhatsAppConnection() {
   try {
-    logger.whatsapp('Stopping WhatsApp connection');
+    // Delegates to the connection module which closes the ACTUAL socket.
+    // (The old code referenced a non-existent whatsappClient.sock, so the
+    //  socket stayed alive and a later start opened a SECOND connection -
+    //  one of the causes of multiplying "Bad MAC" errors.)
     connectionStopped = true;
-    
-    if (whatsappClient && whatsappClient.sock) {
-      await whatsappClient.sock.logout();
-      whatsappClient.sock.end();
-    }
-    
-    // Notify server about status change
-    if (process.send) {
-      process.send('whatsapp_stopped');
-    }
-    
+    await connect.stop();
     logger.whatsapp('WhatsApp connection stopped successfully');
   } catch (error) {
     logger.error('Error stopping WhatsApp connection', { error: error.message });
@@ -117,12 +149,9 @@ async function startWhatsAppConnection() {
     logger.whatsapp('Starting WhatsApp connection');
     connectionStopped = false;
     
-    // Import fresh connection module
-    delete require.cache[require.resolve('./lib/connection')];
-    const connect = require("./lib/connection");
-    
-    // Re-initialize the connection
-    const result = await connect();
+    // Reuse the SAME connection module - deleting require.cache (old approach)
+    // leaked listeners and could open duplicate sockets.
+    const result = await connect.resume();
     whatsappClient = result;
     
     if (result) {

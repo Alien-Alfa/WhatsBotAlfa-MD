@@ -46,19 +46,29 @@ const downloadFileStream = async (url, filename) => {
   
   const filePath = path.join(tempDir, filename);
   
+  // Timers live outside try so the finally block can always clear them
+  let stallTimer = null;
+  let totalTimer = null;
   try {
-    // Add timeout and retry logic
+    // Stall-based timeout: resets every time data arrives, so large files are
+    // never killed mid-transfer while a dead connection still fails fast.
+    const STALL_TIMEOUT_MS = 60000; // no data for 60s -> abort
+    const TOTAL_TIMEOUT_MS = 600000; // hard 10 minute cap for the whole file
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
+    const abort = () => controller.abort();
+    stallTimer = setTimeout(abort, STALL_TIMEOUT_MS);
+    totalTimer = setTimeout(abort, TOTAL_TIMEOUT_MS);
+    const resetStallTimer = () => {
+      clearTimeout(stallTimer);
+      stallTimer = setTimeout(abort, STALL_TIMEOUT_MS);
+    };
+
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       }
     });
-    
-    clearTimeout(timeoutId);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -67,9 +77,11 @@ const downloadFileStream = async (url, filename) => {
     // Create write stream
     const fileStream = fs.createWriteStream(filePath);
     
-    // Pipe the response to file with error handling
+    // Pipe the response to file with error handling; the stall timer keeps
+    // resetting while chunks are arriving.
     await new Promise((resolve, reject) => {
-      const stream = response.body.pipe(fileStream);
+      response.body.on('data', resetStallTimer);
+      response.body.pipe(fileStream);
       
       response.body.on('error', (error) => {
         fileStream.destroy();
@@ -88,15 +100,6 @@ const downloadFileStream = async (url, filename) => {
           reject(new Error('File download incomplete or empty'));
         }
       });
-      
-      // Handle stream end without finish (connection issues)
-      stream.on('end', () => {
-        setTimeout(() => {
-          if (!fileStream.destroyed) {
-            fileStream.end();
-          }
-        }, 1000);
-      });
     });
     
     return filePath;
@@ -112,12 +115,15 @@ const downloadFileStream = async (url, filename) => {
     
     // Handle specific error types
     if (error.name === 'AbortError') {
-      throw new Error('Download timeout - file too large or connection slow');
+      throw new Error('Download timeout - connection stalled or file took too long (60s stall / 10min total limit)');
     } else if (error.message.includes('rate-overlimit')) {
       throw new Error('Rate limit exceeded - please try again later');
     } else {
       throw error;
     }
+  } finally {
+    if (stallTimer) clearTimeout(stallTimer);
+    if (totalTimer) clearTimeout(totalTimer);
   }
 };
 
@@ -873,8 +879,10 @@ const downloadAudioFromY2mate = async (url) => {
       if (!match) return await message.reply("_Provide a song name to search._");
       
       let filePath = null;
+      let dlink = null;
+      let title = null;
       try {
-        const { dlink, title } = await ytsdl(match + " song");
+        ({ dlink, title } = await ytsdl(match + " song"));
         await message.reply(`_Downloading ${title}..._`);
         
         // Generate unique filename
@@ -896,9 +904,12 @@ const downloadAudioFromY2mate = async (url) => {
         );
       } catch (e) {
         logger.error("Error in song streaming download:", e);
-        // Fallback to buffer method
+        // Fallback to buffer method. Reuse the dlink we already obtained (it
+        // stays valid) and only re-run the search if we never got one.
         try {
-          const { dlink, title } = await ytsdl(match + " song");
+          if (!dlink) {
+            ({ dlink, title } = await ytsdl(match + " song"));
+          }
           const buffer = await getBuffer(dlink);
           await message.sendMessage(
             message.jid,
@@ -928,8 +939,10 @@ const downloadAudioFromY2mate = async (url) => {
       if (!match) return await message.reply("_Provide a video name to search._");
       
       let filePath = null;
+      let dlink = null;
+      let title = null;
       try {
-        const { dlink, title } = await ytsdl(match, "video");
+        ({ dlink, title } = await ytsdl(match, "video"));
         await message.reply(`_Downloading ${title}..._`);
         
         // Generate unique filename
@@ -950,9 +963,12 @@ const downloadAudioFromY2mate = async (url) => {
         );
       } catch (e) {
         logger.error("Error in video streaming download:", e);
-        // Fallback to direct URL method
+        // Fallback to direct URL method. Reuse the dlink we already obtained
+        // (it stays valid) and only re-run the search if we never got one.
         try {
-          const { dlink, title } = await ytsdl(match, "video");
+          if (!dlink) {
+            ({ dlink, title } = await ytsdl(match, "video"));
+          }
           await message.sendMessage(
             message.jid,
             { video: { url: dlink }, caption: title, mimetype: "video/mp4", fileName: `${title}.mp4` },
