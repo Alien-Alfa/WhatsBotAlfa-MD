@@ -4,6 +4,7 @@ const {
   sleep,
   isPrivate
 } = require("../../lib")
+const logger = require("../../lib/logger");
 
 function formatTime(seconds) {
   if (isNaN(seconds) || seconds < 0) {
@@ -73,21 +74,8 @@ command({
   
   try {
     const start = Date.now();
-    
-    // Initial checking message
     const checkingText = "```Checking server response...```";
-    let key;
-    
-    if (me) {
-      await message.client.sendMessage(message.jid, {
-        text: checkingText,
-        edit: message.key
-      });
-      key = message.key;
-    } else {
-      const response = await message.reply(checkingText);
-      key = response.key;
-    }
+    const placeholder = await message.reply(checkingText);
     
     // Calculate ping
     const end = Date.now();
@@ -112,13 +100,19 @@ command({
 │
 └─「 Aurora-MD Active 」`.trim();
 
-    // Send final response after a brief delay
-    setTimeout(async () => {
-      await message.client.sendMessage(message.jid, {
-        text: responseText,
-        edit: key
-      });
-    }, 1000);
+    try {
+      if (placeholder?.key) {
+        await message.client.sendMessage(message.jid, {
+          text: responseText,
+          edit: placeholder.key
+        });
+      } else {
+        await message.reply(responseText);
+      }
+    } catch (error) {
+      logger.error("[Ping response edit failed]", { error: error.message });
+      await message.reply(responseText);
+    }
     
   } catch (error) {
     logger.error("[Ping Error]:", error);

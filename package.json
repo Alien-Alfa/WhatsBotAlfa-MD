@@ -69,6 +69,7 @@
   },
   "scripts": {
     "start": "node setup-mongodb.js && node server.js",
+    "postinstall": "node scripts/patch-ytsr.js",
     "start:direct": "node server.js",
     "start:mongodb": "USE_MONGODB=true node setup-mongodb.js && node server.js",
     "start:sqlite": "USE_MONGODB=false node server.js",

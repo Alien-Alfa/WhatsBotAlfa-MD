@@ -19,6 +19,8 @@ const config = {
 //-------------------------------------------------------------------------------------------------------------------------------------------
   SIMPLE_LOGS: toBool(process.env.SIMPLE_LOGS) || false,
 //-------------------------------------------------------------------------------------------------------------------------------------------
+  LOG_MESSAGE: toBool(process.env.LOG_MESSAGE) || false,
+//-------------------------------------------------------------------------------------------------------------------------------------------
   ANTILINK_ACTION: process.env.ANTILINK_ACTION || "kick",
 //-------------------------------------------------------------------------------------------------------------------------------------------
   SESSION_ID: process.env.SESSION_ID || "",
@@ -27,11 +29,15 @@ const config = {
 //-------------------------------------------------------------------------------------------------------------------------------------------
   AUTH_TOKEN: process.env.AUTH_TOKEN || "",
 //-------------------------------------------------------------------------------------------------------------------------------------------
-  HANDLERS: false, //process.env.HANDLER === "false", //|| process.env.HANDLER === "null" || process.env.HANDLER === undefined ? "^" : process.env.HANDLER,
+  HANDLERS: process.env.HANDLER === "false" || process.env.HANDLER === "null" || process.env.HANDLER === undefined ? "^" : process.env.HANDLER,
 //-------------------------------------------------------------------------------------------------------------------------------------------
   RMBG_KEY: process.env.RMBG_KEY || false,
 //-------------------------------------------------------------------------------------------------------------------------------------------
   BRANCH: process.env.BRANCH || "master",
+//-------------------------------------------------------------------------------------------------------------------------------------------
+  HEROKU_GIT_URL: process.env.HEROKU_GIT_URL || "",
+//-------------------------------------------------------------------------------------------------------------------------------------------
+  STALE_MESSAGE_GRACE: parseInt(process.env.STALE_MESSAGE_GRACE, 10) || 60000,
 //-------------------------------------------------------------------------------------------------------------------------------------------
   WARN_COUNT: parseInt(process.env.WARN_COUNT) || 3,
 //-------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,50 +75,14 @@ const config = {
 //-------------------------------------------------------------------------------------------------------------------------------------------
   AUTO_STATUS_READ: toBool(process.env.AUTO_STATUS_READ) || false,
 //-------------------------------------------------------------------------------------------------------------------------------------------
+  ALLOW_ALL_CALLS: toBool(process.env.ALLOW_ALL_CALLS) || false,
+//-------------------------------------------------------------------------------------------------------------------------------------------
   REMOVEBG: process.env.RMBG_KEY || false,
 //-------------------------------------------------------------------------------------------------------------------------------------------
   // Database Configuration
   USE_MONGODB: USE_MONGODB,
   MONGODB_URI: MONGODB_URI,
   DATABASE_URL: DATABASE_URL,
-//-------------------------------------------------------------------------------------------------------------------------------------------
-  // Always use local SQLite database as primary
-  DATABASE: DATABASE_URL === "./assets/database.db"
-    ? new Sequelize({
-        dialect: "sqlite",
-        storage: DATABASE_URL,
-        logging: false,
-        define: {
-          freezeTableName: true, // Prevent table name pluralization
-          timestamps: true
-        },
-        pool: {
-          max: 10,
-          min: 0,
-          acquire: 30000,
-          idle: 10000
-        }
-      })
-    : new Sequelize(DATABASE_URL, {
-        dialect: "postgres",
-        ssl: true,
-        protocol: "postgres",
-        dialectOptions: {
-          native: true,
-          ssl: { require: true, rejectUnauthorized: false },
-        },
-        logging: false,
-        define: {
-          freezeTableName: true, // Prevent table name pluralization
-          timestamps: true
-        },
-        pool: {
-          max: 10,
-          min: 0,
-          acquire: 30000,
-          idle: 10000
-        }
-      }),
 //============================================================================================================================================
 };
 
@@ -128,5 +98,30 @@ try {
 } catch (e) {
   // Never let override loading break the bot config
 }
+
+if (config.RMBG_KEY) config.REMOVEBG = config.RMBG_KEY;
+
+// Construct the database after dashboard overrides are loaded so DATABASE_URL
+// and USE_MONGODB-related settings are consistent from the start of the worker.
+config.DATABASE = config.DATABASE_URL === "./assets/database.db"
+  ? new Sequelize({
+      dialect: "sqlite",
+      storage: config.DATABASE_URL,
+      logging: false,
+      define: { freezeTableName: true, timestamps: true },
+      pool: { max: 10, min: 0, acquire: 30000, idle: 10000 }
+    })
+  : new Sequelize(config.DATABASE_URL, {
+      dialect: "postgres",
+      ssl: true,
+      protocol: "postgres",
+      dialectOptions: {
+        native: true,
+        ssl: { require: true, rejectUnauthorized: false },
+      },
+      logging: false,
+      define: { freezeTableName: true, timestamps: true },
+      pool: { max: 10, min: 0, acquire: 30000, idle: 10000 }
+    });
 
 module.exports = config;

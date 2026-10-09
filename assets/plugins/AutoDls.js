@@ -141,6 +141,26 @@ const cleanupFile = (filePath) => {
 // Helper function to add delay between requests
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+const beginDownloadProgress = async (message, text) => {
+  const response = await message.reply(text);
+  return { message, key: response?.key || null };
+};
+
+const updateDownloadProgress = async (progress, text) => {
+  if (!progress?.key) return progress.message.reply(text);
+  try {
+    return await progress.message.client.sendMessage(progress.message.jid, {
+      text,
+      edit: progress.key,
+    });
+  } catch (error) {
+    logger.warn("Could not edit download progress; sending a new status", { error: error.message });
+    const response = await progress.message.reply(text);
+    if (response?.key) progress.key = response.key;
+    return response;
+  }
+};
+
 // Y2mate YouTube downloader function
 const downloadFromY2mate = async (url, quality = "360p") => {
   try {
@@ -501,18 +521,20 @@ const downloadAudioFromY2mate = async (url) => {
   };
 
   const downloadYoutubeMedia = async (message, match) => {
+    let progress = null;
     try {
-      await message.reply("_Downloading YouTube media..._");
       const link = match.match(/(https?:\/\/[^\s]+)/);
       if (!link) return await message.reply("_Invalid YouTube URL._");
       
       const url = link[0];
+      progress = await beginDownloadProgress(message, "_Getting video details from YouTube..._");
       logger.info("🔍 Attempting to download YouTube URL:", url);
       
       // Try Y2mate first (most reliable)
       try {
         logger.info("🔄 Using Y2mate method...");
         const { title, quality, dlink, filesize } = await downloadFromY2mate(url, "360p");
+        await updateDownloadProgress(progress, `_Downloading ${title}..._`);
         let filePath = null;
         
         try {
@@ -557,6 +579,8 @@ const downloadAudioFromY2mate = async (url) => {
           if (!videoUrl) {
             throw new Error("No download URL found");
           }
+
+          await updateDownloadProgress(progress, `_Downloading ${title || "YouTube video"}..._`);
           
           let filePath = null;
           let thumbnailBuffer = null;
@@ -617,6 +641,7 @@ const downloadAudioFromY2mate = async (url) => {
           try {
             logger.info("🔄 Using final fallback ytv method...");
             const { dlink, title } = await ytv(url, "360p");
+            await updateDownloadProgress(progress, `_Downloading ${title}..._`);
             let filePath = null;
             
             try {
@@ -645,14 +670,15 @@ const downloadAudioFromY2mate = async (url) => {
             }
           } catch (finalError) {
             logger.error("All YouTube download methods failed:", finalError.message);
-            return await message.reply("_YouTube download is currently unavailable. Please try again later._");
+            return await updateDownloadProgress(progress, "_YouTube download is currently unavailable. Please try again later._");
           }
         }
       }
       
     } catch (error) {
       logger.error("YouTube download error:", error);
-      await message.reply(`_Error downloading YouTube media: ${error.message}_`);
+      if (progress) await updateDownloadProgress(progress, `_Error downloading YouTube media: ${error.message}_`);
+      else await message.reply(`_Error downloading YouTube media: ${error.message}_`);
     }
   };
   
@@ -690,14 +716,14 @@ const downloadAudioFromY2mate = async (url) => {
     async (message, match) => {
       match = match || (message.reply_message && message.reply_message.text);
       if (!match || !isYtUrl(match)) return await message.reply("_Provide a valid YouTube URL._");
-      
+      const progress = await beginDownloadProgress(message, "_Getting it from YouTube..._");
       let filePath = null;
       try {
         // Try Y2mate first
         try {
           logger.info("🔄 Using Y2mate for audio download...");
           const { title, quality, dlink, filesize } = await downloadAudioFromY2mate(match);
-          await message.reply(`_Downloading ${title}..._`);
+          await updateDownloadProgress(progress, `_Downloading ${title}..._`);
           
           // Generate unique filename
           const filename = `youtube_audio_y2mate_${Date.now()}.mp3`;
@@ -726,7 +752,7 @@ const downloadAudioFromY2mate = async (url) => {
           
           // Fallback to original yta method
           const { dlink, title } = await yta(match);
-          await message.reply(`_Downloading ${title}..._`);
+          await updateDownloadProgress(progress, `_Downloading ${title}..._`);
           
           // Generate unique filename
           const filename = `youtube_audio_${Date.now()}.mp3`;
@@ -759,13 +785,14 @@ const downloadAudioFromY2mate = async (url) => {
           const { dlink, title } = await yta(match);
           const buffer = await getBuffer(dlink);
           const audio = await toAudio(buffer, "mp3");
+          await updateDownloadProgress(progress, `_Downloading ${title}..._`);
           await message.sendMessage(
             message.jid,
             { audio, mimetype: "audio/mpeg", fileName: `${title}.mp3` },
             { quoted: message }
           );
         } catch (fallbackError) {
-          await message.reply(`_Error downloading audio: ${fallbackError.message}_`);
+          await updateDownloadProgress(progress, `_Error downloading audio: ${fallbackError.message}_`);
         }
       } finally {
         // Clean up temp file
@@ -792,12 +819,13 @@ const downloadAudioFromY2mate = async (url) => {
       }
       
       let filePath = null;
+      const progress = await beginDownloadProgress(message, "_Getting it from YouTube..._");
       try {
         // Try Y2mate first
         try {
           logger.info("🔄 Using Y2mate for video download...");
           const { title, quality: actualQuality, dlink, filesize } = await downloadFromY2mate(match.split(";")[0], quality);
-          await message.reply(`_Downloading ${title} (${actualQuality})..._`);
+          await updateDownloadProgress(progress, `_Downloading ${title} (${actualQuality})..._`);
           
           // Generate unique filename
           const filename = `youtube_video_y2mate_${Date.now()}.mp4`;
@@ -824,7 +852,7 @@ const downloadAudioFromY2mate = async (url) => {
           
           // Fallback to original ytv method
           const { dlink, title } = await ytv(match.split(";")[0], quality);
-          await message.reply(`_Downloading ${title} (${quality})..._`);
+          await updateDownloadProgress(progress, `_Downloading ${title} (${quality})..._`);
           
           // Generate unique filename
           const filename = `youtube_video_${Date.now()}.mp4`;
@@ -851,13 +879,14 @@ const downloadAudioFromY2mate = async (url) => {
         // Final fallback to direct URL method
         try {
           const { dlink, title } = await ytv(match.split(";")[0], quality);
+          await updateDownloadProgress(progress, `_Downloading ${title} (${quality})..._`);
           await message.sendMessage(
             message.jid,
             { video: { url: dlink }, caption: title, mimetype: "video/mp4", fileName: `${title}.mp4` },
             { quoted: message }
           );
         } catch (fallbackError) {
-          await message.reply(`_Error downloading video: ${fallbackError.message}_`);
+          await updateDownloadProgress(progress, `_Error downloading video: ${fallbackError.message}_`);
         }
       } finally {
         // Clean up temp file
@@ -881,9 +910,11 @@ const downloadAudioFromY2mate = async (url) => {
       let filePath = null;
       let dlink = null;
       let title = null;
+      let progress = null;
       try {
+        progress = await beginDownloadProgress(message, "_Getting it from YouTube..._");
         ({ dlink, title } = await ytsdl(match + " song"));
-        await message.reply(`_Downloading ${title}..._`);
+        await updateDownloadProgress(progress, `_Downloading ${title}..._`);
         
         // Generate unique filename
         const filename = `song_${Date.now()}.mp3`;
@@ -917,7 +948,8 @@ const downloadAudioFromY2mate = async (url) => {
             { quoted: message }
           );
         } catch (fallbackError) {
-          await message.reply(`_Error downloading song: ${fallbackError.message}_`);
+          if (progress) await updateDownloadProgress(progress, `_Error downloading song: ${fallbackError.message}_`);
+          else await message.reply(`_Error downloading song: ${fallbackError.message}_`);
         }
       } finally {
         // Clean up temp file
@@ -941,9 +973,11 @@ const downloadAudioFromY2mate = async (url) => {
       let filePath = null;
       let dlink = null;
       let title = null;
+      let progress = null;
       try {
+        progress = await beginDownloadProgress(message, "_Getting it from YouTube..._");
         ({ dlink, title } = await ytsdl(match, "video"));
-        await message.reply(`_Downloading ${title}..._`);
+        await updateDownloadProgress(progress, `_Downloading ${title}..._`);
         
         // Generate unique filename
         const filename = `video_${Date.now()}.mp4`;
@@ -975,7 +1009,8 @@ const downloadAudioFromY2mate = async (url) => {
             { quoted: message }
           );
         } catch (fallbackError) {
-          await message.reply(`_Error downloading video: ${fallbackError.message}_`);
+          if (progress) await updateDownloadProgress(progress, `_Error downloading video: ${fallbackError.message}_`);
+          else await message.reply(`_Error downloading video: ${fallbackError.message}_`);
         }
       } finally {
         // Clean up temp file

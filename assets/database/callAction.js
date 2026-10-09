@@ -59,6 +59,21 @@ const logger = require("../../lib/logger");
         logger.warn("MongoDB isCallAction error:", error);
         return false;
       }
+    },
+
+    async listCallActions() {
+      try {
+        const models = await initModels();
+        const entries = await models.CallAction.find({ isEnabled: true }).sort({ jid: 1 }).lean();
+        return entries.map(entry => entry.jid);
+      } catch (error) {
+        logger.warn("MongoDB listCallActions error:", error);
+        return [];
+      }
+    },
+
+    async setCallAction(jid, enabled) {
+      return enabled ? !!(await this.addCallAction(jid)) : await this.removeCallAction(jid);
     }
   };
   
@@ -72,7 +87,9 @@ if (!config.DATABASE) {
     call: null,
     saveCall: async () => null,
     checkCall: async () => false,
-    deleteCall: async () => null
+    deleteCall: async () => null,
+    listCallActions: async () => [],
+    setCallAction: async () => false,
   };
   return;
 }
@@ -100,9 +117,25 @@ async function deleteAllcall() {
   });
 }
 
+async function listCallActions() {
+  const entries = await call.findAll({ order: [['chatId', 'ASC']] });
+  return entries.map(entry => entry.chatId);
+}
+
+async function setCallAction(chatId, enabled) {
+  if (enabled) {
+    await call.findOrCreate({ where: { chatId }, defaults: { chatId } });
+    return true;
+  }
+  await call.destroy({ where: { chatId } });
+  return true;
+}
+
 module.exports = {
   call,
   getcall,
   savecall,
-  deleteAllcall
+  deleteAllcall,
+  listCallActions,
+  setCallAction,
 };

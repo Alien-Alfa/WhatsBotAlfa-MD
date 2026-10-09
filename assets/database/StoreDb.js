@@ -106,6 +106,16 @@ const messageDb = config.DATABASE.define("message", {
   ]
 });
 
+const deletedMessageDb = config.DATABASE.define("deletedMessage", {
+  id: { type: DataTypes.STRING, allowNull: false, primaryKey: true },
+  jid: { type: DataTypes.STRING, allowNull: false },
+  originalMessageId: { type: DataTypes.STRING, allowNull: false },
+  deletedAt: { type: DataTypes.DATE, allowNull: false },
+}, {
+  tableName: 'DeletedMessages',
+  indexes: [{ fields: ['jid', 'deletedAt'] }],
+});
+
 const contactDb = config.DATABASE.define("contact", {
   jid: {
     type: DataTypes.STRING,
@@ -169,7 +179,7 @@ class DatabaseQueue {
 
 const dbQueue = new DatabaseQueue();
 
-const saveContact = async (jid, name) => {
+const saveContact = async (jid, name, options = {}) => {
   try {
     if (!jid || !name || isJidGroup(jid)) return;
     
@@ -180,8 +190,7 @@ const saveContact = async (jid, name) => {
       return;
     }
     
-    // Queue the database operation to prevent SQLite locking
-    const result = await dbQueue.add(async () => {
+    const persistContact = async () => {
       let retries = 3;
       
       while (retries > 0) {
@@ -212,7 +221,13 @@ const saveContact = async (jid, name) => {
           throw error;
         }
       }
-    });
+    };
+
+    // Message persistence already runs inside the queue; enqueueing a nested
+    // contact write there would wait forever for the current task to finish.
+    const result = options.inQueue
+      ? await persistContact()
+      : await dbQueue.add(persistContact);
     
     contactCache.set(cacheKey, { name, timestamp: Date.now() });
     return result;
@@ -243,7 +258,7 @@ const persistOne = async ({ message, user }) => {
       messageCache.set(cacheKey, { timestamp: Date.now() });
 
       if (user && message.pushName) {
-        await saveContact(user, message.pushName);
+        await saveContact(user, message.pushName, { inQueue: true });
       }
 
       break; // Success, exit retry loop
@@ -353,14 +368,14 @@ const loadMessage = async (id) => {
 
 const loadDeletedMessages = async (jid, sinceTimestamp) => {
   try {
-    const messages = await messageDb.findAll({
+    const messages = await deletedMessageDb.findAll({
       where: {
         jid,
-        createdAt: {
+        deletedAt: {
           [Op.gte]: sinceTimestamp,
         },
       },
-      order: [['createdAt', 'DESC']],
+      order: [['deletedAt', 'DESC']],
       limit: 100, // Performance: Limit results
     });
 
@@ -368,6 +383,20 @@ const loadDeletedMessages = async (jid, sinceTimestamp) => {
   } catch (error) {
     logger.error("Error loading deleted messages:", error);
     throw new Error("Error loading deleted messages");
+  }
+};
+
+const saveDeletedMessage = async ({ id, jid, originalMessageId, deletedAt = new Date() }) => {
+  if (!id || !jid || !originalMessageId) return;
+  try {
+    await dbQueue.add(() => deletedMessageDb.upsert({
+      id,
+      jid,
+      originalMessageId,
+      deletedAt,
+    }));
+  } catch (error) {
+    logger.warn("Save deleted message error:", error.message || error);
   }
 };
 
@@ -456,6 +485,7 @@ module.exports = {
   saveMessage,
   loadMessage,
   loadDeletedMessages,
+  saveDeletedMessage,
   saveChat,
   getName,
   flushMessageQueue,

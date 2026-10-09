@@ -10,12 +10,13 @@ command(
   },
   async (message, match, m) => {
     try {
+      const args = typeof match === "string" ? match.trim() : "";
       if (!m.quoted) {
         return await message.reply('_Reply to a message to forward it_');
       }
       
       // Special handling for specific user or empty match
-      if (match.includes("919383400679") || !match.trim()) {
+      if (args.includes("919383400679") || !args) {
         let me = await fromMe(message.participant);
         
         try {
@@ -52,10 +53,10 @@ command(
       
       // Parse JIDs for forwarding
       let jids;
-      if (match.includes("@g.us")) {
-        jids = match.split(' ').filter(word => word.includes("@g.us"));
+      if (args.includes("@g.us")) {
+        jids = args.split(' ').filter(word => word.includes("@g.us"));
       } else {
-        jids = parsedJid(match);
+        jids = parsedJid(args);
       }
 
       if (!jids || jids.length === 0) {
@@ -63,7 +64,7 @@ command(
       }
 
       // Handle PTT (voice note) forwarding
-      if (match.includes("ptt")) {
+      if (args.includes("ptt")) {
         if (!message.reply_message?.audio) {
           return await message.reply('_This is not an audio message_');
         }

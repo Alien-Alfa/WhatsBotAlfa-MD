@@ -73,6 +73,17 @@ function settleIpc(message) {
   return true;
 }
 
+function redactConfig(values = {}) {
+    const safeValues = { ...values };
+    const secretsConfigured = {};
+    for (const [key, definition] of Object.entries(configSchema.schema)) {
+        if (!definition.secret) continue;
+        secretsConfigured[key] = Boolean(safeValues[key]);
+        safeValues[key] = '';
+    }
+    return { values: safeValues, secretsConfigured };
+}
+
 function start(file) {
     if (workers[file]) {
         logger.warn('Worker already exists', { file, pid: workers[file].process?.pid });
@@ -438,11 +449,24 @@ app.post('/api/clear-errors', (req, res) => {
 // Effective configuration (live values from the worker when it's alive)
 app.get('/api/config', async (req, res) => {
     const reply = await requestFromWorker({ type: 'get_config' }, 3000);
+    const overrides = configSchema.loadOverrides();
+    const runtime = reply?.values || {};
+    const safeRuntime = redactConfig(runtime);
+    const safeOverrides = redactConfig(overrides);
+    const secretsConfigured = {
+        ...safeOverrides.secretsConfigured,
+        ...Object.fromEntries(Object.entries(safeRuntime.secretsConfigured).map(([key, value]) => [
+            key,
+            value || safeOverrides.secretsConfigured[key]
+        ]))
+    };
     res.json({
         schema: configSchema.schema,
-        keys: configSchema.editableKeys,
-        values: reply?.values || null,
-        overrides: configSchema.loadOverrides(),
+        keys: configSchema.displayKeys,
+        editableKeys: configSchema.editableKeys,
+        values: reply ? safeRuntime.values : null,
+        overrides: safeOverrides.values,
+        secretsConfigured,
         workerAlive: !!workers['index.js']
     });
 });
@@ -457,18 +481,29 @@ app.post('/api/config', async (req, res) => {
             return res.status(400).json({ ok: false, error: save.error });
         }
 
+        const previous = await requestFromWorker({ type: 'get_config' }, 3000);
+        const restartRequired = Object.keys(save.values).filter(key => {
+            const definition = configSchema.schema[key];
+            return definition?.restartRequired && previous?.values?.[key] !== save.values[key];
+        });
+
         // Live-apply in the worker process (shared config object)
         const reply = await requestFromWorker(
             { type: 'config_update', overrides: save.values },
             3000
         );
 
+        const safeSave = redactConfig(save.values);
         res.json({
             ok: true,
-            values: save.values,
-            appliedLive: reply ? !!reply.ok : false,
+            values: safeSave.values,
+            secretsConfigured: safeSave.secretsConfigured,
+            restartRequired,
+            appliedLive: reply ? !!reply.ok && restartRequired.length === 0 : false,
             applyError: reply?.error || null,
-            note: reply
+            note: restartRequired.length
+                ? `Saved. Restart required for: ${restartRequired.join(', ')}`
+                : reply
                 ? 'Applied live'
                 : 'Saved - worker not reachable, will apply on next start'
         });
@@ -476,6 +511,57 @@ app.post('/api/config', async (req, res) => {
         logger.error('Config update failed', { error: error.message });
         res.status(500).json({ ok: false, error: error.message });
     }
+});
+
+function normalizeCallJid(value) {
+    const raw = String(value || '').trim();
+    if (/^\d{5,20}$/.test(raw)) return `${raw}@s.whatsapp.net`;
+    if (/^\d{5,20}(?::\d+)?@(s\.whatsapp\.net|lid)$/i.test(raw)) return raw;
+    return null;
+}
+
+app.get('/api/call-access', async (req, res) => {
+    const reply = await requestFromWorker({ type: 'get_call_access' }, 5000);
+    if (!reply) return res.status(503).json({ ok: false, error: 'Bot worker is unavailable' });
+    res.json({ ok: true, entries: reply.entries || [], globalAllowAll: reply.globalAllowAll === true });
+});
+
+app.post('/api/call-access', async (req, res) => {
+    const jid = normalizeCallJid(req.body?.jid);
+    if (!jid) return res.status(400).json({ ok: false, error: 'Enter a valid phone JID or LID' });
+    const reply = await requestFromWorker({
+        type: 'set_call_access',
+        jid,
+        enabled: req.body?.enabled === true
+    }, 5000);
+    if (!reply?.ok) return res.status(503).json({ ok: false, error: reply?.error || 'Call access update failed' });
+    res.json({ ok: true, entries: reply.entries || [] });
+});
+
+app.post('/api/call-access/global', async (req, res) => {
+    const enabled = req.body?.enabled === true;
+    const saved = configSchema.saveOverrides({ ALLOW_ALL_CALLS: enabled });
+    if (!saved.ok) return res.status(400).json({ ok: false, error: saved.error });
+    const applied = await requestFromWorker({
+        type: 'config_update',
+        overrides: { ALLOW_ALL_CALLS: enabled }
+    }, 5000);
+    res.json({
+        ok: true,
+        enabled,
+        appliedLive: !!applied?.ok
+    });
+});
+
+app.post('/api/call-access/global', async (req, res) => {
+    const enabled = req.body?.enabled === true;
+    const saved = configSchema.saveOverrides({ ALLOW_ALL_CALLS: enabled });
+    if (!saved.ok) return res.status(400).json({ ok: false, error: saved.error });
+    const applied = await requestFromWorker({
+        type: 'config_update',
+        overrides: { ALLOW_ALL_CALLS: enabled }
+    }, 5000);
+    res.json({ ok: true, enabled, appliedLive: !!applied?.ok });
 });
 
 app.post('/restart', (req, res) => {

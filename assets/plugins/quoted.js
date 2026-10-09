@@ -31,26 +31,13 @@ command(
 
       let count = 0;
 
-      // Filter REVOKE messages and forward originals
+      // Deletion events are captured from Baileys messages.update.
       for (const msg of messages) {
-        let parsed;
-        try {
-          parsed = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
-        } catch (e) {
-          continue; // skip if parsing fails
-        }
-
-        const isRevoke = parsed?.message?.protocolMessage?.type === 'REVOKE';
-        const deletedKeyId = parsed?.message?.protocolMessage?.key?.id;
-
-        if (isRevoke && deletedKeyId) {
-          const original = await loadMessage(deletedKeyId);
-
-          if (original && original.message) {
-            const deserialized = await serialize(original.message, message.client);
-            await message.forward(message.jid, deserialized);
-            count++;
-          }
+        const original = await loadMessage(msg.originalMessageId);
+        if (original?.message) {
+          const deserialized = await serialize(original.message, message.client);
+          await message.forward(message.jid, deserialized);
+          count++;
         }
       }
 

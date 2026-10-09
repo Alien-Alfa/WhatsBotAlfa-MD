@@ -96,17 +96,19 @@ async function searchYoutube(query) {
     if (!query) return null;
     
     const filters = await ytsr.getFilters(query);
-    const filter = filters.get('Type').get('Video');
-    const options = {
-      limit: 1, // Retrieve only the first result
-    };
-    
-    const searchResult = await ytsr(filter.url, options);
-    return searchResult.items[0] || null;
+    const videoFilter = filters?.get?.('Type')?.get?.('Video');
+    const options = { limit: 5 };
+    const searchResult = videoFilter?.url
+      ? await ytsr(videoFilter.url, options)
+      : await ytsr(query, options);
+    const items = Array.isArray(searchResult?.items) ? searchResult.items : [];
+    return items.find(item => item.type === 'video') || items[0] || null;
   } catch (error) {
     logger.error("YouTube search error:", error);
     return null;
   }
 }
+
+module.exports.searchYoutube = searchYoutube;
 
 // Made with ❤ by AlienAlfa

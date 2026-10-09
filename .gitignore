@@ -1,6 +1,7 @@
 session
 assets/database.db
 node_modules
+temp
 
 # MongoDB related files
 .env

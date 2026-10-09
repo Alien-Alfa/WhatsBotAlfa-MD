@@ -59,13 +59,15 @@ command(
       
       let isme = await fromMe(message.participant);
       let packname, author;
+      const args = typeof match === "string" ? match.trim() : "";
+      const [requestedPackname, requestedAuthor] = args.split(":", 2);
       
       if (!isme) {
-        packname = match?.split(":")[0] || "𝞓𝙇𝞘𝞢𝞜-𝞓𝙇𝙁𝞓";
-        author = match?.split(":")[1] || message.pushName;
+        packname = requestedPackname || "𝞓𝙇𝞘𝞢𝞜-𝞓𝙇𝙁𝞓";
+        author = requestedAuthor || message.pushName;
       } else {
-        packname = match?.split(":")[0] || config.PACKNAME;
-        author = match?.split(":")[1] || config.AUTHOR;
+        packname = requestedPackname || config.PACKNAME;
+        author = requestedAuthor || config.AUTHOR;
       }
       
       let buff = await m.quoted.download();

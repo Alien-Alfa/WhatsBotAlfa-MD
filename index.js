@@ -48,7 +48,7 @@ let logFlushTimer = null;
 
 if (process.send) {
   logger.onEntry = (entry) => {
-    if (entry.level !== 'ERROR' && entry.level !== 'WARN') return;
+    if (entry.level === 'TRACE') return;
     pendingLogEntries.push(entry);
     if (pendingLogEntries.length > 100) {
       pendingLogEntries.splice(0, pendingLogEntries.length - 100);
@@ -91,6 +91,12 @@ process.on('message', async (message) => {
         try {
           const { applyOverrides } = require('./lib/configSchema');
           const result = applyOverrides(config, message.overrides || {});
+          if (result.ok && Object.hasOwn(message.overrides || {}, 'RMBG_KEY')) {
+            config.REMOVEBG = config.RMBG_KEY;
+          }
+          if (result.ok && Object.hasOwn(message.overrides || {}, 'HANDLERS')) {
+            require('./lib/plugins').refreshCommandPatterns();
+          }
           logger.system('Config overrides applied', { keys: Object.keys(message.overrides || {}) });
           if (process.send) process.send({ type: 'config_applied', id: message.id, ok: result.ok, error: result.error });
         } catch (error) {
@@ -101,12 +107,42 @@ process.on('message', async (message) => {
       }
       case 'get_config': {
         try {
-          const { editableKeys } = require('./lib/configSchema');
+          const { displayKeys } = require('./lib/configSchema');
           const values = {};
-          for (const key of editableKeys) values[key] = config[key];
+          for (const key of displayKeys) {
+            values[key] = key === 'DATABASE'
+              ? config.DATABASE?.getDialect() || 'unavailable'
+              : config[key];
+          }
           if (process.send) process.send({ type: 'config_values', id: message.id, values });
         } catch (error) {
           logger.warn('Failed to read config values', { error: error.message });
+        }
+        break;
+      }
+      case 'get_call_access': {
+        try {
+          const callActions = require('./assets/database/callAction');
+          const entries = await callActions.listCallActions();
+          if (process.send) process.send({
+            type: 'call_access',
+            id: message.id,
+            entries,
+            globalAllowAll: config.ALLOW_ALL_CALLS === true
+          });
+        } catch (error) {
+          if (process.send) process.send({ type: 'call_access', id: message.id, ok: false, error: error.message });
+        }
+        break;
+      }
+      case 'set_call_access': {
+        try {
+          const callActions = require('./assets/database/callAction');
+          const ok = await callActions.setCallAction(message.jid, message.enabled === true);
+          const entries = await callActions.listCallActions();
+          if (process.send) process.send({ type: 'call_access_updated', id: message.id, ok, entries });
+        } catch (error) {
+          if (process.send) process.send({ type: 'call_access_updated', id: message.id, ok: false, error: error.message });
         }
         break;
       }

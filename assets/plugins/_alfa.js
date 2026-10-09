@@ -1,13 +1,21 @@
-const {command, isPrivate, sleep, getBuffer } = require("../../lib")
-const config = require('../../config')
-const fs = require("fs")
-const { exec, spawn, execSync } = require("child_process")
-const fetch = require('node-fetch')
-const ffmpeg = require("../../lib/myffmpeg");
+const { command, isPrivate } = require("../../lib");
 const googleTTS = require('google-tts-api');
 const logger = require("../../lib/logger");
 
-const getRandom = (text) => { return `${Math.floor(Math.random() * 10000)}${text}` }
+const getLanguageFromText = (input) => {
+  const value = typeof input === "string" ? input.trim() : "";
+  const languageMatch = value.match(/^\{([a-z]{2,3}(?:[-_][a-z0-9]{2,8})*)\}\s*/i);
+  if (!languageMatch) return { lang: "en", text: value };
+
+  const lang = languageMatch[1]
+    .replace(/_/g, "-")
+    .split("-")
+    .map((part, index) => index === 0
+      ? part.toLowerCase()
+      : /^[a-z]{2}$/i.test(part) ? part.toUpperCase() : part)
+    .join("-");
+  return { lang, text: value.slice(languageMatch[0].length).trim() };
+};
 
 //============================================================================================================================================
 // STATUS SAVER ( MAKE fromMe: false TO USE AS PUBLIC )
@@ -22,9 +30,10 @@ command(
   async (message, match, m) => {
     try {
       if (message.isGroup) return;
+        if (typeof match !== "string") return;
       const triggerKeywords = ["save", "send", "sent", "snt", "give", "snd"];
-      const cmdz = match.toLowerCase().split(" ")[0];
-      if (triggerKeywords.some((tr) => cmdz.includes(tr))) {
+        const cmdz = match.trim().toLowerCase().split(/\s+/)[0];
+        if (triggerKeywords.includes(cmdz) && m?.quoted?.key?.id && m.quoted.message) {
         const relayOptions = { messageId: m.quoted.key.id };
         return await message.client.relayMessage(
           message.jid,
@@ -45,17 +54,12 @@ command({
   type: "tool"
 }, async (message, match) => {
   try {
-    if (!match) return await message.reply("_Waiting for a query_\n\nExample: tts Hello World\nFor other languages: tts {es} Hola Mundo");
+    if (typeof match !== "string" || !match.trim()) {
+      return await message.reply("_Waiting for a query_\n\nExample: tts Hello World\nFor other languages: tts {es} Hola Mundo or tts {pt-BR} Olá");
+    }
 
-    const getLanguageFromText = (input) => {
-      const qmatch = input.match(/^\{(\w{2})\}\s*/);
-      if (qmatch) {
-        const cleanedInput = input.replace(qmatch[0], "").trim();
-        return { lang: qmatch[1], text: cleanedInput };
-      } else {
-        return { lang: 'en', text: input };
-      }
-    };
+    const { lang, text } = getLanguageFromText(match);
+    if (!text) return await message.reply("_Add text after the language code._");
 
     const sendAudioMessage = async (text, lang) => {
       const url = await googleTTS.getAudioUrl(text, {
@@ -67,7 +71,6 @@ command({
         audio: { url: url },
         mimetype: "audio/mpeg",
         ptt: true,
-        waveform: ["00", "99", "00", "99", "00", "99", "00"]
       });
     };
 
@@ -88,13 +91,10 @@ command({
           audio: { url: tex.url },
           mimetype: "audio/mpeg",
           ptt: true,
-          waveform: ["00", "99", "00", "99", "00", "99", "00"]
         });
       }
       await message.client.sendMessage(message.jid, { text: "_Finished!_" });
     };
-
-    const { lang, text } = getLanguageFromText(match);
 
     if (text.length < 200) {
       await sendAudioMessage(text, lang);
@@ -104,9 +104,11 @@ command({
 
   } catch (error) {
     logger.error("[Error]:", error);
-    await message.reply("_Error processing TTS request_");
+    await message.reply(`_Error processing TTS request: ${error.message}_`);
   }
 });
+
+module.exports.getLanguageFromText = getLanguageFromText;
 
 //============================================================================================================================================
   

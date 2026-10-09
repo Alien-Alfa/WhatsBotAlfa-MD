@@ -4,46 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aurora-MD · Bot Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0b0f1a;
-  --bg-2: #101627;
-  --panel: rgba(255, 255, 255, 0.045);
-  --panel-border: rgba(255, 255, 255, 0.09);
-  --text: #e7ecf5;
-  --text-dim: #8b94ab;
-  --accent: #6366f1;
-  --accent-2: #8b5cf6;
-  --green: #10b981;
-  --red: #ef4444;
-  --amber: #f59e0b;
-  --radius: 14px;
-  --mono: "SFMono-Regular", "JetBrains Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --bg: #0d171d;
+  --bg-2: #14232a;
+  --panel: #1a2a32;
+  --panel-border: #30464e;
+  --text: #e7f0f0;
+  --text-dim: #9aafb3;
+  --accent: #32b7bd;
+  --accent-2: #f09a68;
+  --green: #63c99f;
+  --red: #ee776e;
+  --amber: #e6bd70;
+  --radius: 8px;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; }
 body {
-  font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
-  background:
-    radial-gradient(1100px 500px at 15% -10%, rgba(99, 102, 241, 0.18), transparent 60%),
-    radial-gradient(900px 500px at 110% 10%, rgba(139, 92, 246, 0.14), transparent 55%),
-    var(--bg);
+  font-family: "DM Sans", "Trebuchet MS", sans-serif;
+  background-color: var(--bg);
+  background-image: linear-gradient(rgba(50, 183, 189, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(50, 183, 189, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
   color: var(--text);
   min-height: 100vh;
 }
-.app { max-width: 1180px; margin: 0 auto; padding: 22px 20px 60px; }
+.app { max-width: 1260px; margin: 0 auto; padding: 26px 24px 64px; }
 
 /* ---------- Header ---------- */
 header {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 14px; margin-bottom: 18px; flex-wrap: wrap;
+  gap: 14px; margin-bottom: 18px; padding: 6px 0 18px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--panel-border);
 }
 .brand { display: flex; align-items: baseline; gap: 10px; }
-.brand h1 { font-size: 1.55em; font-weight: 700; letter-spacing: 0.5px; }
-.brand h1 span { background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.brand h1 { font-size: 1.55em; font-weight: 700; letter-spacing: 0; }
+.brand h1 span { color: var(--accent); }
 .brand .ver { color: var(--text-dim); font-size: 0.8em; font-family: var(--mono); }
 .status-pill {
-  padding: 8px 16px; border-radius: 999px; font-size: 0.88em; font-weight: 600;
+  padding: 8px 13px; border-radius: 999px; font-size: 0.86em; font-weight: 700;
   border: 1px solid var(--panel-border); background: var(--panel);
   display: inline-flex; align-items: center; gap: 8px;
 }
@@ -53,17 +57,17 @@ header {
 .status-pill.connecting .dot { background: var(--amber); color: var(--amber); }
 
 /* ---------- Tabs ---------- */
-.tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap;
-  background: var(--panel); border: 1px solid var(--panel-border); padding: 6px; border-radius: var(--radius); }
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap;
+  background: #14242b; border: 1px solid var(--panel-border); padding: 5px; border-radius: var(--radius); }
 .tabs button {
   border: none; background: transparent; color: var(--text-dim); font-size: 0.95em;
-  padding: 9px 16px; border-radius: 9px; cursor: pointer; font-weight: 600;
-  transition: all .18s ease; display: flex; align-items: center; gap: 7px;
+  padding: 9px 15px; border-radius: 6px; cursor: pointer; font-weight: 700;
+  transition: background .16s ease, color .16s ease; display: flex; align-items: center; gap: 7px;
 }
-.tabs button:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.tabs button:hover { color: var(--text); background: #233941; }
 .tabs button.active {
-  color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+  color: #082126; background: var(--accent);
+  box-shadow: 0 2px 10px rgba(50,183,189,0.2);
 }
 .badge {
   background: var(--red); color: #fff; font-size: 0.72em; padding: 2px 7px;
@@ -77,41 +81,44 @@ header {
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: none;} }
 .panel {
   background: var(--panel); border: 1px solid var(--panel-border);
-  border-radius: var(--radius); padding: 18px; margin-bottom: 16px;
+  border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
 }
-.panel h3 { font-size: 0.95em; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 14px; }
+.panel h3 { font-size: 0.98em; color: var(--text); font-weight: 700; letter-spacing: 0; margin-bottom: 16px; }
 /* ---------- Stat cards ---------- */
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .card {
   background: var(--panel); border: 1px solid var(--panel-border);
-  border-radius: var(--radius); padding: 16px; position: relative; overflow: hidden;
+  border-radius: var(--radius); padding: 14px; position: relative; overflow: hidden;
 }
 .card::after { content: ""; position: absolute; inset: 0 auto auto 0; width: 100%; height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2)); opacity: .8; }
-.card.err::after { background: linear-gradient(90deg, var(--red), #f97316); }
-.card.ok::after { background: linear-gradient(90deg, var(--green), #22d3ee); }
-.card .label { font-size: 0.74em; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.1px; }
+  background: var(--accent); opacity: .9; }
+.card.err::after { background: var(--red); }
+.card.ok::after { background: var(--green); }
+.card .label { font-size: 0.74em; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0; }
 .card .value { font-size: 1.55em; font-weight: 700; margin-top: 6px; font-family: var(--mono); }
 .card .sub { font-size: 0.75em; color: var(--text-dim); margin-top: 4px; }
 
 /* ---------- Buttons ---------- */
 .controls { display: flex; flex-wrap: wrap; gap: 10px; }
 .btn {
-  border: none; border-radius: 11px; padding: 12px 20px; color: #fff;
-  font-size: 0.92em; font-weight: 600; cursor: pointer; letter-spacing: 0.4px;
-  transition: transform .15s ease, filter .15s ease;
-  box-shadow: 0 5px 14px rgba(0,0,0,0.28);
+  border: none; border-radius: 6px; padding: 10px 15px; color: #fff;
+  font-size: 0.92em; font-weight: 600; cursor: pointer; letter-spacing: 0;
+  transition: transform .15s ease, filter .15s ease, background .15s ease;
+  box-shadow: 0 2px 5px rgba(23,42,50,0.12);
 }
 .btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
 .btn:active { transform: translateY(0); }
 .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
-.btn.restart { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
-.btn.stop    { background: linear-gradient(135deg, #ef4444, #dc2626); }
-.btn.start   { background: linear-gradient(135deg, #10b981, #059669); }
-.btn.update  { background: linear-gradient(135deg, #f59e0b, #d97706); }
-.btn.danger  { background: linear-gradient(135deg, #b91c1c, #7f1d1d); }
-.btn.ghost   { background: rgba(255,255,255,0.08); border: 1px solid var(--panel-border); }
-.btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.btn.restart { background: #28677b; }
+.btn.stop    { background: #a74743; }
+.btn.start   { background: #28765f; }
+.btn.update  { background: #92662d; }
+.btn.danger  { background: #913a3c; }
+.btn.ghost   { color: var(--text); background: #22353d; border: 1px solid var(--panel-border); box-shadow: none; }
+.btn.primary { color: #082126; background: var(--accent); }
+.btn.secondary { color: var(--text); background: #2a4149; box-shadow: none; }
+.btn.allow-all { color: #ffe5e2; background: #703b42; }
+.btn.allow-all.enabled { color: #e7fff4; background: #246b56; }
 
 /* ---------- Console / logs ---------- */
 .log-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
@@ -122,29 +129,29 @@ header {
 }
 .log-toolbar .spacer { flex: 1; }
 .console {
-  background: #070a12; border: 1px solid var(--panel-border); border-radius: 10px;
+  background: #091419; border: 1px solid #294149; border-radius: 6px;
   height: 480px; overflow-y: auto; padding: 12px 14px; font-family: var(--mono);
   font-size: 0.8em; line-height: 1.55; white-space: pre-wrap; word-break: break-word;
 }
 .console .line { padding: 1px 0; }
-.console .ts { color: #4b5570; }
+.console .ts { color: #739097; }
 .console .lvl { font-weight: 700; display: inline-block; min-width: 78px; }
-.console .lvl.ERROR { color: var(--red); }
+.console .lvl.ERROR { color: #ff8b82; }
 .console .lvl.WARN { color: var(--amber); }
-.console .lvl.INFO, .console .lvl.SYSTEM, .console .lvl.WHATSAPP { color: #22d3ee; }
-.console .lvl.DEBUG, .console .lvl.TRACE, .console .lvl.DATABASE, .console .lvl.PLUGIN, .console .lvl.PERF { color: #7c86a8; }
-.console .meta { color: #6b7492; }
-.console .empty { color: #4b5570; font-style: italic; }
+.console .lvl.INFO, .console .lvl.SYSTEM, .console .lvl.WHATSAPP { color: #66d4ce; }
+.console .lvl.DEBUG, .console .lvl.TRACE, .console .lvl.DATABASE, .console .lvl.PLUGIN, .console .lvl.PERF { color: #93aaaf; }
+.console .meta { color: #91a8ad; }
+.console .empty { color: #91a8ad; font-style: italic; }
 /* ---------- Errors ---------- */
 .err-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
 .err-count { font-family: var(--mono); font-size: 1.05em; }
 .err-count b { color: var(--red); }
 .error-list { display: flex; flex-direction: column; gap: 8px; max-height: 560px; overflow-y: auto; }
 .error-item {
-  background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.25);
-  border-left: 4px solid var(--red); border-radius: 9px; padding: 10px 12px;
+  background: #332326; border: 1px solid #694348;
+  border-left: 3px solid var(--red); border-radius: 5px; padding: 10px 12px;
 }
-.error-item.warn { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.28); border-left-color: var(--amber); }
+.error-item.warn { background: #332e22; border-color: #66583a; border-left-color: var(--amber); }
 .error-item .top { display: flex; justify-content: space-between; gap: 10px; font-size: 0.78em; color: var(--text-dim); margin-bottom: 5px; font-family: var(--mono); }
 .error-item .top .lvl { font-weight: 700; }
 .error-item .top .lvl.ERROR { color: var(--red); }
@@ -153,45 +160,65 @@ header {
 .error-item .m { color: var(--text-dim); font-size: 0.85em; margin-top: 4px; font-family: var(--mono); white-space: pre-wrap; }
 
 /* ---------- Settings ---------- */
-.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field label { font-size: 0.82em; color: var(--text-dim); font-weight: 600; }
-.field input[type="text"], .field input[type="number"], .field select {
-  background: var(--bg-2); border: 1px solid var(--panel-border); color: var(--text);
-  border-radius: 9px; padding: 10px 12px; font-size: 0.95em; outline: none; transition: border-color .15s;
+.settings-section { padding: 18px 0 20px; border-top: 1px solid var(--panel-border); }
+.settings-section:first-child { border-top: 0; padding-top: 0; }
+.settings-section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+.settings-section h4 { font-size: 1em; font-weight: 700; margin-bottom: 3px; }
+.settings-section-head p, .field .hint, .settings-note { color: var(--text-dim); font-size: 0.82em; line-height: 1.5; }
+.settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px 18px; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field label { font-size: 0.84em; color: var(--text); font-weight: 700; }
+.field input[type="text"], .field input[type="password"], .field input[type="number"], .field textarea, .field select {
+  width: 100%; background: var(--bg-2); border: 1px solid #3a535c; color: var(--text);
+  border-radius: 6px; padding: 10px 11px; font: inherit; font-size: 0.93em; outline: none; transition: border-color .15s, box-shadow .15s;
 }
-.field input:focus, .field select:focus { border-color: var(--accent); }
-.field .hint { font-size: 0.74em; color: #5b6480; }
-.toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  background: var(--bg-2); border: 1px solid var(--panel-border); border-radius: 9px; padding: 10px 12px; }
-.toggle span { font-size: 0.9em; }
-.switch { position: relative; width: 44px; height: 24px; flex: 0 0 auto; display: inline-block; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; inset: 0; background: #374151; border-radius: 999px; cursor: pointer; transition: .2s; }
-.slider::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; }
-.switch input:checked + .slider { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
-.switch input:checked + .slider::before { transform: translateX(20px); }
-.settings-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; align-items: center; }
-.settings-note { font-size: 0.8em; color: var(--text-dim); }
+.field textarea { min-height: 76px; resize: vertical; }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(50,183,189,0.14); }
+.field input::placeholder, .field textarea::placeholder { color: #789096; }
+.field .hint { font-size: 0.76em; }
+.runtime-value { padding: 10px 11px; border-radius: 6px; border: 1px solid var(--panel-border); background: #21353d; font-family: var(--mono); font-size: 0.84em; overflow-wrap: anywhere; }
+.field-state { color: var(--amber); font-size: 0.73em; font-weight: 700; text-transform: uppercase; }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px;
+  background: var(--bg-2); border: 1px solid var(--panel-border); border-radius: 6px; padding: 9px 11px; }
+.toggle span { font-size: 0.88em; font-weight: 600; }
+.switch { position: relative; width: 42px; height: 24px; flex: 0 0 auto; display: inline-block; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.slider { position: absolute; inset: 0; background: #50656b; border-radius: 999px; cursor: pointer; transition: .2s; }
+.slider::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #eaf2f1; border-radius: 50%; transition: .2s; box-shadow: 0 1px 3px #0008; }
+.switch input:checked + .slider { background: var(--accent); }
+.switch input:checked + .slider::before { transform: translateX(18px); }
+.switch input:focus-visible + .slider { outline: 3px solid rgba(50,183,189,0.3); }
+.settings-actions { display: flex; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--panel-border); flex-wrap: wrap; align-items: center; }
+.call-entry-form { display: flex; gap: 10px; max-width: 680px; margin-bottom: 14px; }
+.call-entry-form input { min-width: 0; flex: 1; background: var(--bg-2); border: 1px solid #3a535c; border-radius: 6px; padding: 10px 11px; color: var(--text); font: inherit; }
+.access-list { display: grid; gap: 7px; max-width: 680px; }
+.access-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 11px; border: 1px solid var(--panel-border); border-radius: 6px; background: #1e3038; }
+.access-row code { font-family: var(--mono); font-size: 0.84em; overflow-wrap: anywhere; }
+.access-empty { color: var(--text-dim); font-size: 0.88em; padding: 8px 0; }
+.restart-note { color: #f0cc82; background: #352e20; border: 1px solid #665538; padding: 10px 12px; border-radius: 6px; font-size: 0.84em; }
 
 /* ---------- Links / toast ---------- */
 .links { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
 .links a { color: var(--text-dim); text-decoration: none; font-size: 0.9em; padding: 8px 14px;
-  border-radius: 9px; background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); transition: all .15s; }
-.links a:hover { color: #fff; background: rgba(255,255,255,0.1); }
+  border-radius: 6px; background: #20323a; border: 1px solid var(--panel-border); transition: all .15s; }
+.links a:hover { color: var(--accent); border-color: var(--accent); }
 #toast { position: fixed; bottom: 24px; right: 24px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
 .toast {
-  background: var(--bg-2); border: 1px solid var(--panel-border); border-left: 4px solid var(--accent);
-  padding: 12px 16px; border-radius: 10px; font-size: 0.9em; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  animation: slideIn .2s ease; max-width: 340px;
+  background: var(--panel); border: 1px solid var(--panel-border); border-left: 4px solid var(--accent);
+  padding: 12px 16px; border-radius: 7px; font-size: 0.9em; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  animation: slideIn .2s ease; max-width: min(360px, calc(100vw - 32px));
 }
 .toast.ok { border-left-color: var(--green); }
 .toast.err { border-left-color: var(--red); }
 @keyframes slideIn { from { transform: translateX(30px); opacity: 0;} to { transform: none; opacity: 1;} }
 
 @media (max-width: 640px) {
-  .app { padding: 14px 10px 50px; }
+  .app { padding: 15px 12px 48px; }
   .brand h1 { font-size: 1.25em; }
+  .panel { padding: 15px; }
+  .settings-grid { grid-template-columns: minmax(0, 1fr); }
+  .call-entry-form { flex-direction: column; }
+  .settings-section-head { flex-direction: column; }
   .console { height: 380px; }
 }
 </style>
@@ -293,6 +320,7 @@ header {
           <option>DEBUG</option>
         </select>
         <button class="btn ghost" id="btnPauseLogs" style="padding:8px 14px">⏸ Pause</button>
+        <button class="btn ghost" id="btnExportLogs" style="padding:8px 14px">Export logs</button>
         <button class="btn ghost" id="btnClearView" style="padding:8px 14px">Clear view</button>
         <span class="spacer"></span>
         <label><input type="checkbox" id="autoScroll" checked> auto-scroll</label>
@@ -308,6 +336,7 @@ header {
         <div class="err-count">Errors: <b id="errTotal">0</b> · Warnings: <b id="warnTotal">0</b></div>
         <div class="controls">
           <button class="btn ghost" id="btnRefreshErrors" style="padding:9px 16px">🔄 Refresh</button>
+          <button class="btn ghost" id="btnExportErrors" style="padding:9px 16px">Export errors</button>
           <button class="btn danger" id="btnClearErrors" style="padding:9px 16px">🗑 Clear counter</button>
         </div>
       </div>
@@ -318,13 +347,38 @@ header {
   <!-- ============ SETTINGS ============ -->
   <section id="tab-settings" class="tab">
     <div class="panel">
-      <h3>Live Configuration <span id="cfgWorkerState" class="settings-note"></span></h3>
-      <form id="configForm" class="settings-grid"></form>
-      <div class="settings-actions">
-        <button class="btn primary" id="btnSaveConfig">💾 Save &amp; Apply</button>
-        <button class="btn ghost" id="btnReloadConfig">↻ Reload</button>
-        <span class="settings-note" id="cfgNote">Changes apply instantly and persist across restarts (stored in session/config-overrides.json).</span>
+      <div class="settings-section-head">
+        <div>
+          <h3>Runtime configuration</h3>
+          <p>Environment settings and live bot behavior, grouped by area.</p>
+        </div>
+        <span id="cfgWorkerState" class="settings-note"></span>
       </div>
+      <div id="cfgRestartNote" class="restart-note" hidden></div>
+      <form id="configForm"></form>
+      <div class="settings-actions">
+        <button type="button" class="btn primary" id="btnSaveConfig">Save settings</button>
+        <button type="button" class="btn ghost" id="btnReloadConfig">Reload</button>
+        <button type="button" class="btn secondary" id="btnRestartConfig" hidden>Restart to apply</button>
+        <span class="settings-note" id="cfgNote">Sensitive values stay masked. Restart-marked changes need a worker restart.</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="settings-section-head">
+        <div>
+          <h3>Call allowlist</h3>
+          <p>Listed callers are exempt from automatic call rejection. Add a phone number or LID.</p>
+        </div>
+        <button type="button" class="btn ghost" id="btnRefreshCalls">Refresh</button>
+      </div>
+      <div class="call-entry-form">
+        <input id="callJidInput" type="text" inputmode="text" autocomplete="off" placeholder="Phone number or LID">
+        <button type="button" class="btn primary" id="btnAddCall">Add caller</button>
+        <button type="button" class="btn allow-all" id="btnGlobalAllowAll" aria-pressed="false">Allow all calls</button>
+      </div>
+      <p id="globalCallStatus" class="settings-note" aria-live="polite">Automatic call rejection is active.</p>
+      <div id="callAccessList" class="access-list"><span class="access-empty">Loading call access…</span></div>
     </div>
   </section>
 </div>
@@ -367,7 +421,10 @@ document.querySelectorAll('.tabs button').forEach(btn => {
     btn.classList.add('active');
     $('tab-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'errors') loadErrors();
-    if (btn.dataset.tab === 'settings' && !configLoaded) loadConfig();
+    if (btn.dataset.tab === 'settings') {
+      if (!configLoaded) loadConfig();
+      loadCallAccess();
+    }
   });
 });
 
@@ -505,6 +562,25 @@ $('btnClearView').addEventListener('click', () => {
 });
 $('logLevel').addEventListener('change', () => { if (!logsPaused) pollLogs(); });
 
+async function exportJson(url, filename) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(response.statusText);
+    const data = await response.json();
+    const href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = filename;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(href), 1000);
+    toast('Export downloaded', 'ok');
+  } catch (error) {
+    toast('Export failed: ' + error.message, 'err');
+  }
+}
+
+$("btnExportLogs").addEventListener('click', () => exportJson('/api/logs?limit=500', 'aurora-logs.json'));
+
 /* ================= errors ================= */
 async function loadErrors() {
   try {
@@ -535,6 +611,7 @@ async function loadErrors() {
 }
 
 $('btnRefreshErrors').addEventListener('click', loadErrors);
+$('btnExportErrors').addEventListener('click', () => exportJson('/api/errors?limit=300', 'aurora-errors.json'));
 $('btnClearErrors').addEventListener('click', async () => {
   try {
     await fetch('/api/clear-errors', { method: 'POST' });
@@ -552,18 +629,19 @@ async function loadConfig() {
     const data = await fetch('/api/config').then(r => r.json());
     configSchemaCache = data.schema || {};
     $('cfgWorkerState').textContent = data.workerAlive
-      ? '· live values from running worker'
-      : '· worker offline — showing saved overrides';
-    renderConfigForm(data.keys || [], data.values, data.overrides || {});
+      ? 'Worker online'
+      : 'Worker offline · showing saved overrides';
+    renderConfigForm(data.keys || [], data.values, data.overrides || {}, data.secretsConfigured || {});
     configLoaded = true;
   } catch {
     toast('Failed to load configuration', 'err');
   }
 }
 
-function renderConfigForm(keys, values, overrides) {
+function renderConfigForm(keys, values, overrides, secretsConfigured) {
   const form = $('configForm');
   form.innerHTML = '';
+  const sections = new Map();
   keys.forEach(key => {
     const def = configSchemaCache[key];
     if (!def) return;
@@ -573,8 +651,32 @@ function renderConfigForm(keys, values, overrides) {
     wrap.className = 'field';
     wrap.dataset.key = key;
     wrap.dataset.type = def.type;
+    wrap.dataset.editable = def.editable !== false;
 
-    if (def.type === 'boolean') {
+    const sectionName = def.section || 'Other';
+    let group = sections.get(sectionName);
+    if (!group) {
+      const section = document.createElement('section');
+      section.className = 'settings-section';
+      const heading = document.createElement('div');
+      heading.className = 'settings-section-head';
+      heading.innerHTML = `<div><h4>${esc(sectionName)}</h4></div>`;
+      const grid = document.createElement('div');
+      grid.className = 'settings-grid';
+      section.append(heading, grid);
+      form.appendChild(section);
+      group = { section, grid };
+      sections.set(sectionName, group);
+    }
+
+    const description = def.description ? `<span class="hint">${esc(def.description)}</span>` : '';
+    const restartBadge = def.restartRequired ? '<span class="field-state">Restart required</span>' : '';
+    if (def.editable === false) {
+      const display = def.secret
+        ? (secretsConfigured[key] ? 'Configured · value hidden' : 'Not configured')
+        : (val || 'Unavailable');
+      wrap.innerHTML = `<label>${esc(def.label)} ${restartBadge}</label><div class="runtime-value">${esc(display)}</div>${description}`;
+    } else if (def.type === 'boolean') {
       wrap.innerHTML = `
         <div class="toggle">
           <span>${esc(def.label)}</span>
@@ -586,24 +688,30 @@ function renderConfigForm(keys, values, overrides) {
     } else if (def.type === 'enum') {
       const opts = def.values.map(v =>
         `<option value="${esc(v)}" ${v === val ? 'selected' : ''}>${esc(v)}</option>`).join('');
-      wrap.innerHTML = `<label>${esc(def.label)}</label><select>${opts}</select>`;
+      wrap.innerHTML = `<label>${esc(def.label)} ${restartBadge}</label><select>${opts}</select>${description}`;
     } else if (def.type === 'integer') {
-      wrap.innerHTML = `<label>${esc(def.label)}</label>
-        <input type="number" value="${esc(val)}" min="${def.min ?? ''}" max="${def.max ?? ''}">`;
+      wrap.innerHTML = `<label>${esc(def.label)} ${restartBadge}</label>
+        <input type="number" value="${esc(val)}" min="${def.min ?? ''}" max="${def.max ?? ''}">${description}`;
+    } else if (def.type === 'secret') {
+      wrap.innerHTML = `<label>${esc(def.label)} ${restartBadge}</label>
+        <input type="password" value="" autocomplete="new-password" placeholder="${secretsConfigured[key] ? 'Configured · leave blank to keep' : 'Not configured'}" maxlength="${def.maxLength || 1000}">${description}`;
+    } else if (def.type === 'textarea') {
+      wrap.innerHTML = `<label>${esc(def.label)} ${restartBadge}</label>
+        <textarea maxlength="${def.maxLength || 500}">${esc(val)}</textarea>${description}`;
     } else {
-      wrap.innerHTML = `<label>${esc(def.label)}</label>
-        <input type="text" value="${esc(val)}" maxlength="${def.maxLength || 300}">
-        ${def.type === 'handler' ? '<span class="hint">Used as the command prefix (regex-safe, 1–5 chars)</span>' : ''}`;
+      wrap.innerHTML = `<label>${esc(def.label)} ${restartBadge}</label>
+        <input type="text" value="${esc(val)}" maxlength="${def.maxLength || 300}">${description}`;
     }
-    form.appendChild(wrap);
+    group.grid.appendChild(wrap);
   });
 }
 
 async function saveConfig() {
   const payload = {};
   document.querySelectorAll('#configForm .field').forEach(f => {
+    if (f.dataset.editable !== 'true') return;
     const key = f.dataset.key, type = f.dataset.type;
-    const input = f.querySelector('input, select');
+    const input = f.querySelector('input, select, textarea');
     if (!input) return;
     payload[key] = type === 'boolean' ? input.checked : input.value;
   });
@@ -618,7 +726,18 @@ async function saveConfig() {
       toast(data.error || 'Invalid configuration', 'err');
       return;
     }
-    toast(data.appliedLive ? 'Saved & applied live ✅' : 'Saved — applies on next start ✅', 'ok');
+    const restartNote = $('cfgRestartNote');
+    restartNote.hidden = !data.restartRequired?.length;
+    restartNote.textContent = data.restartRequired?.length
+      ? `Restart required for: ${data.restartRequired.join(', ')}`
+      : '';
+    $('btnRestartConfig').hidden = !data.restartRequired?.length;
+    $('cfgNote').textContent = data.restartRequired?.length
+      ? 'Settings saved. Restart the worker to load these changes.'
+      : 'Settings saved and applied.';
+    toast(data.restartRequired?.length ? 'Saved · restart required' : 'Settings saved', 'ok');
+    configLoaded = false;
+    await loadConfig();
   } catch {
     toast('Failed to save configuration', 'err');
   }
@@ -626,6 +745,98 @@ async function saveConfig() {
 
 $('btnSaveConfig').addEventListener('click', saveConfig);
 $('btnReloadConfig').addEventListener('click', () => { configLoaded = false; loadConfig(); });
+
+async function loadCallAccess() {
+  try {
+    const response = await fetch('/api/call-access');
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Could not load call access');
+    renderCallAccess(data.entries || [], data.globalAllowAll === true);
+  } catch (error) {
+    $('callAccessList').innerHTML = `<span class="access-empty">${esc(error.message)}</span>`;
+  }
+}
+
+let globalAllowAllCalls = false;
+
+function renderCallAccess(entries, allowAll = globalAllowAllCalls) {
+  globalAllowAllCalls = allowAll;
+  const toggle = $('btnGlobalAllowAll');
+  toggle.setAttribute('aria-pressed', String(allowAll));
+  toggle.classList.toggle('enabled', allowAll);
+  toggle.textContent = allowAll ? 'Allow all calls: On' : 'Allow all calls: Off';
+  $('globalCallStatus').textContent = allowAll
+    ? 'All calls are allowed. Automatic rejection is disabled.'
+    : 'Automatic call rejection is active. Listed callers remain exempt.';
+
+  const list = $('callAccessList');
+  list.innerHTML = '';
+  if (!entries.length) {
+    list.innerHTML = '<span class="access-empty">No caller exceptions configured.</span>';
+    return;
+  }
+  entries.forEach(jid => {
+    const row = document.createElement('div');
+    row.className = 'access-row';
+    const value = document.createElement('code');
+    value.textContent = jid;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'btn danger';
+    remove.textContent = 'Remove';
+    remove.addEventListener('click', () => setCallAccess(jid, false));
+    row.append(value, remove);
+    list.appendChild(row);
+  });
+}
+
+async function setCallAccess(jid, enabled) {
+  try {
+    const response = await fetch('/api/call-access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jid, enabled })
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Call access update failed');
+    renderCallAccess(data.entries || []);
+    toast(enabled ? 'Caller added' : 'Caller removed', 'ok');
+  } catch (error) {
+    toast(error.message, 'err');
+  }
+}
+
+async function addCallAccess() {
+  const input = $('callJidInput');
+  const jid = input.value.trim();
+  if (!jid) return toast('Enter a phone number or LID', 'err');
+  await setCallAccess(jid, true);
+  input.value = '';
+}
+
+async function toggleGlobalCallAccess() {
+  const enabled = !globalAllowAllCalls;
+  try {
+    const response = await fetch('/api/call-access/global', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled })
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Could not update global call access');
+    renderCallAccess(data.entries || [], data.enabled === true);
+    toast(data.appliedLive ? (enabled ? 'All calls allowed' : 'Call rejection enabled') : 'Saved; worker unavailable', data.appliedLive ? 'ok' : 'err');
+  } catch (error) {
+    toast(error.message, 'err');
+  }
+}
+
+$('btnAddCall').addEventListener('click', addCallAccess);
+$('btnRefreshCalls').addEventListener('click', loadCallAccess);
+$('btnGlobalAllowAll').addEventListener('click', toggleGlobalCallAccess);
+$('callJidInput').addEventListener('keydown', event => {
+  if (event.key === 'Enter') addCallAccess();
+});
 
 /* ================= control buttons ================= */
 async function postAction(url, confirmMsg, btn) {
@@ -648,6 +859,14 @@ async function postAction(url, confirmMsg, btn) {
 $('btnRestart').addEventListener('click', function () {
   postAction('/restart', 'Restart the bot worker process?', this)
     .then(() => setTimeout(pollStats, 3000));
+});
+$('btnRestartConfig').addEventListener('click', function () {
+  postAction('/restart', 'Restart the worker to apply restart-required settings?', this)
+    .then(() => {
+      this.hidden = true;
+      $('cfgRestartNote').hidden = true;
+      setTimeout(pollStats, 3000);
+    });
 });
 $('btnToggle').addEventListener('click', function () {
   const url = isConnectedState ? '/stop-whatsapp' : '/start-whatsapp';
