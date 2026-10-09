@@ -13,7 +13,7 @@ consoleGuard.install();
 
 const config = require("./config");
 const connect = require("./lib/connection");
-const { UpdateLocal, WriteSession} = require("./lib");
+const { UpdateLocal, WriteSession, isSessionCredentials } = require("./lib");
 const { logger } = require("./lib/logger");
 
 // Add got for HTTP requests
@@ -209,26 +209,36 @@ async function startWhatsAppConnection() {
 
 async function auth() {
   try {
-    if (!fsx.existsSync("./session/creds.json")) {
-      logger.system('Session credentials not found, attempting to generate from environment');
-      
-      // Try to generate session from environment variables
-      if (process.env.SESSION || process.env.SESSION_ID) {
-        await WriteSession();
-        
-        // Check if session was successfully created
-        if (fsx.existsSync("./session/creds.json")) {
-          logger.system('Session generated successfully from environment');
-          return initialize();
-        }
+    const credsPath = path.join(__dirname, "session", "creds.json");
+    let existingCredentialsAreValid = false;
+
+    if (fsx.existsSync(credsPath)) {
+      try {
+        const currentCredentials = JSON.parse(await fs.readFile(credsPath, "utf8"));
+        existingCredentialsAreValid = isSessionCredentials(currentCredentials);
+      } catch {
+        existingCredentialsAreValid = false;
       }
-      
-      // If no session environment variables or generation failed, proceed with QR
-      logger.system('No session found, will generate QR code for authentication');
-      return initialize();
+
+      if (existingCredentialsAreValid) {
+        logger.system("Session credentials found, initializing connection");
+        return initialize();
+      }
+
+      const backupPath = `${credsPath}.invalid-${Date.now()}`;
+      await fs.rename(credsPath, backupPath);
+      logger.warn("Invalid creds.json moved aside; attempting environment session import");
     }
-    
-    logger.system('Session credentials found, initializing connection');
+
+    if (String(process.env.SESSION || "").trim() || String(process.env.SESSION_ID || "").trim()) {
+      logger.system("No valid creds.json found; attempting environment session import");
+      if (await WriteSession()) {
+        logger.system("Session credentials imported successfully");
+        return initialize();
+      }
+    }
+
+    logger.system("No usable session found; starting QR authentication");
     return initialize();
   } catch (error) {
     logger.error('Authentication initialization failed', { error: error.message });

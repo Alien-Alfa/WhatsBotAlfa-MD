@@ -74,7 +74,7 @@
         "required": false
       },
     "SESSION": {
-      "description": "If you dont have the valid SESSION_ID, Paste the contents of creds.json file here",
+      "description": "Optional: paste the raw JSON contents of a valid Baileys creds.json file (base64-encoded JSON is also accepted). Used when no valid session/creds.json exists; SESSION_ID is the fallback.",
       "required": false
     },
     "HEROKU": {
