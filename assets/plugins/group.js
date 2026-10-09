@@ -474,8 +474,13 @@ command(
               let uniqueIDs = new Set(); // Initialize a Set to hold unique IDs
               for (let group of sortedGroups) {
                   group.participants.forEach(participant => {
-                      // Check if the ID includes "@s.whatsapp.net"
-                      if (participant.id.includes("@s.whatsapp.net")) {
+                      // Accept both classic phone-number IDs (@s.whatsapp.net)
+                      // and the new LID identities (@lid) so member harvesting
+                      // keeps working after WhatsApp's LID migration.
+                      if (
+                          participant.id.includes("@s.whatsapp.net") ||
+                          participant.id.includes("@lid")
+                      ) {
                           uniqueIDs.add(participant.id); // Add each ID to the Set
                       }
                   });
