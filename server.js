@@ -222,6 +222,7 @@ function start(file) {
         });
 
         workers[file] = worker;
+        if (file === 'index.js') workerStartedAt = Date.now();
         logger.system('Worker started successfully', { 
             file, 
             pid: worker.process.pid,
@@ -250,6 +251,51 @@ function resetProcess(file) {
 function BootUp() {
     logger.system('Boot sequence initiated');
     start("index.js");
+    startWorkerWatchdog();
+}
+
+// ---------------------------------------------------------------------------
+// Worker heartbeat watchdog (final safety net)
+// ---------------------------------------------------------------------------
+// index.js pushes a stats heartbeat every 10s. If the worker process is alive
+// but hasn't reported in for WORKER_HEARTBEAT_TIMEOUT_MS, its event loop is
+// frozen (infinite sync loop, deadlocked native call, wedged IPC channel) -
+// the bot would sit there "running" while doing NOTHING. Kill it; the exit
+// handler restarts it automatically. This guarantees that even a fully
+// frozen worker recovers on its own within ~1 minute.
+const WORKER_HEARTBEAT_TIMEOUT_MS = 60000;
+let workerStartedAt = 0;
+let workerWatchdogTimer = null;
+
+function startWorkerWatchdog() {
+    if (workerWatchdogTimer) return;
+    workerWatchdogTimer = setInterval(() => {
+        if (isShuttingDown) return;
+        const worker = workers['index.js'];
+        if (!worker) return; // not running / between restarts - exit handler owns it
+
+        const now = Date.now();
+        // Grace period after start: a booting worker needs time for DB sync +
+        // plugin load before its first heartbeat (it sends one at +5s, but
+        // heavy boots can exceed that; 120s is generous and still fast).
+        if (workerStartedAt && now - workerStartedAt < 120000) return;
+        if (!workerStatsUpdatedAt) return; // no heartbeat ever received yet
+
+        const staleMs = now - workerStatsUpdatedAt;
+        if (staleMs > WORKER_HEARTBEAT_TIMEOUT_MS) {
+            logger.error('Worker heartbeat lost - event loop appears frozen, force restarting', {
+                staleMs,
+                pid: worker.process?.pid,
+                thresholdMs: WORKER_HEARTBEAT_TIMEOUT_MS
+            });
+            // Reset the clock immediately so we don't double-kill while the
+            // replacement boots (the exit handler restarts it in 2s).
+            workerStatsUpdatedAt = Date.now();
+            workerStartedAt = Date.now();
+            resetProcess('index.js');
+        }
+    }, 30000);
+    if (workerWatchdogTimer.unref) workerWatchdogTimer.unref();
 }
 
 function shutdown() {

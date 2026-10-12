@@ -140,44 +140,116 @@ const contactCache = new Map();
 const messageCache = new Map();
 const CACHE_TTL = 300000; // 5 minutes
 
-// Database operation queue to prevent SQLite locking
+// Database operation queue to prevent SQLite locking.
+//
+// HARDENED (issue: "bot connected but stops receiving / needs rescan"):
+// the OLD queue had a fatal wedge path - `process()` set isProcessing=true
+// and if a single SQLite op hung forever (lock contention, no busy timeout),
+// isProcessing stayed true FOREVER and EVERY subsequent dbQueue.add() promise
+// never settled. Because saveMessage()/flushMessageQueue() are awaited inside
+// the message handler, one wedged write silently froze the entire message
+// pipeline while WhatsApp still showed the bot "connected".
+//
+// Three guarantees now:
+//   1. every operation has a hard 10s timeout - it can never hang the loop
+//   2. a generation counter lets a watchdog force-reset a truly wedged loop
+//      without a zombie loop corrupting state when it eventually unblocks
+//   3. stats are exposed so the dashboard can see timeouts/wedges
 class DatabaseQueue {
   constructor() {
     this.queue = [];
     this.isProcessing = false;
+    this.gen = 0;                    // bumped to invalidate zombie loops
+    this.lastProgressAt = Date.now();
+    this.opTimeoutMs = 10000;
+    this.stats = { enqueued: 0, done: 0, failed: 0, timedOut: 0, wedged: 0 };
   }
 
-  async add(operation) {
+  add(operation) {
+    this.stats.enqueued++;
     return new Promise((resolve, reject) => {
       this.queue.push({ operation, resolve, reject });
       this.process();
     });
   }
 
+  /** Force-reset a wedged loop (called by the watchdog below). */
+  forceReset(reason) {
+    this.gen++; // any zombie loop exits at its next queue check
+    this.isProcessing = false;
+    this.stats.wedged++;
+    this.lastProgressAt = Date.now();
+    logger.warn('Database queue force-reset', {
+      reason,
+      dropped: this.queue.length
+    });
+    this.process();
+  }
+
   async process() {
     if (this.isProcessing || this.queue.length === 0) return;
-    
+
     this.isProcessing = true;
-    
-    while (this.queue.length > 0) {
+    const myGen = ++this.gen;
+
+    while (this.queue.length > 0 && this.gen === myGen) {
       const { operation, resolve, reject } = this.queue.shift();
-      
+
+      let timer = null;
+      const timeout = new Promise((_, rej) => {
+        timer = setTimeout(
+          () => rej(new Error(`DB operation timed out after ${this.opTimeoutMs}ms`)),
+          this.opTimeoutMs
+        );
+      });
+
       try {
-        const result = await operation();
+        const result = await Promise.race([operation(), timeout]);
+        this.stats.done++;
         resolve(result);
       } catch (error) {
+        if (error && /^DB operation timed out/.test(error.message)) {
+          this.stats.timedOut++;
+        } else {
+          this.stats.failed++;
+        }
         reject(error);
+      } finally {
+        if (timer) clearTimeout(timer);
+        this.lastProgressAt = Date.now();
       }
-      
-      // Small delay to prevent overwhelming SQLite
-      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // Tiny yield to avoid starving the event loop (kept small: with WAL
+      // enabled writes are fast and a 10ms delay added up to real lag).
+      await new Promise((r) => setTimeout(r, 2));
     }
-    
-    this.isProcessing = false;
+
+    // Only the CURRENT generation may flip the flag - a force-reset zombie
+    // loop that unblocks later must not clobber the new loop's state.
+    if (this.gen === myGen) {
+      this.isProcessing = false;
+      this.lastProgressAt = Date.now();
+    }
+  }
+
+  getStats() {
+    return { ...this.stats, pending: this.queue.length, isProcessing: this.isProcessing };
   }
 }
 
 const dbQueue = new DatabaseQueue();
+
+// Watchdog: if the queue claims to be processing but made no progress for
+// 30s, the loop is wedged (hung op that even the timeout couldn't reach -
+// e.g. event-loop starvation). Force-reset so the pipeline can never stay
+// frozen permanently.
+const dbQueueWatchdog = setInterval(() => {
+  if (!dbQueue.isProcessing) return;
+  if (Date.now() - dbQueue.lastProgressAt > 30000) {
+    dbQueue.forceReset('no progress for 30s');
+  }
+}, 10000);
+if (dbQueueWatchdog.unref) dbQueueWatchdog.unref();
 
 const saveContact = async (jid, name, options = {}) => {
   try {
@@ -489,4 +561,6 @@ module.exports = {
   saveChat,
   getName,
   flushMessageQueue,
+  // Dashboard visibility into DB queue health (timeouts / wedges)
+  getQueueStats: () => dbQueue.getStats(),
 };

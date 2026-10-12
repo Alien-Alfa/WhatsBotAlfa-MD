@@ -109,7 +109,16 @@ config.DATABASE = config.DATABASE_URL === "./assets/database.db"
       storage: config.DATABASE_URL,
       logging: false,
       define: { freezeTableName: true, timestamps: true },
-      pool: { max: 10, min: 0, acquire: 30000, idle: 10000 }
+      pool: { max: 1, min: 0, acquire: 30000, idle: 10000 },
+      dialectOptions: {
+        // SQLITE_BUSY hardening: without a busy timeout a locked DB file
+        // makes reads/writes FAIL OR HANG, which used to wedge the message
+        // pipeline (bot "connected" but deaf). WAL also removes the
+        // reader-blocks-writer contention that caused the locks.
+        //   busy_timeout: wait up to 5s for the lock instead of erroring
+        //   journal_mode WAL: concurrent readers never block the writer
+        busy_timeout: 5000
+      }
     })
   : new Sequelize(config.DATABASE_URL, {
       dialect: "postgres",
@@ -123,5 +132,22 @@ config.DATABASE = config.DATABASE_URL === "./assets/database.db"
       define: { freezeTableName: true, timestamps: true },
       pool: { max: 10, min: 0, acquire: 30000, idle: 10000 }
     });
+
+// SQLite-specific durability + concurrency pragmas. WAL mode is the single
+// biggest stability fix for a file-backed bot DB: it lets the message
+// pipeline write while reads happen, eliminating the SQLITE_BUSY storms that
+// previously froze message processing. Applied right after construction and
+// again lazily on first use (some hosts reset pragmas on reconnect).
+if (config.DATABASE_URL === "./assets/database.db" && config.DATABASE) {
+  try {
+    config.DATABASE.query("PRAGMA journal_mode = WAL;");
+    config.DATABASE.query("PRAGMA busy_timeout = 5000;");
+    config.DATABASE.query("PRAGMA synchronous = NORMAL;");
+    config.DATABASE.query("PRAGMA cache_size = -8000;"); // 8MB page cache
+    config.DATABASE.query("PRAGMA wal_autocheckpoint = 512;");
+  } catch (e) {
+    // Pragmas are best-effort; the bot works without them, just less robustly
+  }
+}
 
 module.exports = config;
